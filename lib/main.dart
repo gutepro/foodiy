@@ -1,38 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
-  runApp(const FoodiyApp());
-}
+import 'firebase_options.dart';
+import 'router.dart';
 
-class FoodiyApp extends StatelessWidget {
-  const FoodiyApp({super.key});
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'foodiy',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        useMaterial3: true,
-      ),
-      home: const FoodiyHomePage(),
-    );
-  }
-}
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-class FoodiyHomePage extends StatelessWidget {
-  const FoodiyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          'FOODIY WORKS',
-          style: TextStyle(fontSize: 32),
-        ),
-      ),
-    );
-  }
+  runApp(const FoodiyRouter());
 }
