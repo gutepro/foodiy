@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "988257088468",
+    "project_id": "foodiy-6a9d9",
+    "storage_bucket": "foodiy-6a9d9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988257088468:android:58ea5c38ccf672c920dc41",
+        "android_client_info": {
+          "package_name": "com.example.foodiy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyiQl9KFPBMBZK0nsoGc42-xJv-Fz_fPM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988257088468:android:b0e4677771997dc620dc41",
+        "android_client_info": {
+          "package_name": "com.foodiy.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyiQl9KFPBMBZK0nsoGc42-xJv-Fz_fPM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
