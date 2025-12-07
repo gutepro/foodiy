@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'package:foodiy/core/models/user_type.dart';
 import 'package:foodiy/core/services/current_user_service.dart';
-import 'package:foodiy/features/chef/presentation/screens/chef_dashboard_screen.dart';
 import 'package:foodiy/features/chef/presentation/screens/chef_my_recipes_screen.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_upload_screen.dart';
 
@@ -87,18 +86,6 @@ class ChefProfileFreeScreen extends StatelessWidget {
           ),
           if (isPremiumChef) ...[
             const SizedBox(height: 8),
-            ListTile(
-              leading: const Icon(Icons.dashboard),
-              title: const Text('Chef dashboard'),
-              subtitle: const Text('View stats and advanced tools'),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const ChefDashboardScreen(),
-                  ),
-                );
-              },
-            ),
           ],
           if (userType == UserType.freeChef) ...[
             const SizedBox(height: 16),
