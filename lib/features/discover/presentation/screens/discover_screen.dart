@@ -1,232 +1,343 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:foodiy/core/widgets/recipe_image.dart';
+import 'package:foodiy/features/discovery/discovery_feed.dart';
+import 'package:foodiy/features/discovery/discovery_feed.dart'
+    show
+        DiscoveryCategoryRow,
+        DiscoveryCookbook,
+        DiscoveryRepository,
+        PublicCookbookScreen;
+import 'package:foodiy/features/search/presentation/screens/search_results_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
-import 'package:foodiy/features/recipe/presentation/screens/recipe_details_screen.dart';
+import 'package:foodiy/shared/constants/categories.dart';
+import 'package:foodiy/core/services/current_user_service.dart';
+import 'package:foodiy/core/models/user_type.dart';
+import 'package:foodiy/shared/services/ads_service.dart';
+import 'package:foodiy/shared/widgets/banner_ad_container.dart';
 
-class DiscoverScreen extends StatelessWidget {
+class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
+
+  @override
+  State<DiscoverScreen> createState() => _DiscoverScreenState();
+}
+
+class _DiscoverScreenState extends State<DiscoverScreen> {
+  late final TextEditingController _searchController;
+  final DiscoveryRepository _repo = DiscoveryRepository();
+  bool _adsLogged = false;
+  VoidCallback? _profileListener;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+    _profileListener = () {
+      if (mounted) {
+        setState(() {});
+      }
+    };
+    CurrentUserService.instance.profileNotifier.addListener(_profileListener!);
+  }
+
+  @override
+  void dispose() {
+    if (_profileListener != null) {
+      CurrentUserService.instance.profileNotifier
+          .removeListener(_profileListener!);
+    }
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final categories = kRecipeCategoryOptions;
+    final userType =
+        CurrentUserService.instance.currentProfile?.userType ?? UserType.freeUser;
+    final adsOn = AdsService.adsEnabled(userType);
+    if (!_adsLogged) {
+      debugPrint(
+        '[ADS_TIER] screen=Discover tier=$userType adsEnabled=$adsOn',
+      );
+      _adsLogged = true;
+    }
+    return Scaffold(
+      appBar: AppBar(title: const Text('Discover')),
+      bottomNavigationBar: BannerAdContainer(showAds: adsOn),
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {});
+          },
+          child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 16),
+            itemCount: 1 + categories.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 16),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextField(
+                    controller: _searchController,
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (value) {
+                      final query = value.trim();
+                      if (query.isEmpty) return;
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      context.push(
+                        AppRoutes.searchResults,
+                        extra: SearchResultsArgs(query: query),
+                      );
+                    },
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search),
+                      hintText: 'Search cookbooks or chefs',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              final categoryIndex = index - 1;
+              final category = categories[categoryIndex];
+              final stream = _repo.watchPublicCookbooksByCategory(
+                category.key,
+                limit: 10,
+              );
+              return StreamBuilder<List<DiscoveryCookbook>>(
+                stream: stream,
+                builder: (context, snapshot) {
+                  final cookbooks =
+                      snapshot.data ?? const <DiscoveryCookbook>[];
+                  return _CategorySection(
+                    title: category.title,
+                    keyName: category.key,
+                    cookbooks: cookbooks,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CategorySection extends StatelessWidget {
+  const _CategorySection({
+    required this.title,
+    required this.keyName,
+    required this.cookbooks,
+  });
+
+  final String title;
+  final String keyName;
+  final List<DiscoveryCookbook> cookbooks;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Discover')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: DiscoverSectionHeader(title: title, onSeeAll: null),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 260,
+          child: cookbooks.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.menu_book_outlined,
+                          size: 18,
+                          color: Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'No public cookbooks yet',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: cookbooks.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final cookbook = cookbooks[index];
+                    return _CookbookCardInline(cookbook: cookbook);
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CookbookCardInline extends StatelessWidget {
+  const _CookbookCardInline({required this.cookbook});
+
+  final DiscoveryCookbook cookbook;
+  static bool _loggedFirst = false;
+
+  String? _pickImage() {
+    final urlA = (cookbook.imageUrl).trim();
+    if (urlA.isNotEmpty) return urlA;
+    final urlB = (cookbook.coverImageUrl).trim();
+    if (urlB.isNotEmpty) return urlB;
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final url = _pickImage();
+
+    if (!_loggedFirst) {
+      _loggedFirst = true;
+      debugPrint(
+        '[DISCOVER_CARD_IMAGE] id=${cookbook.id} imageUrl=${cookbook.imageUrl} coverImageUrl=${cookbook.coverImageUrl}',
+      );
+    }
+
+    return SizedBox(
+      width: 180,
+      child: Card(
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        elevation: 0.8,
+        child: InkWell(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => PublicCookbookScreen(
+                  cookbookId: cookbook.id,
+                  title: cookbook.title,
+                  ownerId: cookbook.ownerId,
+                ),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 4 / 3,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: url == null
+                        ? _PlaceholderBox()
+                        : RecipeImage(
+                            imageUrl: url,
+                            height: double.infinity,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  cookbook.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  cookbook.ownerName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.public, size: 14, color: Colors.green),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Public',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: Colors.green.shade800,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DiscoverSectionHeader extends StatelessWidget {
+  const DiscoverSectionHeader({super.key, required this.title, this.onSeeAll});
+
+  final String title;
+  final VoidCallback? onSeeAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Row(
         children: [
-          Text('Popular chefs', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 12),
-          const _PopularChefsSection(),
-          const SizedBox(height: 24),
-          Text('Popular recipes', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 12),
-          const _PopularRecipesSection(),
+          Expanded(
+            child: Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          if (onSeeAll != null)
+            TextButton(onPressed: onSeeAll, child: const Text('See all')),
         ],
       ),
     );
   }
 }
 
-class _PopularChefsSection extends StatelessWidget {
-  const _PopularChefsSection();
-
+class _PlaceholderBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    return SizedBox(
-      height: 110,
-      child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .where('isChef', isEqualTo: true)
-            .limit(20)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text('Failed to load chefs'));
-          }
-          final docs = snapshot.data?.docs ?? const [];
-          final filteredDocs = uid == null
-              ? docs
-              : docs.where((doc) => doc.id != uid).toList();
-          if (filteredDocs.isEmpty) {
-            return const Center(child: Text('No chefs yet'));
-          }
-          return ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: filteredDocs.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final data = filteredDocs[index].data();
-              final name = data['displayName'] as String? ?? 'Chef';
-              final photoUrl = data['photoUrl'] as String? ?? '';
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundImage:
-                        photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-                    backgroundColor: Colors.grey.shade300,
-                    child: photoUrl.isEmpty
-                        ? Icon(Icons.person, color: Colors.grey.shade600)
-                        : null,
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: 80,
-                    child: Text(
-                      name,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      context.push(AppRoutes.chefProfile,
-                          extra: filteredDocs[index].id);
-                    },
-                    child: const Text('View'),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _PopularRecipesSection extends StatelessWidget {
-  const _PopularRecipesSection();
-
-  @override
-  Widget build(BuildContext context) {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('recipes')
-          .orderBy('views', descending: true)
-          .limit(50)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return const Text('Failed to load recipes');
-        }
-        final docs = snapshot.data?.docs ?? const [];
-        final filteredDocs = uid == null
-            ? docs
-            : docs
-                .where((doc) {
-                  final data = doc.data();
-                  final chefId = data['chefId'] as String?;
-                  return chefId == null || chefId != uid;
-                })
-                .toList();
-        if (docs.isEmpty) {
-          return const Text('No recipes yet.');
-        }
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.9,
-          ),
-          itemCount: filteredDocs.length,
-          itemBuilder: (context, index) {
-            final doc = filteredDocs[index];
-            final data = doc.data();
-            final id = doc.id;
-            final title = data['title'] as String? ?? 'Untitled';
-            final imageUrl = data['imageUrl'] as String? ?? '';
-            final stepsList = data['steps'] as List<dynamic>? ?? const [];
-            final stepsCount = stepsList.length;
-            return _RecipeCard(
-              id: id,
-              title: title,
-              imageUrl: imageUrl,
-              stepsCount: stepsCount,
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class _RecipeCard extends StatelessWidget {
-  const _RecipeCard({
-    required this.id,
-    required this.title,
-    required this.imageUrl,
-    required this.stepsCount,
-  });
-
-  final String id;
-  final String title;
-  final String imageUrl;
-  final int stepsCount;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          final localeCode = Localizations.localeOf(context).languageCode;
-          context.push(
-            AppRoutes.recipeDetails,
-            extra: RecipeDetailsArgs(
-              id: id,
-              title: title,
-              imageUrl: imageUrl,
-              time: '$stepsCount steps',
-              difficulty: '-',
-              originalLanguageCode: localeCode,
-              ingredients: const [],
-              steps: const [],
-            ),
-          );
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RecipeImage(
-              imageUrl: imageUrl,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-          ],
-        ),
+    return Container(
+      color: Colors.grey.shade200,
+      child: const Center(
+        child: Icon(Icons.image_not_supported_outlined, size: 32),
       ),
     );
   }

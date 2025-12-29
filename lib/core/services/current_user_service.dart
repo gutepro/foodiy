@@ -136,6 +136,9 @@ class CurrentUserService {
       },
       SetOptions(merge: true),
     );
+    debugPrint(
+      '[USER_ROLE_UPDATE] written role=${_userTypeStringFromEnum(newType)} uid=${user.uid}',
+    );
     profileNotifier.value = _cachedProfile;
   }
 
@@ -150,7 +153,9 @@ class CurrentUserService {
       _cachedProfile = profile;
       profileNotifier.value = profile;
       SubscriptionService.instance.start();
-      debugPrint('[PLAN_STREAM] profile change received uid=$uid userType=${profile.userTypeString} tier=${profile.tierString}');
+      debugPrint(
+        '[USER_ROLE_STREAM] role=${profile.userTypeString} tier=${profile.tierString} uid=$uid',
+      );
     });
   }
 }

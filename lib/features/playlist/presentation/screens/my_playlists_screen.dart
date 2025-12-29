@@ -174,6 +174,7 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
 
   bool _isFavoritesCookbook(PersonalPlaylist cb, String currentUid) {
     final lower = cb.name.toLowerCase().trim();
+    final favId = PersonalPlaylistService.favoritesCookbookId(currentUid);
     return cb.id == favId ||
         cb.isFavorites ||
         (lower == 'favorite recipes' && cb.ownerId == currentUid);
