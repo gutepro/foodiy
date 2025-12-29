@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-
 import '../models/user_type.dart';
+import 'subscription_service.dart';
 import 'user_following_service.dart';
 import 'access_control_service.dart';
 
@@ -14,16 +16,27 @@ class CurrentUserService {
 
   AppUserProfile? _cachedProfile;
   UserFollowingService? _followingService;
+  final ValueNotifier<AppUserProfile?> profileNotifier =
+      ValueNotifier<AppUserProfile?>(null);
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
+      _profileListener;
 
   AppUserProfile? get currentProfile => _cachedProfile;
   UserType get currentUserType => _cachedProfile?.userType ?? UserType.freeUser;
   UserFollowingService? get followingService => _followingService;
 
+  void clearCache() {
+    _profileListener?.cancel();
+    _profileListener = null;
+    _cachedProfile = null;
+    _followingService = null;
+    profileNotifier.value = null;
+  }
+
   Future<void> refreshFromFirebase() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      _cachedProfile = null;
-      _followingService = null;
+      clearCache();
       return;
     }
 
@@ -36,6 +49,7 @@ class CurrentUserService {
         'displayName': user.displayName,
         'photoUrl': user.photoURL,
         'userType': 'homeCook',
+        'tier': 'freeUser',
         'isChef': false,
         'followingChefIds': <String>[],
         'createdAt': now,
@@ -54,9 +68,14 @@ class CurrentUserService {
         uid: user.uid,
       );
     }
+    SubscriptionService.instance.start();
 
     _followingService =
         UserFollowingService(FirebaseFirestore.instance, user.uid);
+    _followingService?.primeCache(_cachedProfile?.followingChefIds ?? const []);
+
+    _listenToProfileChanges(user.uid);
+    profileNotifier.value = _cachedProfile;
   }
 
   void updateUserType(UserType newType) {
@@ -90,9 +109,13 @@ class CurrentUserService {
       photoUrl: user.photoURL,
       userType: newType,
       userTypeString: _userTypeStringFromEnum(newType),
+      tierString: _tierStringFromEnum(newType),
       isChef: AccessControlService.instance.isChef(newType),
       followingChefIds: _cachedProfile?.followingChefIds ?? const [],
       subscriptionPlan: newPlan,
+      subscriptionStatus:
+          newPlan == SubscriptionPlan.none ? 'inactive' : 'active',
+      subscriptionPlanId: _planIdFromEnum(newPlan),
       createdAt: _cachedProfile?.createdAt,
       updatedAt: DateTime.now(),
     );
@@ -101,7 +124,34 @@ class CurrentUserService {
       'CurrentUserService.updateUserType: userType=$newType, subscriptionPlan=$newPlan for uid=${user.uid}',
     );
 
-    // TODO: Persist the new userType and subscriptionPlan to Firestore or custom claims.
+    FirebaseFirestore.instance.collection('users').doc(user.uid).set(
+      {
+        'userType': _userTypeStringFromEnum(newType),
+        'tier': _tierStringFromEnum(newType),
+        'isChef': AccessControlService.instance.isChef(newType),
+        'subscriptionPlanId': _planIdFromEnum(newPlan),
+        'subscriptionStatus':
+            newPlan == SubscriptionPlan.none ? 'inactive' : 'active',
+        'updatedAt': FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
+    profileNotifier.value = _cachedProfile;
+  }
+
+  void _listenToProfileChanges(String uid) {
+    _profileListener?.cancel();
+    if (uid.isEmpty) return;
+    final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
+    _profileListener = docRef.snapshots().listen((snap) {
+      if (!snap.exists) return;
+      final data = snap.data() ?? {};
+      final profile = AppUserProfile.fromFirestore(data, uid: uid);
+      _cachedProfile = profile;
+      profileNotifier.value = profile;
+      SubscriptionService.instance.start();
+      debugPrint('[PLAN_STREAM] profile change received uid=$uid userType=${profile.userTypeString} tier=${profile.tierString}');
+    });
   }
 }
 
@@ -115,5 +165,31 @@ String _userTypeStringFromEnum(UserType type) {
       return 'premiumChef';
     case UserType.premiumUser:
       return 'homeCook';
+  }
+}
+
+String _tierStringFromEnum(UserType type) {
+  switch (type) {
+    case UserType.freeUser:
+      return 'freeUser';
+    case UserType.premiumUser:
+      return 'premiumUser';
+    case UserType.freeChef:
+      return 'freeChef';
+    case UserType.premiumChef:
+      return 'premiumChef';
+  }
+}
+
+String _planIdFromEnum(SubscriptionPlan plan) {
+  switch (plan) {
+    case SubscriptionPlan.userMonthly:
+    case SubscriptionPlan.userYearly:
+      return 'premium_user';
+    case SubscriptionPlan.chefMonthly:
+    case SubscriptionPlan.chefYearly:
+      return 'premium_chef';
+    case SubscriptionPlan.none:
+      return '';
   }
 }
