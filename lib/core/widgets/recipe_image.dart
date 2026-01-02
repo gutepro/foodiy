@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodiy/core/brand/brand_assets.dart';
 
 class RecipeImage extends StatelessWidget {
   final String imageUrl;
@@ -42,7 +43,7 @@ class RecipeImage extends StatelessWidget {
       ),
       child: Center(
         child: Image.asset(
-          'assets/images/foodiy_logo.png.png',
+          BrandAssets.foodiyLogo,
           width: height * 0.6,
           height: height * 0.6,
         ),

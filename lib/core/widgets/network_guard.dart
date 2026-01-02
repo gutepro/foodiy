@@ -16,15 +16,17 @@ class NetworkGuard extends StatefulWidget {
 
 class _NetworkGuardState extends State<NetworkGuard> {
   final Connectivity _connectivity = Connectivity();
-  StreamSubscription<ConnectivityResult>? _subscription;
+  StreamSubscription<List<ConnectivityResult>>? _subscription;
   bool _hasInternet = true;
 
   @override
   void initState() {
     super.initState();
     _initConnectivity();
-    _subscription = _connectivity.onConnectivityChanged.listen((result) {
-      final hasInternet = result != ConnectivityResult.none;
+    _subscription =
+        _connectivity.onConnectivityChanged.listen((results) {
+      final hasInternet = results.isNotEmpty &&
+          results.first != ConnectivityResult.none;
       if (mounted) {
         setState(() {
           _hasInternet = hasInternet;
@@ -34,8 +36,9 @@ class _NetworkGuardState extends State<NetworkGuard> {
   }
 
   Future<void> _initConnectivity() async {
-    final result = await _connectivity.checkConnectivity();
-    final hasInternet = result != ConnectivityResult.none;
+    final results = await _connectivity.checkConnectivity();
+    final hasInternet =
+        results.isNotEmpty && results.first != ConnectivityResult.none;
     if (mounted) {
       setState(() {
         _hasInternet = hasInternet;

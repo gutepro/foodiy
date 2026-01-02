@@ -1,0 +1,376 @@
+{
+  "homeTitle": "דף הבית",
+  "myRecipesTitle": "המתכונים שלי",
+  "backToHomeButton": "חזרה לדף הבית",
+  "homeLoadErrorTitle": "היו לנו בעיות בטעינת מתכונים.",
+  "untitledRecipe": "מתכון ללא שם",
+  "deleteRecipeTooltip": "מחק מתכון",
+  "noRecipesYet": "אין מתכונים עדיין",
+  "homeLoadErrorHeadline": "היו לנו בעיות בטעינת התוכן שלך.",
+  "homeLoadErrorDescription": "המתכונים והספרים שלך בטוחים. אפשר לנסות שוב או לחזור לדף הבית.",
+  "tryAgain": "נסה שוב",
+  "homeChefPlaceholder": "שף",
+  "homeGreetingChef": "היי {name}, מוכן לבשל?",
+  "@homeGreetingChef": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeGreetingUser": "היי {name}, ברוך הבא",
+  "@homeGreetingUser": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeUploadPromptChef": "העלה מתכון והפוך אותו לחוויה רגועה, שלב-אחר-שלב.",
+  "homeUploadPromptUser": "גלה מתכונים וספרים. העלאות מיועדות לשפים.",
+  "homeUploadRecipe": "העלה מתכון",
+  "homeCreateManual": "צור ידנית",
+  "homeFreeChefLimit": "שפים חינמיים יכולים לפרסם עד {limit} מתכונים.",
+  "@homeFreeChefLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "homeUpgradeToChef": "הפוך לשף כדי להעלות",
+  "homeShoppingListTooltip": "רשימת קניות",
+  "homeSearchTooltip": "חיפוש",
+  "homeResumeCookingTitle": "המשך בישול",
+  "homeNotNow": "לא עכשיו",
+  "homeStepRemaining": "שלב {step} • נותרו {time}",
+  "@homeStepRemaining": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "time": {}
+    }
+  },
+  "homeResumeButton": "המשך",
+  "homeMyCookbooks": "ספרי הבישול שלי",
+  "homeSeeAll": "הצג הכל",
+  "homeNoCookbooks": "אין ספרי בישול עדיין",
+  "homeLoadingRecipesTimeout": "טעינת מתכונים חרגה מהזמן.",
+  "homeUploadsForChefsTitle": "העלאות מיועדות לשפים",
+  "homeUploadsForChefsBody": "הפוך לשף כדי להוסיף ולארגן מתכונים משלך.",
+  "homeBecomeChefButton": "הפוך לשף",
+  "homeUploadDocBody": "העלה מסמך מתכון כדי להתחיל את ספר המתכונים האישי.",
+  "homeUploadsForChefsSnackbar": "העלאות מיועדות לשפים. הפוך לשף כדי להוסיף מתכונים.",
+  "homeDeleteRecipeTitle": "מחק מתכון",
+  "homeDeleteRecipeMessage": "האם למחוק את \"{title}\"? לא ניתן לבטל.",
+  "@homeDeleteRecipeMessage": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "homeCancel": "בטל",
+  "homeDelete": "מחק",
+  "homeRecipeDeleted": "המתכון נמחק",
+  "homeDeleteRecipeFailed": "מחיקת המתכון נכשלה: {error}",
+  "@homeDeleteRecipeFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "profileTitle": "פרופיל",
+  "profileAnonymousUser": "משתמש אנונימי",
+  "profileNoEmail": "אין אימייל",
+  "profileEditChefProfile": "עריכת פרופיל שף",
+  "profileAccountTypeChef": "חשבון שף",
+  "profileAccountTypeUser": "חשבון משתמש רגיל",
+  "profilePlanBillingTitle": "תוכנית וחיוב",
+  "profileSubscriptionTitle": "צפה במנוי שלי",
+  "profileSubscriptionSubtitle": "ראה את התוכנית הנוכחית ואפשרויות השדרוג",
+  "profileChefToolsTitle": "כלי שף",
+  "profileRecentActivityTitle": "פעילות אחרונה",
+  "profileSeeAll": "הצג הכל",
+  "profileNoRecentActivity": "אין פעילות אחרונה עדיין",
+  "profileSettingsTitle": "הגדרות",
+  "profileOpenSettings": "פתח הגדרות",
+  "profileOpenSettingsSubtitle": "חשבון, העדפות ועוד",
+  "profileUserTypeFreeUser": "משתמש חינם",
+  "profileUserTypePremiumUser": "משתמש פרימיום",
+  "profileUserTypeFreeChef": "שף חינם",
+  "profileUserTypePremiumChef": "שף פרימיום",
+  "profileChefDashboardUnavailable": "לוח הבקרה לשף זמין לחשבונות שף.",
+  "profileChefDashboardTitle": "לוח בקרה לשף",
+  "profileChefDashboardSubtitle": "נהל את התוכן שלך ב-Foodiy",
+  "profileUploadRecipe": "העלה מתכון",
+  "profileCreateCookbook": "צור ספר מתכונים",
+  "profileChefInsights": "תובנות שף",
+  "profileFreeChefLimitMessage": "שפים חינמיים יכולים לפרסם עד {limit} מתכונים.\\nמתכונים: {current} / {limit}",
+  "@profileFreeChefLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      }
+    }
+  },
+  "profileUpgradeToPremiumChef": "שדרג לשף פרימיום",
+  "profileStatMyRecipes": "המתכונים שלי",
+  "profileStatMyCookbooks": "ספרי המתכונים שלי",
+  "profileStatFollowers": "עוקבים",
+  "profileStatChefInsights": "תובנות שף",
+  "profileInsightsDescription": "התוכן שלך גלוי ונמצא ב-Foodiy.",
+  "profileInsightsRecipes": "מתכונים",
+  "profileInsightsCookbooks": "ספרי מתכונים",
+  "profileInsightsFollowers": "עוקבים",
+  "profileInsightsPremiumNote": "שפים פרימיום נהנים מפחות מגבלות וחוויה נקייה יותר.",
+  "profileInsightsClose": "סגור",
+  "profileStepsCount": "{count} שלבים",
+  "@profileStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "navHome": "דף הבית",
+  "navDiscover": "גילוי",
+  "navCookbooks": "ספרי בישול",
+  "navProfile": "פרופיל",
+  "settingsTitle": "הגדרות",
+  "settingsPlayTimerSound": "נגן צליל כשהטיימר מסתיים",
+  "settingsNotificationsSection": "התראות",
+  "settingsNotificationSettings": "הגדרות התראות",
+  "settingsNotificationSettingsSubtitle": "בחר אילו התראות לקבל",
+  "settingsAccountSection": "חשבון",
+  "settingsEditPersonalDetails": "ערוך פרטים אישיים",
+  "settingsChangePassword": "שינוי סיסמה",
+  "settingsLogout": "התנתק",
+  "settingsLogoutFail": "ההתנתקות נכשלה. נסה שוב.",
+  "settingsDeleteAccount": "מחק חשבון",
+  "settingsPreferencesSection": "העדפות אפליקציה",
+  "settingsLanguageUnits": "שפה ויחידות",
+  "settingsLanguageUnitsSubtitle": "בחר שפת אפליקציה ויחידות מידה",
+  "settingsLegalSection": "מידע משפטי",
+  "settingsTermsOfUse": "תנאי שימוש",
+  "settingsPrivacyPolicy": "מדיניות פרטיות",
+  "settingsAboutSection": "אודות",
+  "settingsAboutApp": "אודות Foodiy",
+  "settingsAboutAppSubtitle": "למד עוד על האפליקציה",
+  "languageUnitsTitle": "שפה ויחידות",
+  "languageSectionTitle": "שפה",
+  "languagePickerLabel": "שפת האפליקציה",
+  "languageSystemDefault": "ברירת מחדל של המכשיר",
+  "languageEnglish": "אנגלית",
+  "languageHebrew": "עברית",
+  "languageSpanish": "ספרדית",
+  "languageFrench": "צרפתית",
+  "languageArabic": "ערבית",
+  "languageChinese": "סינית",
+  "languageJapanese": "יפנית",
+  "languageItalian": "איטלקית",
+  "unitsSectionTitle": "יחידות",
+  "unitsMetric": "מטרי (גרמים, צלזיוס)",
+  "unitsImperial": "אימפריאלי (כוסות, פרנהייט)",
+  "notificationTitle": "התראות",
+  "notificationPreferencesTitle": "העדפות התראות",
+  "notificationNewChefRecipesTitle": "מתכונים חדשים משפים",
+  "notificationNewChefRecipesSubtitle": "קבל התראות כשהשפים מפרסמים מתכונים חדשים",
+  "notificationPlaylistSuggestionsTitle": "המלצות לפלייליסטים",
+  "notificationPlaylistSuggestionsSubtitle": "קבל הצעות לפלייליסטים שאולי תאהב",
+  "notificationAppTipsTitle": "טיפים ועדכוני אפליקציה",
+  "privacyTitle": "מדיניות פרטיות",
+  "privacyPlaceholder": "זהו טקסט זמני למדיניות הפרטיות של Foodiy.\\n\\nכאן יתואר כיצד נתוני משתמשים נשמרים ומוגנים.\\nבהמשך נחליף את הטקסט הזה במדיניות האמיתית.",
+  "termsTitle": "תנאי שימוש",
+  "termsPlaceholder": "זהו טקסט זמני לתנאי השימוש של Foodiy.\\n\\nכאן יתוארו כללי השימוש באפליקציה והגבלת אחריות.\\nבהמשך נחליף טקסט זה בתנאים האמיתיים.",
+  "aboutTitle": "אודות Foodiy",
+  "aboutAppName": "Foodiy",
+  "aboutVersion": "גרסה 0.1.0 (dev)",
+  "aboutDescription": "Foodiy היא החבר שלך לבישול ולספרי מתכונים.\\n\\nצור ועקוב אחר ספרי מתכונים, גלה אוספי שפים, בנה ספרים משלך ונהל רשימות קניות – הכל במקום אחד.",
+  "aboutCopyright": "© {year} Foodiy. כל הזכויות שמורות.",
+  "@aboutCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSectionFailed": "הקטע נכשל בטעינה",
+  "homeSectionErrorDetails": "[{tag}] {error}",
+  "@homeSectionErrorDetails": {
+    "placeholders": {
+      "tag": {},
+      "error": {}
+    }
+  },
+  "homeUiError": "שגיאת ממשק: {error}",
+  "@homeUiError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "discoverSearchHint": "חיפוש ספרי מתכונים או שפים",
+  "discoverNoCookbooks": "אין עדיין ספרי מתכונים ציבוריים",
+  "discoverPublicBadge": "ציבורי",
+  "discoverCategoryBreakfast": "ארוחת בוקר",
+  "discoverCategoryBrunch": "בראנץ'",
+  "discoverCategoryQuickWeeknightDinners": "ארוחות ערב מהירות באמצע שבוע",
+  "discoverCategoryFridayLunch": "ארוחת צהריים של שישי",
+  "discoverCategoryComfortFood": "אוכל מנחם",
+  "discoverCategoryBakingBasics": "יסודות אפייה",
+  "discoverCategoryBreadAndDough": "לחם ובצקים",
+  "discoverCategoryPastries": "מאפים",
+  "discoverCategoryCakesAndDesserts": "עוגות וקינוחים",
+  "discoverCategoryCookiesAndSmallSweets": "עוגיות ומתוקים קטנים",
+  "discoverCategoryChocolateLovers": "חובבי שוקולד",
+  "discoverCategoryHealthyAndLight": "בריא וקליל",
+  "discoverCategoryHighProtein": "עשיר בחלבון",
+  "discoverCategoryVegetarian": "צמחוני",
+  "discoverCategoryVegan": "טבעוני",
+  "discoverCategoryGlutenFree": "ללא גלוטן",
+  "discoverCategoryOnePotMeals": "ארוחות סיר אחד",
+  "discoverCategorySoupsAndStews": "מרקים ותבשילים",
+  "discoverCategorySalads": "סלטים",
+  "discoverCategoryPastaAndRisotto": "פסטה וריזוטו",
+  "discoverCategoryRiceAndGrains": "אורז ודגנים",
+  "discoverCategoryMiddleEastern": "מטבח מזרח תיכון",
+  "discoverCategoryItalianClassics": "קלאסיקות איטלקיות",
+  "discoverCategoryAsianInspired": "בהשראה אסייתית",
+  "discoverCategoryStreetFood": "אוכל רחוב",
+  "discoverCategoryFamilyFavorites": "מועדפי המשפחה",
+  "discoverCategoryHostingAndHolidays": "אירוח וחגים",
+  "discoverCategoryMealPrep": "הכנת אוכל מראש",
+  "discoverCategoryKidsFriendly": "ידידותי לילדים",
+  "discoverCategoryLateNightCravings": "נשנושי לילה"
+  ,
+  "cookbooksLoadError": "סנכרון ספרי המתכונים נכשל. נסה שוב.",
+  "cookbooksEmptyTitle": "אין לך עדיין ספרי מתכונים",
+  "cookbooksEmptyBody": "צור את ספר המתכונים הראשון שלך",
+  "cookbooksUntitled": "ספר מתכונים ללא שם",
+  "cookbooksPrivateBadge": "פרטי",
+  "cookbooksRecipeCount": "{count} מתכונים",
+  "@cookbooksRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksChefCookbookSuffix": "ספר שף",
+  "cookbooksActionRename": "שנה שם",
+  "cookbooksActionShare": "שתף",
+  "cookbooksActionDelete": "מחק",
+  "cookbooksMissing": "ספר מתכונים זה כבר לא קיים",
+  "cookbooksCreateFailed": "לא ניתן ליצור ספר מתכונים: {error}",
+  "@cookbooksCreateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cookbooksRenameTitle": "שינוי שם לספר",
+  "cookbooksRenameNewName": "שם חדש",
+  "cookbooksNameRequired": "חובה להזין שם",
+  "cookbooksSave": "שמור",
+  "cookbooksDeleteTitle": "מחיקת ספר",
+  "cookbooksDeleteMessage": "למחוק את \"{name}\"?",
+  "@cookbooksDeleteMessage": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksShareSubject": "ספר מתכונים: {name}",
+  "@cookbooksShareSubject": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksCategoryLimit": "אפשר לבחור עד 5 קטגוריות",
+  "cookbooksCategoryPublicRequired": "בחר 1-5 קטגוריות לספרי מתכונים ציבוריים",
+  "cookbooksPublicSubtitle": "ספרי מתכונים ציבוריים גלויים לאחרים",
+  "cookbooksBasicsTitle": "יסודות",
+  "cookbooksNameLabel": "שם ספר המתכונים",
+  "cookbooksChooseImage": "בחר תמונה",
+  "cookbooksCategoriesTitle": "קטגוריות",
+  "cookbooksCategoriesPublicHint": "בחר 1-5 קטגוריות כדי שאחרים ימצאו את הספר שלך.",
+  "cookbooksCategoriesPrivateHint": "רשות: הוסף עד 5 קטגוריות.",
+  "cookbooksCategoriesSelected": "{count}/5 נבחרו",
+  "@cookbooksCategoriesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksCreateTitle": "צור ספר מתכונים",
+  "cookbooksBack": "חזרה",
+  "cookbooksNext": "הבא",
+  "cookbooksCreate": "צור",
+  "recipeDifficultyMedium": "בינונית",
+  "recipeSaveSuccess": "המתכון \"{title}\" נשמר והתווסף למתכונים שלי",
+  "@recipeSaveSuccess": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "recipeSaveFailed": "הפעולה נכשלה: {error}",
+  "@recipeSaveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "recipeCreateTitle": "צור מתכון",
+  "recipeEditTitle": "ערוך מתכון",
+  "recipeOnlyChefBody": "רק חשבונות שף יכולים להעלות מתכונים.\n\nשדרג לתוכנית שף כדי להתחיל ליצור מתכונים.",
+  "recipeFreePlanLimitBody": "הגעת למגבלת ההעלאה בתוכנית שף חינמית.\n\nשדרג לשף פרימיום כדי ליצור עוד מתכונים.",
+  "recipePhotoLabel": "תמונת מתכון",
+  "recipeTakePhoto": "צלם תמונה",
+  "recipePhotoLibrary": "ספריית תמונות",
+  "recipePickFile": "קבצים",
+  "recipeUploadLimitBanner": "תוכנית שף חינמית - העלאת מתכונים מוגבלת.\nשדרג לשף פרימיום כדי להסיר מגבלה זו.",
+  "recipeTitleLabel": "כותרת מתכון",
+  "recipeIngredientsTitle": "מרכיבים",
+  "recipeIngredientLabel": "מרכיב",
+  "recipeQuantityLabel": "כמות",
+  "recipeUnitLabel": "יחידה",
+  "recipeAddIngredient": "הוסף מרכיב",
+  "recipeToolsTitle": "כלים / ציוד",
+  "recipeToolLabel": "כלי",
+  "recipeAddTool": "הוסף כלי",
+  "recipePreCookingTitle": "הכנה לפני הבישול",
+  "recipePreCookingHint": "לדוגמה: חמם תנור ל-200C, רפד את התבנית, השריית שעועית לילה...",
+  "recipeStepsTitle": "שלבים",
+  "recipeAddStep": "הוסף שלב",
+  "recipePreviewInPlayer": "תצוגה מקדימה בנגן",
+  "recipeUpdateButton": "עדכן מתכון",
+  "recipeSaveButton": "שמור מתכון",
+  "recipeStepLabel": "שלב",
+  "recipeStepMinutesLabel": "דק'",
+  "recipeRemoveStepTooltip": "הסר שלב",
+  "recipeDeleteButton": "מחק מתכון",
+  "recipeDeleteStep1Title": "למחוק את המתכון?",
+  "recipeDeleteStep1Body": "האם אתה בטוח שברצונך למחוק את המתכון?",
+  "recipeDeleteStep1Continue": "המשך",
+  "recipeDeleteStep2Title": "הפעולה אינה הפיכה",
+  "recipeDeleteStep2Body": "מחיקת מתכון זה תסיר אותו לצמיתות.",
+  "recipeDeleteStep2Delete": "מחק",
+  "recipeDeleteFailed": "המחיקה נכשלה: {error}",
+  "@recipeDeleteFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "importDocTitle": "ייבוא מתכון ממסמך",
+  "importDocHeader": "ייבוא מתכון מתוך מסמך",
+  "importDocBody": "בחר קובץ או צילום מתכון נקי. נשמור על יציבות בזמן הקריאה והיצירה של המתכון עבורך.",
+  "importDocFileReady": "הקובץ מוכן",
+  "importDocAddDocument": "הוסף מסמך מתכון",
+  "importDocFormatsShort": "PDF, DOCX, JPG, PNG, WEBP",
+  "importDocProcessingNote": "נשמור על ההעלאה יציבה בזמן העיבוד.",
+  "importDocEmptyHelper": "לא נבחר קובץ עדיין. הוסף קובץ או צילום ברור כדי להמשיך.",
+  "importDocChooseFile": "בחר קובץ",
+  "importDocChoosePhoto": "בחר תמונה",
+  "importDocTakePhoto": "צלם תמונה",
+  "importDocTipsTitle": "טיפים ליבוא רגוע",
+  "importDocTip1": "השתמש בתמונה מוארת היטב עם כל המתכון גלוי.",
+  "importDocTip2": "הישאר במסך זה עד שנעביר אותך למתכון.",
+  "importDocTip3": "תוכל לערוך פרטים לאחר סיום היבוא.",
+  "importDocUpload": "העלה וייבא",
+  "importDocSupportedFooter": "נתמך: PDF, DOC, DOCX, JPG, PNG, WEBP. קבצים גדולים עשויים לקחת זמן רב יותר לעיבוד."
+}

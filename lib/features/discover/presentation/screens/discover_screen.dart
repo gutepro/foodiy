@@ -9,6 +9,7 @@ import 'package:foodiy/features/discovery/discovery_feed.dart'
         DiscoveryCookbook,
         DiscoveryRepository,
         PublicCookbookScreen;
+import 'package:foodiy/features/chef/application/chef_follow_service.dart';
 import 'package:foodiy/features/search/presentation/screens/search_results_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/shared/constants/categories.dart';
@@ -16,6 +17,7 @@ import 'package:foodiy/core/services/current_user_service.dart';
 import 'package:foodiy/core/models/user_type.dart';
 import 'package:foodiy/shared/services/ads_service.dart';
 import 'package:foodiy/shared/widgets/banner_ad_container.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
@@ -54,6 +56,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final categories = kRecipeCategoryOptions;
     final userType =
         CurrentUserService.instance.currentProfile?.userType ?? UserType.freeUser;
@@ -65,7 +68,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       _adsLogged = true;
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('Discover')),
+      appBar: AppBar(title: Text(l10n.navDiscover)),
       bottomNavigationBar: BannerAdContainer(showAds: adsOn),
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,
@@ -77,7 +80,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           child: ListView.separated(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(bottom: 16),
-            itemCount: 1 + categories.length,
+            itemCount: 2 + categories.length,
             separatorBuilder: (_, __) => const SizedBox(height: 16),
             itemBuilder: (context, index) {
               if (index == 0) {
@@ -97,7 +100,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                     },
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.search),
-                      hintText: 'Search cookbooks or chefs',
+                      hintText: l10n.discoverSearchHint,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -106,7 +109,16 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 );
               }
 
-              final categoryIndex = index - 1;
+              if (index == 1) {
+                final currentUid =
+                    CurrentUserService.instance.currentProfile?.uid ?? '';
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _ChefsCarousel(currentUid: currentUid),
+                );
+              }
+
+              final categoryIndex = index - 2;
               final category = categories[categoryIndex];
               final stream = _repo.watchPublicCookbooksByCategory(
                 category.key,
@@ -118,13 +130,131 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   final cookbooks =
                       snapshot.data ?? const <DiscoveryCookbook>[];
                   return _CategorySection(
-                    title: category.title,
+                    title: categoryTitleForKey(l10n, category.key),
                     keyName: category.key,
                     cookbooks: cookbooks,
                   );
                 },
               );
             },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChefsCarousel extends StatelessWidget {
+  const _ChefsCarousel({required this.currentUid});
+
+  final String currentUid;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DiscoverSectionHeader(title: 'Chefs to follow', onSeeAll: null),
+        const SizedBox(height: 12),
+        StreamBuilder<List<FollowingChef>>(
+          stream: ChefFollowService.instance.watchTopChefs(
+            excludeUid: currentUid,
+            limit: 12,
+          ),
+          builder: (context, snapshot) {
+            final chefs = snapshot.data ?? const <FollowingChef>[];
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                chefs.isEmpty) {
+              return const SizedBox(
+                height: 120,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (chefs.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  'No chefs to show yet. Check back soon!',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              );
+            }
+            return SizedBox(
+              height: 180,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: chefs.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final chef = chefs[index];
+                  return _ChefCard(chef: chef);
+                },
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _ChefCard extends StatelessWidget {
+  const _ChefCard({required this.chef});
+
+  final FollowingChef chef;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final avatarUrl = chef.avatarUrl.trim();
+    return SizedBox(
+      width: 150,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            context.push(AppRoutes.chefProfile, extra: chef.chefId);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundImage:
+                      avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
+                  backgroundColor: Colors.grey.shade200,
+                  child: avatarUrl.isEmpty
+                      ? Icon(Icons.person, color: Colors.grey.shade600)
+                      : null,
+                  onBackgroundImageError: (_, __) {},
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  chef.displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.group_outlined, size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${chef.followersCount} followers',
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -146,6 +276,7 @@ class _CategorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -171,7 +302,7 @@ class _CategorySection extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'No public cookbooks yet',
+                          l10n.discoverNoCookbooks,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: Colors.grey.shade700,
                           ),
@@ -213,6 +344,7 @@ class _CookbookCardInline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final url = _pickImage();
 
     if (!_loggedFirst) {
@@ -285,7 +417,7 @@ class _CookbookCardInline extends StatelessWidget {
                     const Icon(Icons.public, size: 14, color: Colors.green),
                     const SizedBox(width: 4),
                     Text(
-                      'Public',
+                      l10n.discoverPublicBadge,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: Colors.green.shade800,
                         fontWeight: FontWeight.w600,
@@ -311,6 +443,7 @@ class DiscoverSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Row(
@@ -324,7 +457,7 @@ class DiscoverSectionHeader extends StatelessWidget {
             ),
           ),
           if (onSeeAll != null)
-            TextButton(onPressed: onSeeAll, child: const Text('See all')),
+            TextButton(onPressed: onSeeAll, child: Text(l10n.homeSeeAll)),
         ],
       ),
     );
@@ -340,5 +473,72 @@ class _PlaceholderBox extends StatelessWidget {
         child: Icon(Icons.image_not_supported_outlined, size: 32),
       ),
     );
+  }
+}
+
+String categoryTitleForKey(AppLocalizations l10n, String key) {
+  switch (key) {
+    case 'breakfast':
+      return l10n.discoverCategoryBreakfast;
+    case 'brunch':
+      return l10n.discoverCategoryBrunch;
+    case 'quick-weeknight-dinners':
+      return l10n.discoverCategoryQuickWeeknightDinners;
+    case 'friday-lunch':
+      return l10n.discoverCategoryFridayLunch;
+    case 'comfort-food':
+      return l10n.discoverCategoryComfortFood;
+    case 'baking-basics':
+      return l10n.discoverCategoryBakingBasics;
+    case 'bread-and-dough':
+      return l10n.discoverCategoryBreadAndDough;
+    case 'pastries':
+      return l10n.discoverCategoryPastries;
+    case 'cakes-and-desserts':
+      return l10n.discoverCategoryCakesAndDesserts;
+    case 'cookies-and-small-sweets':
+      return l10n.discoverCategoryCookiesAndSmallSweets;
+    case 'chocolate-lovers':
+      return l10n.discoverCategoryChocolateLovers;
+    case 'healthy-and-light':
+      return l10n.discoverCategoryHealthyAndLight;
+    case 'high-protein':
+      return l10n.discoverCategoryHighProtein;
+    case 'vegetarian':
+      return l10n.discoverCategoryVegetarian;
+    case 'vegan':
+      return l10n.discoverCategoryVegan;
+    case 'gluten-free':
+      return l10n.discoverCategoryGlutenFree;
+    case 'one-pot-meals':
+      return l10n.discoverCategoryOnePotMeals;
+    case 'soups-and-stews':
+      return l10n.discoverCategorySoupsAndStews;
+    case 'salads':
+      return l10n.discoverCategorySalads;
+    case 'pasta-and-risotto':
+      return l10n.discoverCategoryPastaAndRisotto;
+    case 'rice-and-grains':
+      return l10n.discoverCategoryRiceAndGrains;
+    case 'middle-eastern':
+      return l10n.discoverCategoryMiddleEastern;
+    case 'italian-classics':
+      return l10n.discoverCategoryItalianClassics;
+    case 'asian-inspired':
+      return l10n.discoverCategoryAsianInspired;
+    case 'street-food':
+      return l10n.discoverCategoryStreetFood;
+    case 'family-favorites':
+      return l10n.discoverCategoryFamilyFavorites;
+    case 'hosting-and-holidays':
+      return l10n.discoverCategoryHostingAndHolidays;
+    case 'meal-prep':
+      return l10n.discoverCategoryMealPrep;
+    case 'kids-friendly':
+      return l10n.discoverCategoryKidsFriendly;
+    case 'late-night-cravings':
+      return l10n.discoverCategoryLateNightCravings;
+    default:
+      return key;
   }
 }

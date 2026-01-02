@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:foodiy/core/services/current_user_service.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/features/subscription/presentation/screens/package_selection_screen.dart';
 
 class InitialProfileSetupScreen extends StatefulWidget {
   const InitialProfileSetupScreen({super.key});
@@ -29,7 +30,11 @@ class _InitialProfileSetupScreenState extends State<InitialProfileSetupScreen> {
       _showMessage('Please enter your name');
       return;
     }
-    // TODO: Save initial profile data (displayName, role) to Firestore.
+    _saveName(name);
+  }
+
+  Future<void> _saveName(String name) async {
+    await CurrentUserService.instance.updateDisplayName(name);
     _goToPackages();
   }
 
@@ -37,7 +42,10 @@ class _InitialProfileSetupScreenState extends State<InitialProfileSetupScreen> {
     await CurrentUserService.instance.refreshFromFirebase();
     // TODO: Only show package selection on first login, skip for returning users based on Firestore flag.
     if (!mounted) return;
-    context.go(AppRoutes.selectPackage);
+    context.go(
+      AppRoutes.selectPackage,
+      extra: PlanPickerEntrySource.onboarding,
+    );
   }
 
   void _showMessage(String message) {

@@ -33,35 +33,14 @@ class SubscriptionPaymentScreen extends StatelessWidget {
               'You are about to subscribe to:\n$title',
               style: theme.textTheme.bodyMedium,
             ),
-            const SizedBox(height: 16),
-            Text(
-              'In a real app this screen would integrate Apple/Google in app purchases.',
-              style: theme.textTheme.bodySmall,
-            ),
             const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Integrate real payment flow.
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Simulated payment success for $title'),
-                    ),
-                  );
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text('Simulate payment success'),
-              ),
-            ),
-            const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () {
                   Navigator.of(context).pop(false);
                 },
-                child: const Text('Cancel'),
+                child: const Text('Back'),
               ),
             ),
           ],

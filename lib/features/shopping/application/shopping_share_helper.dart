@@ -14,7 +14,7 @@ class ShoppingShareHelper {
     for (final item in items) {
       final checkbox = item.isChecked ? '[x]' : '[ ]';
       final quantityPart =
-          item.quantity.isNotEmpty ? ' - ${item.quantity}' : '';
+          item.quantityText.isNotEmpty ? ' - ${item.quantityText}' : '';
       buffer.writeln('$checkbox ${item.name}$quantityPart');
     }
 
@@ -36,7 +36,7 @@ class ShoppingShareHelper {
     for (final item in snapshot.items) {
       final checkbox = item.isChecked ? '[x]' : '[ ]';
       final quantityPart =
-          item.quantity.isNotEmpty ? ' - ${item.quantity}' : '';
+          item.quantityText.isNotEmpty ? ' - ${item.quantityText}' : '';
       buffer.writeln('$checkbox ${item.name}$quantityPart');
     }
 

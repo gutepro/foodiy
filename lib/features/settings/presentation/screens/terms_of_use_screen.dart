@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class TermsOfUseScreen extends StatelessWidget {
   const TermsOfUseScreen({super.key});
@@ -6,17 +7,16 @@ class TermsOfUseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Terms of use'),
+        title: Text(l10n.termsTitle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Text(
-            'This is a placeholder for the Foodiy terms of use.\n\n'
-            'Here you will describe the rules for using the app, limitations of liability, and other legal details.\n'
-            'Later we will replace this text with the real terms.',
+            l10n.termsPlaceholder,
             style: theme.textTheme.bodyMedium,
           ),
         ),

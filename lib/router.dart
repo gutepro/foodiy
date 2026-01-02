@@ -11,7 +11,11 @@ import 'features/playlists/playlists_screen.dart';
 import 'features/recipe/presentation/screens/recipe_details_screen.dart';
 import 'features/recipe/presentation/screens/recipe_player_screen.dart';
 import 'features/recipe/presentation/screens/recipe_upload_screen.dart';
-import 'features/recipes/recipe_screen.dart';
+import 'features/recipe/presentation/screens/recipe_import_document_screen.dart';
+import 'features/recipe/presentation/screens/import_needs_review_screen.dart';
+import 'features/recipe/presentation/screens/import_failed_screen.dart';
+import 'features/recipe/domain/recipe.dart';
+import 'features/recipe/application/recipe_firestore_service.dart';
 import 'features/playlist/presentation/screens/playlist_details_screen.dart';
 import 'features/playlist/presentation/screens/my_playlists_screen.dart';
 import 'features/playlist/presentation/screens/personal_playlist_details_screen.dart';
@@ -26,12 +30,28 @@ import 'features/shell/presentation/screens/main_shell_screen.dart';
 import 'features/shopping/presentation/screens/shopping_history_screen.dart';
 import 'features/shopping/presentation/screens/shopping_history_details_screen.dart';
 import 'features/shopping/presentation/screens/shopping_list_screen.dart';
+import 'features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'features/legal/presentation/screens/legal_consent_screen.dart';
 import 'features/subscription/presentation/screens/package_selection_screen.dart';
 import 'features/subscription/presentation/screens/subscription_checkout_placeholder_screen.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 import 'features/chef/presentation/screens/chef_profile_screen.dart';
+import 'features/chef/presentation/screens/edit_chef_profile_screen.dart';
 import 'router/app_routes.dart';
 import 'shared/theme/theme.dart';
+import 'features/settings/application/settings_service.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
+
+const _supportedAppLocales = [
+  Locale('en'),
+  Locale('he'),
+  Locale('es'),
+  Locale('fr'),
+  Locale('ar'),
+  Locale('zh'),
+  Locale('ja'),
+  Locale('it'),
+];
 
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.splash,
@@ -43,6 +63,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.login,
       builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.onboarding,
+      builder: (context, state) => const OnboardingScreen(),
     ),
     GoRoute(
       path: AppRoutes.forgotPassword,
@@ -82,10 +106,6 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const DiscoveryScreen(),
     ),
     GoRoute(
-      path: AppRoutes.recipe,
-      builder: (context, state) => const RecipeScreen(),
-    ),
-    GoRoute(
       path: AppRoutes.recipeDetails,
       builder: (context, state) {
         final args = state.extra as RecipeDetailsArgs?;
@@ -118,7 +138,49 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.recipeCreate,
-      builder: (context, state) => const RecipeUploadScreen(),
+      builder: (context, state) {
+        final recipe = state.extra as Recipe?;
+        return RecipeUploadScreen(recipe: recipe);
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.recipeEdit,
+      builder: (context, state) {
+        final id = state.extra as String?;
+        if (id == null || id.isEmpty) {
+          return const Scaffold(
+            body: Center(child: Text('Recipe not found')),
+          );
+        }
+        return FutureBuilder<Recipe?>(
+          future: RecipeFirestoreService.instance.getRecipeById(id),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final recipe = snapshot.data;
+            if (recipe == null) {
+              return const Scaffold(
+                body: Center(child: Text('Recipe not found')),
+              );
+            }
+            return RecipeUploadScreen(recipe: recipe);
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.recipeImportDocument,
+      builder: (context, state) => const RecipeImportDocumentScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.recipeImportNeedsReview,
+      builder: (context, state) {
+        final recipe = state.extra as Recipe?;
+        return ImportNeedsReviewScreen(recipe: recipe);
+      },
     ),
     GoRoute(
       path: AppRoutes.playlistDetails,
@@ -162,7 +224,10 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.selectPackage,
-      builder: (context, state) => const PackageSelectionScreen(),
+      builder: (context, state) => PackageSelectionScreen(
+        source: (state.extra as PlanPickerEntrySource?) ??
+            PlanPickerEntrySource.settings,
+      ),
     ),
     GoRoute(
       path: AppRoutes.subscriptionCheckout,
@@ -205,6 +270,22 @@ final GoRouter appRouter = GoRouter(
         return ChefProfileScreen(chefId: chefId);
       },
     ),
+    GoRoute(
+      path: AppRoutes.editChefProfile,
+      builder: (context, state) {
+        final chefId = state.extra as String?;
+        if (chefId == null || chefId.isEmpty) {
+          return const Scaffold(
+            body: Center(child: Text('Chef not found')),
+          );
+        }
+        return EditChefProfileScreen(chefId: chefId);
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.legalConsent,
+      builder: (context, state) => const LegalConsentScreen(),
+    ),
   ],
 );
 
@@ -213,26 +294,43 @@ class FoodiyRouter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'foodiy',
-      debugShowCheckedModeBanner: false,
-      routerConfig: appRouter,
-      theme: FoodiyTheme.light,
-      supportedLocales: const [Locale('he'), Locale('en')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      localeResolutionCallback: (locale, supportedLocales) {
-        if (locale != null) {
-          for (final supported in supportedLocales) {
-            if (supported.languageCode == locale.languageCode) {
-              return supported;
+    debugPrint('DEBUG MAIN: FoodiyRouter.build() called');
+    final settings = SettingsService.instance;
+
+    return ValueListenableBuilder<String?>(
+      valueListenable: settings.localeListenable,
+      builder: (context, localeCode, _) {
+        final locale = settings.resolvedLocale;
+        debugPrint(
+          '[APP_LOCALE] locale=${locale?.toLanguageTag() ?? 'system'}',
+        );
+        return MaterialApp.router(
+          title: 'foodiy',
+          debugShowCheckedModeBanner: false,
+          routerConfig: appRouter,
+          theme: FoodiyTheme.light,
+          supportedLocales: _supportedAppLocales,
+          locale: locale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          localeResolutionCallback: (deviceLocale, supportedLocales) {
+            if (locale != null) return locale;
+            if (deviceLocale != null) {
+              for (final supported in supportedLocales) {
+                if (supported.languageCode == deviceLocale.languageCode) {
+                  return supported;
+                }
+              }
             }
-          }
-        }
-        return const Locale('he');
+            // Default to English so unknown locales do not flip punctuation or
+            // text direction unexpectedly.
+            return const Locale('en');
+          },
+        );
       },
     );
   }

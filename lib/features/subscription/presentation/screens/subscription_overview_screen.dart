@@ -44,18 +44,22 @@ class SubscriptionOverviewScreen extends StatelessWidget {
             const _PlanRow(
               title: 'Free user',
               description: 'View recipes with ads and basic features.',
+              price: 'Free',
             ),
             const _PlanRow(
               title: 'Premium user',
               description: 'No ads, personal playlists and advanced player.',
+              price: '\$4.99/mo',
             ),
             const _PlanRow(
               title: 'Free chef',
               description: 'Upload limited recipes, basic chef tools.',
+              price: 'Free (limit 10 uploads)',
             ),
             const _PlanRow(
               title: 'Premium chef',
               description: 'Unlimited uploads, public playlists, stats and promotion.',
+              price: '\$9.99/mo',
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -64,7 +68,9 @@ class SubscriptionOverviewScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => const PackageSelectionScreen(),
+                      builder: (_) => const PackageSelectionScreen(
+                        source: PlanPickerEntrySource.settings,
+                      ),
                     ),
                   );
                 },
@@ -79,7 +85,9 @@ class SubscriptionOverviewScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => const PackageSelectionScreen(),
+                        builder: (_) => const PackageSelectionScreen(
+                          source: PlanPickerEntrySource.settings,
+                        ),
                       ),
                     );
                   },
@@ -95,10 +103,11 @@ class SubscriptionOverviewScreen extends StatelessWidget {
 }
 
 class _PlanRow extends StatelessWidget {
-  const _PlanRow({required this.title, required this.description});
+  const _PlanRow({required this.title, required this.description, required this.price});
 
   final String title;
   final String description;
+  final String price;
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +116,7 @@ class _PlanRow extends StatelessWidget {
       child: ListTile(
         title: Text(title, style: theme.textTheme.bodyMedium),
         subtitle: Text(description),
+        trailing: Text(price, style: theme.textTheme.labelLarge),
       ),
     );
   }

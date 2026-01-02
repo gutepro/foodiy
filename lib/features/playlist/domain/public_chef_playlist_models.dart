@@ -38,6 +38,7 @@ class PublicChefPlaylist {
   final String? chefId;
   final String title;
   final String description;
+  final List<String> categories;
   final List<PublicChefPlaylistEntry> entries;
 
   const PublicChefPlaylist({
@@ -46,6 +47,7 @@ class PublicChefPlaylist {
     this.chefId,
     required this.title,
     required this.description,
+    required this.categories,
     required this.entries,
   });
 
@@ -55,6 +57,7 @@ class PublicChefPlaylist {
     'chefId': chefId,
     'title': title,
     'description': description,
+    'categories': categories,
     // entries stored in subcollection
   };
 
@@ -68,6 +71,10 @@ class PublicChefPlaylist {
       chefId: json['chefId'] as String?,
       title: json['title'] as String,
       description: json['description'] as String,
+      categories: (json['categories'] as List<dynamic>?)
+              ?.whereType<String>()
+              .toList() ??
+          const [],
       entries: entries,
     );
   }

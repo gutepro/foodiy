@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodiy/core/brand/brand_assets.dart';
 
 class LoadingScreen extends StatelessWidget {
   final String? message;
@@ -14,12 +15,12 @@ class LoadingScreen extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/images/foodiy_logo.png.png',
-              width: 120,
-              height: 120,
-            ),
+        children: [
+          Image.asset(
+            BrandAssets.foodiyLogo,
+            width: 120,
+            height: 120,
+          ),
             const SizedBox(height: 24),
             const CircularProgressIndicator(),
             if (message != null) ...[

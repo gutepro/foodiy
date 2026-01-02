@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:foodiy/core/brand/brand_assets.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -6,10 +8,11 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('About Foodiy'),
+        title: Text(l10n.aboutTitle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -19,34 +22,32 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Center(
               child: Image.asset(
-                'assets/images/foodiy_logo.png.png',
+                BrandAssets.foodiyLogo,
                 width: 120,
                 height: 120,
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Foodiy',
+              l10n.aboutAppName,
               style: theme.textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              'Version 0.1.0 (dev)',
+              l10n.aboutVersion,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: Colors.grey.shade700,
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Foodiy is your personal cooking and cookbook companion.\n\n'
-              'Create and follow recipe cookbooks, discover chef collections,\n'
-              'build your own cookbooks and manage shopping lists – all in one place.',
+              l10n.aboutDescription,
               style: theme.textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
             const Spacer(),
             Text(
-              '© ${DateTime.now().year} Foodiy. All rights reserved.',
+              l10n.aboutCopyright(DateTime.now().year),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: Colors.grey.shade600,
               ),

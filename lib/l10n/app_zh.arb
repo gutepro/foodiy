@@ -1,0 +1,376 @@
+{
+  "homeTitle": "首页",
+  "myRecipesTitle": "我的食谱",
+  "backToHomeButton": "返回首页",
+  "homeLoadErrorTitle": "加载食谱时遇到问题。",
+  "untitledRecipe": "未命名的食谱",
+  "deleteRecipeTooltip": "删除食谱",
+  "noRecipesYet": "还没有食谱",
+  "homeLoadErrorHeadline": "加载内容时遇到问题。",
+  "homeLoadErrorDescription": "你的食谱和食谱本很安全。你可以重试，或返回首页。",
+  "tryAgain": "重试",
+  "homeChefPlaceholder": "主厨",
+  "homeGreetingChef": "嗨，{name}，准备好做饭了吗？",
+  "@homeGreetingChef": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeGreetingUser": "嗨，{name}，欢迎回来",
+  "@homeGreetingUser": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeUploadPromptChef": "上传食谱，将其变成轻松的分步体验。",
+  "homeUploadPromptUser": "探索食谱和食谱集。上传仅限主厨。",
+  "homeUploadRecipe": "上传食谱",
+  "homeCreateManual": "手动创建",
+  "homeFreeChefLimit": "免费主厨最多可发布 {limit} 个食谱。",
+  "@homeFreeChefLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "homeUpgradeToChef": "成为主厨以便上传",
+  "homeShoppingListTooltip": "购物清单",
+  "homeSearchTooltip": "搜索",
+  "homeResumeCookingTitle": "继续烹饪",
+  "homeNotNow": "暂不",
+  "homeStepRemaining": "第 {step} 步 • 剩余 {time}",
+  "@homeStepRemaining": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "time": {}
+    }
+  },
+  "homeResumeButton": "继续",
+  "homeMyCookbooks": "我的食谱集",
+  "homeSeeAll": "查看全部",
+  "homeNoCookbooks": "还没有食谱集",
+  "homeLoadingRecipesTimeout": "加载食谱超时。",
+  "homeUploadsForChefsTitle": "上传仅限主厨",
+  "homeUploadsForChefsBody": "成为主厨以添加和整理你的食谱。",
+  "homeBecomeChefButton": "成为主厨",
+  "homeUploadDocBody": "上传食谱文档以开始你的个人食谱集。",
+  "homeUploadsForChefsSnackbar": "上传仅限主厨。成为主厨以添加食谱。",
+  "homeDeleteRecipeTitle": "删除食谱",
+  "homeDeleteRecipeMessage": "确定删除“{title}”吗？此操作无法撤销。",
+  "@homeDeleteRecipeMessage": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "homeCancel": "取消",
+  "homeDelete": "删除",
+  "homeRecipeDeleted": "食谱已删除",
+  "homeDeleteRecipeFailed": "删除食谱失败：{error}",
+  "@homeDeleteRecipeFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "profileTitle": "个人资料",
+  "profileAnonymousUser": "匿名用户",
+  "profileNoEmail": "无邮箱",
+  "profileEditChefProfile": "编辑厨师资料",
+  "profileAccountTypeChef": "厨师账户",
+  "profileAccountTypeUser": "普通用户账户",
+  "profilePlanBillingTitle": "套餐与账单",
+  "profileSubscriptionTitle": "查看我的订阅",
+  "profileSubscriptionSubtitle": "查看你当前的套餐和升级选项",
+  "profileChefToolsTitle": "厨师工具",
+  "profileRecentActivityTitle": "最近活动",
+  "profileSeeAll": "查看全部",
+  "profileNoRecentActivity": "暂无最近活动",
+  "profileSettingsTitle": "设置",
+  "profileOpenSettings": "打开设置",
+  "profileOpenSettingsSubtitle": "账户、偏好等",
+  "profileUserTypeFreeUser": "免费用户",
+  "profileUserTypePremiumUser": "高级用户",
+  "profileUserTypeFreeChef": "免费厨师",
+  "profileUserTypePremiumChef": "高级厨师",
+  "profileChefDashboardUnavailable": "厨师面板仅对厨师账户开放。",
+  "profileChefDashboardTitle": "厨师面板",
+  "profileChefDashboardSubtitle": "管理你在Foodiy的内容",
+  "profileUploadRecipe": "上传食谱",
+  "profileCreateCookbook": "创建食谱集",
+  "profileChefInsights": "厨师洞察",
+  "profileFreeChefLimitMessage": "免费厨师最多可发布 {limit} 个食谱。\\n食谱：{current} / {limit}",
+  "@profileFreeChefLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      }
+    }
+  },
+  "profileUpgradeToPremiumChef": "升级为高级厨师",
+  "profileStatMyRecipes": "我的食谱",
+  "profileStatMyCookbooks": "我的食谱集",
+  "profileStatFollowers": "关注者",
+  "profileStatChefInsights": "厨师洞察",
+  "profileInsightsDescription": "你的内容在Foodiy上可见且可被发现。",
+  "profileInsightsRecipes": "食谱",
+  "profileInsightsCookbooks": "食谱集",
+  "profileInsightsFollowers": "关注者",
+  "profileInsightsPremiumNote": "高级厨师享受更少限制和更流畅的体验。",
+  "profileInsightsClose": "关闭",
+  "profileStepsCount": "{count} 步",
+  "@profileStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "navHome": "首页",
+  "settingsTitle": "设置",
+  "settingsPlayTimerSound": "计时结束时播放声音",
+  "settingsNotificationsSection": "通知",
+  "settingsNotificationSettings": "通知设置",
+  "settingsNotificationSettingsSubtitle": "选择你想接收的通知",
+  "settingsAccountSection": "账户",
+  "settingsEditPersonalDetails": "编辑个人信息",
+  "settingsChangePassword": "更改密码",
+  "settingsLogout": "退出登录",
+  "settingsLogoutFail": "退出失败，请重试。",
+  "settingsDeleteAccount": "删除账户",
+  "settingsPreferencesSection": "应用偏好",
+  "settingsLanguageUnits": "语言和单位",
+  "settingsLanguageUnitsSubtitle": "选择应用语言和度量单位",
+  "settingsLegalSection": "法律",
+  "settingsTermsOfUse": "使用条款",
+  "settingsPrivacyPolicy": "隐私政策",
+  "settingsAboutSection": "关于",
+  "settingsAboutApp": "关于 Foodiy",
+  "settingsAboutAppSubtitle": "了解更多关于此应用",
+  "languageUnitsTitle": "语言和单位",
+  "languageSectionTitle": "语言",
+  "languagePickerLabel": "应用语言",
+  "languageSystemDefault": "系统默认",
+  "languageEnglish": "英语",
+  "languageHebrew": "希伯来语",
+  "languageSpanish": "西班牙语",
+  "languageFrench": "法语",
+  "languageArabic": "阿拉伯语",
+  "languageChinese": "中文",
+  "languageJapanese": "日语",
+  "languageItalian": "意大利语",
+  "unitsSectionTitle": "单位",
+  "unitsMetric": "公制（克，摄氏度）",
+  "unitsImperial": "英制（杯，华氏度）",
+  "notificationTitle": "通知",
+  "notificationPreferencesTitle": "通知偏好",
+  "notificationNewChefRecipesTitle": "厨师新食谱",
+  "notificationNewChefRecipesSubtitle": "当厨师发布新食谱时获取通知",
+  "notificationPlaylistSuggestionsTitle": "列表推荐",
+  "notificationPlaylistSuggestionsSubtitle": "接收可能喜欢的列表推荐",
+  "notificationAppTipsTitle": "应用提示和更新",
+  "privacyTitle": "隐私政策",
+  "privacyPlaceholder": "这是 Foodiy 隐私政策的占位文本。\\n\\n这里将描述用户数据如何使用、存储和保护。\\n稍后我们会用正式的政策替换此文本。",
+  "termsTitle": "使用条款",
+  "termsPlaceholder": "这是 Foodiy 使用条款的占位文本。\\n\\n这里将描述应用使用规则、责任限制等法律细节。\\n稍后会用正式条款替换此文本。",
+  "aboutTitle": "关于 Foodiy",
+  "aboutAppName": "Foodiy",
+  "aboutVersion": "版本 0.1.0 (dev)",
+  "aboutDescription": "Foodiy 是你的私人烹饪与食谱助手。\\n\\n创建和关注食谱集，发现厨师合集，构建自己的食谱本并管理购物清单，一站搞定。",
+  "aboutCopyright": "© {year} Foodiy。保留所有权利。",
+  "@aboutCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "navDiscover": "发现",
+  "navCookbooks": "食谱集",
+  "navProfile": "个人资料",
+  "homeSectionFailed": "部分内容无法显示",
+  "homeSectionErrorDetails": "[{tag}] {error}",
+  "@homeSectionErrorDetails": {
+    "placeholders": {
+      "tag": {},
+      "error": {}
+    }
+  },
+  "homeUiError": "界面错误：{error}",
+  "@homeUiError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "discoverSearchHint": "搜索食谱集或厨师",
+  "discoverNoCookbooks": "暂无公开的食谱集",
+  "discoverPublicBadge": "公开",
+  "discoverCategoryBreakfast": "早餐",
+  "discoverCategoryBrunch": "早午餐",
+  "discoverCategoryQuickWeeknightDinners": "工作日晚餐速成",
+  "discoverCategoryFridayLunch": "周五午餐",
+  "discoverCategoryComfortFood": "安慰食物",
+  "discoverCategoryBakingBasics": "烘焙基础",
+  "discoverCategoryBreadAndDough": "面包与面团",
+  "discoverCategoryPastries": "酥点",
+  "discoverCategoryCakesAndDesserts": "蛋糕与甜点",
+  "discoverCategoryCookiesAndSmallSweets": "曲奇与小甜点",
+  "discoverCategoryChocolateLovers": "巧克力爱好者",
+  "discoverCategoryHealthyAndLight": "健康清淡",
+  "discoverCategoryHighProtein": "高蛋白",
+  "discoverCategoryVegetarian": "素食",
+  "discoverCategoryVegan": "纯素",
+  "discoverCategoryGlutenFree": "无麸质",
+  "discoverCategoryOnePotMeals": "一锅料理",
+  "discoverCategorySoupsAndStews": "汤与炖菜",
+  "discoverCategorySalads": "沙拉",
+  "discoverCategoryPastaAndRisotto": "意面与烩饭",
+  "discoverCategoryRiceAndGrains": "米饭与全谷",
+  "discoverCategoryMiddleEastern": "中东风味",
+  "discoverCategoryItalianClassics": "经典意大利",
+  "discoverCategoryAsianInspired": "亚洲风味",
+  "discoverCategoryStreetFood": "街头小吃",
+  "discoverCategoryFamilyFavorites": "家庭最爱",
+  "discoverCategoryHostingAndHolidays": "聚会与节日",
+  "discoverCategoryMealPrep": "备餐",
+  "discoverCategoryKidsFriendly": "适合孩子",
+  "discoverCategoryLateNightCravings": "宵夜解馋"
+  ,
+  "cookbooksLoadError": "同步食谱集失败，请重试。",
+  "cookbooksEmptyTitle": "你还没有任何食谱集",
+  "cookbooksEmptyBody": "创建你的第一个个人食谱集",
+  "cookbooksUntitled": "未命名食谱集",
+  "cookbooksPrivateBadge": "私有",
+  "cookbooksRecipeCount": "{count} 道食谱",
+  "@cookbooksRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksChefCookbookSuffix": "厨师食谱集",
+  "cookbooksActionRename": "重命名",
+  "cookbooksActionShare": "分享",
+  "cookbooksActionDelete": "删除",
+  "cookbooksMissing": "该食谱集已不存在",
+  "cookbooksCreateFailed": "无法创建食谱集：{error}",
+  "@cookbooksCreateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cookbooksRenameTitle": "重命名食谱集",
+  "cookbooksRenameNewName": "新名称",
+  "cookbooksNameRequired": "名称必填",
+  "cookbooksSave": "保存",
+  "cookbooksDeleteTitle": "删除食谱集",
+  "cookbooksDeleteMessage": "删除“{name}”？",
+  "@cookbooksDeleteMessage": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksShareSubject": "食谱集：{name}",
+  "@cookbooksShareSubject": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksCategoryLimit": "最多可选择 5 个类别",
+  "cookbooksCategoryPublicRequired": "公共食谱集需选择 1-5 个类别",
+  "cookbooksPublicSubtitle": "公开的食谱集对他人可见",
+  "cookbooksBasicsTitle": "基础",
+  "cookbooksNameLabel": "食谱集名称",
+  "cookbooksChooseImage": "选择图片",
+  "cookbooksCategoriesTitle": "类别",
+  "cookbooksCategoriesPublicHint": "选择 1-5 个类别，便于他人找到你的食谱集。",
+  "cookbooksCategoriesPrivateHint": "可选：添加最多 5 个类别。",
+  "cookbooksCategoriesSelected": "{count}/5 已选",
+  "@cookbooksCategoriesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksCreateTitle": "创建食谱集",
+  "cookbooksBack": "返回",
+  "cookbooksNext": "下一步",
+  "cookbooksCreate": "创建",
+  "recipeDifficultyMedium": "中等",
+  "recipeSaveSuccess": "食谱“{title}”已保存并添加到我的食谱",
+  "@recipeSaveSuccess": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "recipeSaveFailed": "无法保存/发布食谱：{error}",
+  "@recipeSaveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "recipeCreateTitle": "创建食谱",
+  "recipeEditTitle": "编辑食谱",
+  "recipeOnlyChefBody": "只有厨师账号可以上传食谱。\n\n升级到厨师计划开始创建食谱。",
+  "recipeFreePlanLimitBody": "你已达到免费厨师计划的上传上限。\n\n升级到高级厨师以创建更多食谱。",
+  "recipePhotoLabel": "食谱照片",
+  "recipeTakePhoto": "拍照",
+  "recipePhotoLibrary": "照片库",
+  "recipePickFile": "文件",
+  "recipeUploadLimitBanner": "免费厨师计划——上传食谱有限制。\n升级到高级厨师可移除此限制。",
+  "recipeTitleLabel": "食谱标题",
+  "recipeIngredientsTitle": "食材",
+  "recipeIngredientLabel": "食材",
+  "recipeQuantityLabel": "数量",
+  "recipeUnitLabel": "单位",
+  "recipeAddIngredient": "添加食材",
+  "recipeToolsTitle": "工具 / 设备",
+  "recipeToolLabel": "工具",
+  "recipeAddTool": "添加工具",
+  "recipePreCookingTitle": "烹饪前准备",
+  "recipePreCookingHint": "例如：预热烤箱至 200°C，铺好烤盘，豆子浸泡过夜……",
+  "recipeStepsTitle": "步骤",
+  "recipeAddStep": "添加步骤",
+  "recipePreviewInPlayer": "在播放器中预览",
+  "recipeUpdateButton": "更新食谱",
+  "recipeSaveButton": "保存食谱",
+  "recipeStepLabel": "步骤",
+  "recipeStepMinutesLabel": "分钟",
+  "recipeRemoveStepTooltip": "移除步骤",
+  "recipeDeleteButton": "删除食谱",
+  "recipeDeleteStep1Title": "删除这道食谱？",
+  "recipeDeleteStep1Body": "确定要删除这道食谱吗？",
+  "recipeDeleteStep1Continue": "继续",
+  "recipeDeleteStep2Title": "此操作无法撤销",
+  "recipeDeleteStep2Body": "删除这道食谱将永久移除它。",
+  "recipeDeleteStep2Delete": "删除",
+  "recipeDeleteFailed": "删除食谱失败：{error}",
+  "@recipeDeleteFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "importDocTitle": "从文档导入食谱",
+  "importDocHeader": "从文档导入食谱",
+  "importDocBody": "选择清晰的食谱文件或照片。我们会保持过程稳定，读取并为你创建食谱。",
+  "importDocFileReady": "文件就绪",
+  "importDocAddDocument": "添加食谱文档",
+  "importDocFormatsShort": "PDF, DOCX, JPG, PNG, WEBP",
+  "importDocProcessingNote": "处理时会保持上传稳定。",
+  "importDocEmptyHelper": "尚未选择文件。请添加清晰的食谱文件或照片以继续。",
+  "importDocChooseFile": "选择文件",
+  "importDocChoosePhoto": "选择照片",
+  "importDocTakePhoto": "拍照",
+  "importDocTipsTitle": "平稳导入的提示",
+  "importDocTip1": "使用光线充足、完整显示食谱的照片。",
+  "importDocTip2": "停留在此屏幕，直到带你进入食谱。",
+  "importDocTip3": "导入完成后你可以编辑细节。",
+  "importDocUpload": "上传并导入",
+  "importDocSupportedFooter": "支持：PDF、DOC、DOCX、JPG、PNG、WEBP。较大的文件处理时间可能更长。"
+}

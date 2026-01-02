@@ -1,0 +1,376 @@
+{
+  "homeTitle": "Home",
+  "myRecipesTitle": "My recipes",
+  "backToHomeButton": "Back to Home",
+  "homeLoadErrorTitle": "We had trouble loading recipes.",
+  "untitledRecipe": "Untitled recipe",
+  "deleteRecipeTooltip": "Delete recipe",
+  "noRecipesYet": "No recipes yet",
+  "homeLoadErrorHeadline": "We had trouble loading your content.",
+  "homeLoadErrorDescription": "Your recipes and cookbooks stay safe. You can try again, or go back to Home.",
+  "tryAgain": "Try again",
+  "homeChefPlaceholder": "Chef",
+  "homeGreetingChef": "Hi {name}, ready to cook?",
+  "@homeGreetingChef": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeGreetingUser": "Hi {name}, welcome back",
+  "@homeGreetingUser": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeUploadPromptChef": "Upload a recipe to turn it into a calm, step-by-step experience.",
+  "homeUploadPromptUser": "Explore recipes and cookbooks. Uploads are for chefs.",
+  "homeUploadRecipe": "Upload recipe",
+  "homeCreateManual": "Create manually",
+  "homeFreeChefLimit": "Free chefs can publish up to {limit} recipes.",
+  "@homeFreeChefLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "homeUpgradeToChef": "Become a Chef to upload",
+  "homeShoppingListTooltip": "Shopping list",
+  "homeSearchTooltip": "Search",
+  "homeResumeCookingTitle": "Resume cooking",
+  "homeNotNow": "Not now",
+  "homeStepRemaining": "Step {step} • {time} remaining",
+  "@homeStepRemaining": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "time": {}
+    }
+  },
+  "homeResumeButton": "Resume",
+  "homeMyCookbooks": "My cookbooks",
+  "homeSeeAll": "See all",
+  "homeNoCookbooks": "No cookbooks yet",
+  "homeLoadingRecipesTimeout": "Loading recipes timed out.",
+  "homeUploadsForChefsTitle": "Uploads are for chefs",
+  "homeUploadsForChefsBody": "Become a Chef to add and organize your own recipes.",
+  "homeBecomeChefButton": "Become a Chef",
+  "homeUploadDocBody": "Upload a recipe document to start your personal cookbook.",
+  "homeUploadsForChefsSnackbar": "Uploads are for chefs. Become a Chef to add recipes.",
+  "homeDeleteRecipeTitle": "Delete recipe",
+  "homeDeleteRecipeMessage": "Are you sure you want to delete \"{title}\"? This cannot be undone.",
+  "@homeDeleteRecipeMessage": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "homeCancel": "Cancel",
+  "homeDelete": "Delete",
+  "homeRecipeDeleted": "Recipe deleted",
+  "homeDeleteRecipeFailed": "Failed to delete recipe: {error}",
+  "@homeDeleteRecipeFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "profileTitle": "Profile",
+  "profileAnonymousUser": "Anonymous user",
+  "profileNoEmail": "No email",
+  "profileEditChefProfile": "Edit Chef Profile",
+  "profileAccountTypeChef": "Chef account",
+  "profileAccountTypeUser": "Regular user account",
+  "profilePlanBillingTitle": "Plan and billing",
+  "profileSubscriptionTitle": "View my subscription",
+  "profileSubscriptionSubtitle": "See your current plan and upgrade options",
+  "profileChefToolsTitle": "Chef tools",
+  "profileRecentActivityTitle": "Recent activity",
+  "profileSeeAll": "See all",
+  "profileNoRecentActivity": "No recent activity yet",
+  "profileSettingsTitle": "Settings",
+  "profileOpenSettings": "Open settings",
+  "profileOpenSettingsSubtitle": "Account, preferences and more",
+  "profileUserTypeFreeUser": "Free user",
+  "profileUserTypePremiumUser": "Premium user",
+  "profileUserTypeFreeChef": "Free chef",
+  "profileUserTypePremiumChef": "Premium chef",
+  "profileChefDashboardUnavailable": "Chef dashboard is available for chef accounts.",
+  "profileChefDashboardTitle": "Chef Dashboard",
+  "profileChefDashboardSubtitle": "Manage your content on Foodiy",
+  "profileUploadRecipe": "Upload recipe",
+  "profileCreateCookbook": "Create cookbook",
+  "profileChefInsights": "Chef Insights",
+  "profileFreeChefLimitMessage": "Free chefs can publish up to {limit} recipes.\\nRecipes: {current} / {limit}",
+  "@profileFreeChefLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      }
+    }
+  },
+  "profileUpgradeToPremiumChef": "Upgrade to Premium Chef",
+  "profileStatMyRecipes": "My recipes",
+  "profileStatMyCookbooks": "My cookbooks",
+  "profileStatFollowers": "Followers",
+  "profileStatChefInsights": "Chef Insights",
+  "profileInsightsDescription": "Your content is visible and discoverable on Foodiy.",
+  "profileInsightsRecipes": "Recipes",
+  "profileInsightsCookbooks": "Cookbooks",
+  "profileInsightsFollowers": "Followers",
+  "profileInsightsPremiumNote": "Premium chefs enjoy fewer limits and a cleaner experience.",
+  "profileInsightsClose": "Close",
+  "profileStepsCount": "{count} steps",
+  "@profileStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "navHome": "Home",
+  "navDiscover": "Discover",
+  "navCookbooks": "Cookbooks",
+  "navProfile": "Profile",
+  "settingsTitle": "Settings",
+  "settingsPlayTimerSound": "Play sound when timer finishes",
+  "settingsNotificationsSection": "Notifications",
+  "settingsNotificationSettings": "Notification settings",
+  "settingsNotificationSettingsSubtitle": "Choose which notifications you want to receive",
+  "settingsAccountSection": "Account",
+  "settingsEditPersonalDetails": "Edit personal details",
+  "settingsChangePassword": "Change password",
+  "settingsLogout": "Log out",
+  "settingsLogoutFail": "Failed to log out. Please try again.",
+  "settingsDeleteAccount": "Delete account",
+  "settingsPreferencesSection": "App preferences",
+  "settingsLanguageUnits": "Language and units",
+  "settingsLanguageUnitsSubtitle": "Choose app language and measurement units",
+  "settingsLegalSection": "Legal",
+  "settingsTermsOfUse": "Terms of Use",
+  "settingsPrivacyPolicy": "Privacy Policy",
+  "settingsAboutSection": "About",
+  "settingsAboutApp": "About Foodiy",
+  "settingsAboutAppSubtitle": "Learn more about this app",
+  "languageUnitsTitle": "Language and units",
+  "languageSectionTitle": "Language",
+  "languagePickerLabel": "App language",
+  "languageSystemDefault": "System default",
+  "languageEnglish": "English",
+  "languageHebrew": "Hebrew",
+  "languageSpanish": "Spanish",
+  "languageFrench": "French",
+  "languageArabic": "Arabic",
+  "languageChinese": "Chinese",
+  "languageJapanese": "Japanese",
+  "languageItalian": "Italian",
+  "unitsSectionTitle": "Units",
+  "unitsMetric": "Metric (grams, Celsius)",
+  "unitsImperial": "Imperial (cups, Fahrenheit)",
+  "notificationTitle": "Notifications",
+  "notificationPreferencesTitle": "Notification preferences",
+  "notificationNewChefRecipesTitle": "New recipes from chefs",
+  "notificationNewChefRecipesSubtitle": "Get notified when chefs publish new recipes",
+  "notificationPlaylistSuggestionsTitle": "Playlist suggestions",
+  "notificationPlaylistSuggestionsSubtitle": "Get suggestions for playlists you might like",
+  "notificationAppTipsTitle": "App tips and updates",
+  "privacyTitle": "Privacy policy",
+  "privacyPlaceholder": "This is a placeholder for the Foodiy privacy policy.\\n\\nHere you will describe how user data is used, stored, and protected.\\nLater we will replace this text with the real policy.",
+  "termsTitle": "Terms of Use",
+  "termsPlaceholder": "This is a placeholder for the Foodiy terms of use.\\n\\nHere you will describe the rules for using the app, limitations of liability, and other legal details.\\nLater we will replace this text with the real terms.",
+  "aboutTitle": "About Foodiy",
+  "aboutAppName": "Foodiy",
+  "aboutVersion": "Version 0.1.0 (dev)",
+  "aboutDescription": "Foodiy is your personal cooking and cookbook companion.\\n\\nCreate and follow recipe cookbooks, discover chef collections, build your own cookbooks and manage shopping lists – all in one place.",
+  "aboutCopyright": "© {year} Foodiy. All rights reserved.",
+  "@aboutCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSectionFailed": "Section failed to render",
+  "homeSectionErrorDetails": "[{tag}] {error}",
+  "@homeSectionErrorDetails": {
+    "placeholders": {
+      "tag": {},
+      "error": {}
+    }
+  },
+  "homeUiError": "UI error: {error}",
+  "@homeUiError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "discoverSearchHint": "Search cookbooks or chefs",
+  "discoverNoCookbooks": "No public cookbooks yet",
+  "discoverPublicBadge": "Public",
+  "discoverCategoryBreakfast": "Breakfast",
+  "discoverCategoryBrunch": "Brunch",
+  "discoverCategoryQuickWeeknightDinners": "Quick Weeknight Dinners",
+  "discoverCategoryFridayLunch": "Friday Lunch",
+  "discoverCategoryComfortFood": "Comfort Food",
+  "discoverCategoryBakingBasics": "Baking Basics",
+  "discoverCategoryBreadAndDough": "Bread & Dough",
+  "discoverCategoryPastries": "Pastries",
+  "discoverCategoryCakesAndDesserts": "Cakes & Desserts",
+  "discoverCategoryCookiesAndSmallSweets": "Cookies & Small Sweets",
+  "discoverCategoryChocolateLovers": "Chocolate Lovers",
+  "discoverCategoryHealthyAndLight": "Healthy & Light",
+  "discoverCategoryHighProtein": "High Protein",
+  "discoverCategoryVegetarian": "Vegetarian",
+  "discoverCategoryVegan": "Vegan",
+  "discoverCategoryGlutenFree": "Gluten Free",
+  "discoverCategoryOnePotMeals": "One Pot Meals",
+  "discoverCategorySoupsAndStews": "Soups & Stews",
+  "discoverCategorySalads": "Salads",
+  "discoverCategoryPastaAndRisotto": "Pasta & Risotto",
+  "discoverCategoryRiceAndGrains": "Rice & Grains",
+  "discoverCategoryMiddleEastern": "Middle Eastern",
+  "discoverCategoryItalianClassics": "Italian Classics",
+  "discoverCategoryAsianInspired": "Asian Inspired",
+  "discoverCategoryStreetFood": "Street Food",
+  "discoverCategoryFamilyFavorites": "Family Favorites",
+  "discoverCategoryHostingAndHolidays": "Hosting & Holidays",
+  "discoverCategoryMealPrep": "Meal Prep",
+  "discoverCategoryKidsFriendly": "Kids Friendly",
+  "discoverCategoryLateNightCravings": "Late Night Cravings"
+  ,
+  "cookbooksLoadError": "Cookbooks sync failed. Please try again.",
+  "cookbooksEmptyTitle": "You do not have any cookbooks yet",
+  "cookbooksEmptyBody": "Create your first personal cookbook",
+  "cookbooksUntitled": "Untitled cookbook",
+  "cookbooksPrivateBadge": "Private",
+  "cookbooksRecipeCount": "{count} recipes",
+  "@cookbooksRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksChefCookbookSuffix": "Chef cookbook",
+  "cookbooksActionRename": "Rename",
+  "cookbooksActionShare": "Share",
+  "cookbooksActionDelete": "Delete",
+  "cookbooksMissing": "This cookbook no longer exists",
+  "cookbooksCreateFailed": "Unable to create cookbook: {error}",
+  "@cookbooksCreateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cookbooksRenameTitle": "Rename cookbook",
+  "cookbooksRenameNewName": "New name",
+  "cookbooksNameRequired": "Name is required",
+  "cookbooksSave": "Save",
+  "cookbooksDeleteTitle": "Delete cookbook",
+  "cookbooksDeleteMessage": "Delete \"{name}\"?",
+  "@cookbooksDeleteMessage": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksShareSubject": "Cookbook: {name}",
+  "@cookbooksShareSubject": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksCategoryLimit": "You can select up to 5 categories",
+  "cookbooksCategoryPublicRequired": "Select 1-5 categories for public cookbooks",
+  "cookbooksPublicSubtitle": "Public cookbooks are visible to others",
+  "cookbooksBasicsTitle": "Basics",
+  "cookbooksNameLabel": "Cookbook name",
+  "cookbooksChooseImage": "Choose image",
+  "cookbooksCategoriesTitle": "Categories",
+  "cookbooksCategoriesPublicHint": "Select 1-5 categories so others can find your cookbook.",
+  "cookbooksCategoriesPrivateHint": "Optional: add up to 5 categories.",
+  "cookbooksCategoriesSelected": "{count}/5 selected",
+  "@cookbooksCategoriesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksCreateTitle": "Create cookbook",
+  "cookbooksBack": "Back",
+  "cookbooksNext": "Next",
+  "cookbooksCreate": "Create",
+  "recipeDifficultyMedium": "Medium",
+  "recipeSaveSuccess": "Recipe \"{title}\" saved and added to My recipes",
+  "@recipeSaveSuccess": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "recipeSaveFailed": "Failed to save/publish recipe: {error}",
+  "@recipeSaveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "recipeCreateTitle": "Create recipe",
+  "recipeEditTitle": "Edit recipe",
+  "recipeOnlyChefBody": "Only chef accounts can upload recipes.\n\nUpgrade to a chef plan to start creating recipes.",
+  "recipeFreePlanLimitBody": "You have reached the upload limit for the free chef plan.\n\nUpgrade to a premium chef plan to create more recipes.",
+  "recipePhotoLabel": "Recipe photo",
+  "recipeTakePhoto": "Take a photo",
+  "recipePhotoLibrary": "Photo library",
+  "recipePickFile": "Files",
+  "recipeUploadLimitBanner": "Free chef plan - recipe upload is limited.\nUpgrade to premium chef to remove this limit.",
+  "recipeTitleLabel": "Recipe title",
+  "recipeIngredientsTitle": "Ingredients",
+  "recipeIngredientLabel": "Ingredient",
+  "recipeQuantityLabel": "Qty",
+  "recipeUnitLabel": "Unit",
+  "recipeAddIngredient": "Add ingredient",
+  "recipeToolsTitle": "Tools / Equipment",
+  "recipeToolLabel": "Tool",
+  "recipeAddTool": "Add tool",
+  "recipePreCookingTitle": "Preparation before cooking",
+  "recipePreCookingHint": "For example: preheat oven to 200C, line the tray, soak beans overnight...",
+  "recipeStepsTitle": "Steps",
+  "recipeAddStep": "Add step",
+  "recipePreviewInPlayer": "Preview in player",
+  "recipeUpdateButton": "Update recipe",
+  "recipeSaveButton": "Save recipe",
+  "recipeStepLabel": "Step",
+  "recipeStepMinutesLabel": "min",
+  "recipeRemoveStepTooltip": "Remove step",
+  "recipeDeleteButton": "Delete recipe",
+  "recipeDeleteStep1Title": "Delete recipe?",
+  "recipeDeleteStep1Body": "Are you sure you want to delete this recipe?",
+  "recipeDeleteStep1Continue": "Continue",
+  "recipeDeleteStep2Title": "This cannot be undone",
+  "recipeDeleteStep2Body": "Deleting this recipe will remove it permanently.",
+  "recipeDeleteStep2Delete": "Delete",
+  "recipeDeleteFailed": "Failed to delete recipe: {error}",
+  "@recipeDeleteFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "importDocTitle": "Import recipe from document",
+  "importDocHeader": "Import a recipe from a document",
+  "importDocBody": "Choose a clean recipe file or photo. We will keep things steady while we read it and create a recipe for you.",
+  "importDocFileReady": "File ready",
+  "importDocAddDocument": "Add a recipe document",
+  "importDocFormatsShort": "PDF, DOCX, JPG, PNG, WEBP",
+  "importDocProcessingNote": "We will keep your upload stable while we process it.",
+  "importDocEmptyHelper": "No file chosen yet. Add a clear recipe file or photo to continue.",
+  "importDocChooseFile": "Choose file",
+  "importDocChoosePhoto": "Choose photo",
+  "importDocTakePhoto": "Take photo",
+  "importDocTipsTitle": "Tips for a calm import",
+  "importDocTip1": "Use a well-lit photo with the full recipe visible.",
+  "importDocTip2": "Stay on this screen until we send you to the recipe.",
+  "importDocTip3": "You can edit details after the import finishes.",
+  "importDocUpload": "Upload and import",
+  "importDocSupportedFooter": "Supported: PDF, DOC, DOCX, JPG, PNG, WEBP. Larger files may take longer to process."
+}

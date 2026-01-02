@@ -1,26 +1,26 @@
 class ShoppingItem {
   final String id;
   final String name;
-  final String quantity;
+  final String quantityText;
   final bool isChecked;
 
   const ShoppingItem({
     required this.id,
     required this.name,
-    required this.quantity,
+    required this.quantityText,
     this.isChecked = false,
   });
 
   ShoppingItem copyWith({
     String? id,
     String? name,
-    String? quantity,
+    String? quantityText,
     bool? isChecked,
   }) {
     return ShoppingItem(
       id: id ?? this.id,
       name: name ?? this.name,
-      quantity: quantity ?? this.quantity,
+      quantityText: quantityText ?? this.quantityText,
       isChecked: isChecked ?? this.isChecked,
     );
   }

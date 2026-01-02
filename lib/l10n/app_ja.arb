@@ -1,0 +1,376 @@
+{
+  "homeTitle": "ホーム",
+  "myRecipesTitle": "私のレシピ",
+  "backToHomeButton": "ホームに戻る",
+  "homeLoadErrorTitle": "レシピの読み込み中に問題が発生しました。",
+  "untitledRecipe": "無題のレシピ",
+  "deleteRecipeTooltip": "レシピを削除",
+  "noRecipesYet": "まだレシピがありません",
+  "homeLoadErrorHeadline": "コンテンツの読み込み中に問題が発生しました。",
+  "homeLoadErrorDescription": "レシピとブックは安全です。もう一度試すか、ホームに戻ってください。",
+  "tryAgain": "再試行",
+  "homeChefPlaceholder": "シェフ",
+  "homeGreetingChef": "こんにちは {name}、料理の準備はできましたか？",
+  "@homeGreetingChef": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeGreetingUser": "こんにちは {name}、お帰りなさい",
+  "@homeGreetingUser": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeUploadPromptChef": "レシピをアップして、落ち着いたステップ体験にしましょう。",
+  "homeUploadPromptUser": "レシピやレシピ本を見つけましょう。アップロードはシェフ向けです。",
+  "homeUploadRecipe": "レシピをアップロード",
+  "homeCreateManual": "手動で作成",
+  "homeFreeChefLimit": "無料シェフは最大 {limit} 件のレシピを公開できます。",
+  "@homeFreeChefLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "homeUpgradeToChef": "アップロードするにはシェフになる",
+  "homeShoppingListTooltip": "買い物リスト",
+  "homeSearchTooltip": "検索",
+  "homeResumeCookingTitle": "料理を再開",
+  "homeNotNow": "今はしない",
+  "homeStepRemaining": "ステップ {step} • 残り {time}",
+  "@homeStepRemaining": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "time": {}
+    }
+  },
+  "homeResumeButton": "再開",
+  "homeMyCookbooks": "マイレシピ集",
+  "homeSeeAll": "すべて表示",
+  "homeNoCookbooks": "まだレシピ集がありません",
+  "homeLoadingRecipesTimeout": "レシピの読み込みがタイムアウトしました。",
+  "homeUploadsForChefsTitle": "アップロードはシェフ専用です",
+  "homeUploadsForChefsBody": "シェフになって自分のレシピを追加・整理しましょう。",
+  "homeBecomeChefButton": "シェフになる",
+  "homeUploadDocBody": "レシピ文書をアップして個人レシピ集を始めましょう。",
+  "homeUploadsForChefsSnackbar": "アップロードはシェフ専用です。シェフになってレシピを追加してください。",
+  "homeDeleteRecipeTitle": "レシピを削除",
+  "homeDeleteRecipeMessage": "「{title}」を削除しますか？元に戻せません。",
+  "@homeDeleteRecipeMessage": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "homeCancel": "キャンセル",
+  "homeDelete": "削除",
+  "homeRecipeDeleted": "レシピを削除しました",
+  "homeDeleteRecipeFailed": "レシピの削除に失敗しました: {error}",
+  "@homeDeleteRecipeFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "profileTitle": "プロフィール",
+  "profileAnonymousUser": "匿名ユーザー",
+  "profileNoEmail": "メールなし",
+  "profileEditChefProfile": "シェフプロフィールを編集",
+  "profileAccountTypeChef": "シェフアカウント",
+  "profileAccountTypeUser": "一般ユーザーアカウント",
+  "profilePlanBillingTitle": "プランと請求",
+  "profileSubscriptionTitle": "サブスクリプションを確認",
+  "profileSubscriptionSubtitle": "現在のプランとアップグレードオプションを確認",
+  "profileChefToolsTitle": "シェフツール",
+  "profileRecentActivityTitle": "最近のアクティビティ",
+  "profileSeeAll": "すべて表示",
+  "profileNoRecentActivity": "まだ最近のアクティビティがありません",
+  "profileSettingsTitle": "設定",
+  "profileOpenSettings": "設定を開く",
+  "profileOpenSettingsSubtitle": "アカウント、設定など",
+  "profileUserTypeFreeUser": "無料ユーザー",
+  "profileUserTypePremiumUser": "プレミアムユーザー",
+  "profileUserTypeFreeChef": "無料シェフ",
+  "profileUserTypePremiumChef": "プレミアムシェフ",
+  "profileChefDashboardUnavailable": "シェフ用ダッシュボードはシェフアカウントで利用できます。",
+  "profileChefDashboardTitle": "シェフダッシュボード",
+  "profileChefDashboardSubtitle": "Foodiyでのコンテンツを管理",
+  "profileUploadRecipe": "レシピをアップロード",
+  "profileCreateCookbook": "レシピ本を作成",
+  "profileChefInsights": "シェフインサイト",
+  "profileFreeChefLimitMessage": "無料シェフは最大 {limit} 件のレシピを公開できます。\\nレシピ: {current} / {limit}",
+  "@profileFreeChefLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      }
+    }
+  },
+  "profileUpgradeToPremiumChef": "プレミアムシェフにアップグレード",
+  "profileStatMyRecipes": "私のレシピ",
+  "profileStatMyCookbooks": "マイレシピ本",
+  "profileStatFollowers": "フォロワー",
+  "profileStatChefInsights": "シェフインサイト",
+  "profileInsightsDescription": "あなたのコンテンツはFoodiyで表示・発見されます。",
+  "profileInsightsRecipes": "レシピ",
+  "profileInsightsCookbooks": "レシピ本",
+  "profileInsightsFollowers": "フォロワー",
+  "profileInsightsPremiumNote": "プレミアムシェフは制限が少なく、より快適に使えます。",
+  "profileInsightsClose": "閉じる",
+  "profileStepsCount": "{count} 手順",
+  "@profileStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "navHome": "ホーム",
+  "settingsTitle": "設定",
+  "settingsPlayTimerSound": "タイマー終了時に音を鳴らす",
+  "settingsNotificationsSection": "通知",
+  "settingsNotificationSettings": "通知の設定",
+  "settingsNotificationSettingsSubtitle": "受け取りたい通知を選択してください",
+  "settingsAccountSection": "アカウント",
+  "settingsEditPersonalDetails": "個人情報を編集",
+  "settingsChangePassword": "パスワードを変更",
+  "settingsLogout": "ログアウト",
+  "settingsLogoutFail": "ログアウトに失敗しました。再度お試しください。",
+  "settingsDeleteAccount": "アカウント削除",
+  "settingsPreferencesSection": "アプリの設定",
+  "settingsLanguageUnits": "言語と単位",
+  "settingsLanguageUnitsSubtitle": "アプリの言語と単位を選択",
+  "settingsLegalSection": "法務",
+  "settingsTermsOfUse": "利用規約",
+  "settingsPrivacyPolicy": "プライバシーポリシー",
+  "settingsAboutSection": "情報",
+  "settingsAboutApp": "Foodiy について",
+  "settingsAboutAppSubtitle": "このアプリについて詳しく知る",
+  "languageUnitsTitle": "言語と単位",
+  "languageSectionTitle": "言語",
+  "languagePickerLabel": "アプリの言語",
+  "languageSystemDefault": "システム既定",
+  "languageEnglish": "英語",
+  "languageHebrew": "ヘブライ語",
+  "languageSpanish": "スペイン語",
+  "languageFrench": "フランス語",
+  "languageArabic": "アラビア語",
+  "languageChinese": "中国語",
+  "languageJapanese": "日本語",
+  "languageItalian": "イタリア語",
+  "unitsSectionTitle": "単位",
+  "unitsMetric": "メートル法（グラム、摂氏）",
+  "unitsImperial": "ヤード・ポンド法（カップ、華氏）",
+  "notificationTitle": "通知",
+  "notificationPreferencesTitle": "通知の設定",
+  "notificationNewChefRecipesTitle": "シェフの新しいレシピ",
+  "notificationNewChefRecipesSubtitle": "シェフが新しいレシピを公開したら通知を受け取る",
+  "notificationPlaylistSuggestionsTitle": "プレイリストの提案",
+  "notificationPlaylistSuggestionsSubtitle": "おすすめのプレイリストを受け取る",
+  "notificationAppTipsTitle": "アプリのヒントと更新情報",
+  "privacyTitle": "プライバシーポリシー",
+  "privacyPlaceholder": "これは Foodiy のプライバシーポリシーの仮テキストです。\\n\\nここでデータの利用・保存・保護について説明します。\\n後で正式なポリシーに置き換えます。",
+  "termsTitle": "利用規約",
+  "termsPlaceholder": "これは Foodiy の利用規約の仮テキストです。\\n\\nここで利用ルール、責任制限などの法的詳細を説明します。\\n後で正式な規約に置き換えます。",
+  "aboutTitle": "Foodiy について",
+  "aboutAppName": "Foodiy",
+  "aboutVersion": "バージョン 0.1.0 (dev)",
+  "aboutDescription": "Foodiy はあなたの料理・レシピブックのパートナーです。\\n\\nレシピブックを作成・フォローし、シェフのコレクションを見つけ、自分の本を作って買い物リストも管理できます。",
+  "aboutCopyright": "© {year} Foodiy. All rights reserved.",
+  "@aboutCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "navDiscover": "発見",
+  "navCookbooks": "レシピ集",
+  "navProfile": "プロフィール",
+  "homeSectionFailed": "セクションを表示できませんでした",
+  "homeSectionErrorDetails": "[{tag}] {error}",
+  "@homeSectionErrorDetails": {
+    "placeholders": {
+      "tag": {},
+      "error": {}
+    }
+  },
+  "homeUiError": "UI エラー: {error}",
+  "@homeUiError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "discoverSearchHint": "レシピ本やシェフを検索",
+  "discoverNoCookbooks": "公開されているレシピ本はまだありません",
+  "discoverPublicBadge": "公開",
+  "discoverCategoryBreakfast": "朝食",
+  "discoverCategoryBrunch": "ブランチ",
+  "discoverCategoryQuickWeeknightDinners": "平日夜の簡単ディナー",
+  "discoverCategoryFridayLunch": "金曜ランチ",
+  "discoverCategoryComfortFood": "癒やしの料理",
+  "discoverCategoryBakingBasics": "ベーキング基礎",
+  "discoverCategoryBreadAndDough": "パン・生地",
+  "discoverCategoryPastries": "ペイストリー",
+  "discoverCategoryCakesAndDesserts": "ケーキとデザート",
+  "discoverCategoryCookiesAndSmallSweets": "クッキーと小さなスイーツ",
+  "discoverCategoryChocolateLovers": "チョコ好き",
+  "discoverCategoryHealthyAndLight": "ヘルシー＆軽め",
+  "discoverCategoryHighProtein": "高たんぱく",
+  "discoverCategoryVegetarian": "ベジタリアン",
+  "discoverCategoryVegan": "ヴィーガン",
+  "discoverCategoryGlutenFree": "グルテンフリー",
+  "discoverCategoryOnePotMeals": "ワンポット料理",
+  "discoverCategorySoupsAndStews": "スープ・シチュー",
+  "discoverCategorySalads": "サラダ",
+  "discoverCategoryPastaAndRisotto": "パスタとリゾット",
+  "discoverCategoryRiceAndGrains": "ごはん・雑穀",
+  "discoverCategoryMiddleEastern": "中東料理",
+  "discoverCategoryItalianClassics": "イタリアの定番",
+  "discoverCategoryAsianInspired": "アジア風",
+  "discoverCategoryStreetFood": "ストリートフード",
+  "discoverCategoryFamilyFavorites": "家族の定番",
+  "discoverCategoryHostingAndHolidays": "おもてなし・休日",
+  "discoverCategoryMealPrep": "作り置き",
+  "discoverCategoryKidsFriendly": "子ども向け",
+  "discoverCategoryLateNightCravings": "深夜の一品"
+  ,
+  "cookbooksLoadError": "レシピ本の同期に失敗しました。もう一度お試しください。",
+  "cookbooksEmptyTitle": "まだレシピ本がありません",
+  "cookbooksEmptyBody": "最初のレシピ本を作成しましょう",
+  "cookbooksUntitled": "タイトルなしのレシピ本",
+  "cookbooksPrivateBadge": "非公開",
+  "cookbooksRecipeCount": "{count} 件のレシピ",
+  "@cookbooksRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksChefCookbookSuffix": "シェフのレシピ本",
+  "cookbooksActionRename": "名前を変更",
+  "cookbooksActionShare": "共有",
+  "cookbooksActionDelete": "削除",
+  "cookbooksMissing": "このレシピ本は存在しません",
+  "cookbooksCreateFailed": "レシピ本を作成できませんでした: {error}",
+  "@cookbooksCreateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cookbooksRenameTitle": "レシピ本の名前を変更",
+  "cookbooksRenameNewName": "新しい名前",
+  "cookbooksNameRequired": "名前は必須です",
+  "cookbooksSave": "保存",
+  "cookbooksDeleteTitle": "レシピ本を削除",
+  "cookbooksDeleteMessage": "\"{name}\" を削除しますか？",
+  "@cookbooksDeleteMessage": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksShareSubject": "レシピ本: {name}",
+  "@cookbooksShareSubject": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksCategoryLimit": "最大 5 件まで選択できます",
+  "cookbooksCategoryPublicRequired": "公開レシピ本には 1～5 件のカテゴリが必要です",
+  "cookbooksPublicSubtitle": "公開レシピ本は他のユーザーが見られます",
+  "cookbooksBasicsTitle": "基本情報",
+  "cookbooksNameLabel": "レシピ本の名前",
+  "cookbooksChooseImage": "画像を選択",
+  "cookbooksCategoriesTitle": "カテゴリ",
+  "cookbooksCategoriesPublicHint": "他の人が見つけやすいよう 1～5 件のカテゴリを選んでください。",
+  "cookbooksCategoriesPrivateHint": "任意: 最大 5 件まで追加できます。",
+  "cookbooksCategoriesSelected": "{count}/5 選択済み",
+  "@cookbooksCategoriesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksCreateTitle": "レシピ本を作成",
+  "cookbooksBack": "戻る",
+  "cookbooksNext": "次へ",
+  "cookbooksCreate": "作成",
+  "recipeDifficultyMedium": "中くらい",
+  "recipeSaveSuccess": "レシピ「{title}」を保存し、マイレシピに追加しました",
+  "@recipeSaveSuccess": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "recipeSaveFailed": "レシピの保存/公開に失敗しました: {error}",
+  "@recipeSaveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "recipeCreateTitle": "レシピを作成",
+  "recipeEditTitle": "レシピを編集",
+  "recipeOnlyChefBody": "シェフアカウントのみレシピをアップロードできます。\n\nシェフプランにアップグレードしてレシピを作成してください。",
+  "recipeFreePlanLimitBody": "無料シェフプランのアップロード上限に達しました。\n\nさらに作成するにはプレミアムシェフへアップグレードしてください。",
+  "recipePhotoLabel": "レシピの写真",
+  "recipeTakePhoto": "写真を撮る",
+  "recipePhotoLibrary": "フォトライブラリ",
+  "recipePickFile": "ファイル",
+  "recipeUploadLimitBanner": "無料シェフプランではレシピのアップロードが制限されます。\nプレミアムシェフにアップグレードすると制限が解除されます。",
+  "recipeTitleLabel": "レシピタイトル",
+  "recipeIngredientsTitle": "材料",
+  "recipeIngredientLabel": "材料",
+  "recipeQuantityLabel": "量",
+  "recipeUnitLabel": "単位",
+  "recipeAddIngredient": "材料を追加",
+  "recipeToolsTitle": "道具 / 設備",
+  "recipeToolLabel": "道具",
+  "recipeAddTool": "道具を追加",
+  "recipePreCookingTitle": "調理前の準備",
+  "recipePreCookingHint": "例: オーブンを200℃に予熱、トレイに紙を敷く、豆を一晩浸すなど",
+  "recipeStepsTitle": "手順",
+  "recipeAddStep": "手順を追加",
+  "recipePreviewInPlayer": "プレーヤーでプレビュー",
+  "recipeUpdateButton": "レシピを更新",
+  "recipeSaveButton": "レシピを保存",
+  "recipeStepLabel": "手順",
+  "recipeStepMinutesLabel": "分",
+  "recipeRemoveStepTooltip": "手順を削除",
+  "recipeDeleteButton": "レシピを削除",
+  "recipeDeleteStep1Title": "レシピを削除しますか？",
+  "recipeDeleteStep1Body": "このレシピを削除してもよろしいですか？",
+  "recipeDeleteStep1Continue": "続行",
+  "recipeDeleteStep2Title": "この操作は元に戻せません",
+  "recipeDeleteStep2Body": "このレシピを削除すると永久に削除されます。",
+  "recipeDeleteStep2Delete": "削除",
+  "recipeDeleteFailed": "レシピの削除に失敗しました: {error}",
+  "@recipeDeleteFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "importDocTitle": "ドキュメントからレシピをインポート",
+  "importDocHeader": "ドキュメントからレシピを取り込む",
+  "importDocBody": "きれいなレシピファイルまたは写真を選んでください。読み取りと作成の間、安定した状態を保ちます。",
+  "importDocFileReady": "ファイルの準備完了",
+  "importDocAddDocument": "レシピドキュメントを追加",
+  "importDocFormatsShort": "PDF, DOCX, JPG, PNG, WEBP",
+  "importDocProcessingNote": "処理中もアップロードを安定させます。",
+  "importDocEmptyHelper": "まだファイルが選択されていません。明瞭なレシピファイルや写真を追加してください。",
+  "importDocChooseFile": "ファイルを選ぶ",
+  "importDocChoosePhoto": "写真を選ぶ",
+  "importDocTakePhoto": "写真を撮る",
+  "importDocTipsTitle": "スムーズな取り込みのコツ",
+  "importDocTip1": "レシピ全体が映る明るい写真を使ってください。",
+  "importDocTip2": "レシピに進むまでこの画面にとどまってください。",
+  "importDocTip3": "取り込み後に詳細を編集できます。",
+  "importDocUpload": "アップロードして取り込む",
+  "importDocSupportedFooter": "対応形式: PDF, DOC, DOCX, JPG, PNG, WEBP。大きいファイルは処理に時間がかかる場合があります。"
+}

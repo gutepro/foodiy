@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:foodiy/features/settings/application/settings_service.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -17,21 +18,22 @@ class _NotificationSettingsScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
+      appBar: AppBar(title: Text(l10n.notificationTitle)),
       body: ListView(
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'Notification preferences',
+              l10n.notificationPreferencesTitle,
               style: theme.textTheme.titleMedium,
             ),
           ),
           SwitchListTile(
-            title: const Text('New recipes from chefs'),
-            subtitle: const Text('Get notified when chefs publish new recipes'),
+            title: Text(l10n.notificationNewChefRecipesTitle),
+            subtitle: Text(l10n.notificationNewChefRecipesSubtitle),
             value: settings.notifyNewChefRecipes,
             onChanged: (value) {
               setState(() {
@@ -40,10 +42,8 @@ class _NotificationSettingsScreenState
             },
           ),
           SwitchListTile(
-            title: const Text('Playlist suggestions'),
-            subtitle: const Text(
-              'Get suggestions for playlists you might like',
-            ),
+            title: Text(l10n.notificationPlaylistSuggestionsTitle),
+            subtitle: Text(l10n.notificationPlaylistSuggestionsSubtitle),
             value: settings.notifyPlaylistSuggestions,
             onChanged: (value) {
               setState(() {
@@ -52,7 +52,7 @@ class _NotificationSettingsScreenState
             },
           ),
           SwitchListTile(
-            title: const Text('App tips and updates'),
+            title: Text(l10n.notificationAppTipsTitle),
             value: settings.notifyAppTips,
             onChanged: (value) {
               setState(() {

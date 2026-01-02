@@ -239,8 +239,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
         recipe.chefId == FirebaseAuth.instance.currentUser?.uid;
     final isTranslatedView = translatedFrom != null;
     final canTranslate = recipe.originalLanguageCode.toLowerCase() != 'en';
-    final hasChef =
-        recipe.chefId.isNotEmpty && (recipe.chefName?.isNotEmpty ?? false);
+    final hasChef = recipe.chefId.isNotEmpty;
 
     return Directionality(
       textDirection: _directionFromLanguage(recipe.originalLanguageCode),
@@ -299,13 +298,18 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                       const SizedBox(height: 4),
                       InkWell(
                         onTap: () {
+                          debugPrint(
+                            '[CHEF_NAV] recipeId=${recipe.id} ownerId=${recipe.chefId} ownerName=${recipe.chefName}',
+                          );
                           context.push(
                             AppRoutes.chefProfile,
                             extra: recipe.chefId,
                           );
                         },
                         child: Text(
-                          recipe.chefName ?? '',
+                          (recipe.chefName?.isNotEmpty ?? false)
+                              ? recipe.chefName!
+                              : 'View chef',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w600,

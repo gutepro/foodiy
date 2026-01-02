@@ -1,26 +1,19 @@
 import 'package:flutter/material.dart';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:foodiy/features/analytics/application/recipe_analytics_service.dart';
+import 'package:foodiy/core/services/session_service.dart';
 import 'package:foodiy/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:foodiy/features/profile/presentation/screens/delete_account_screen.dart';
 import 'package:foodiy/features/profile/presentation/screens/edit_personal_details_screen.dart';
-import 'package:foodiy/features/recipe/domain/recipe.dart';
-import 'package:foodiy/features/recipe/presentation/screens/recipe_details_screen.dart';
 import 'package:foodiy/features/settings/application/settings_service.dart';
 import 'package:foodiy/features/settings/presentation/screens/notification_settings_screen.dart';
 import 'package:foodiy/features/settings/presentation/screens/language_units_settings_screen.dart';
 import 'package:foodiy/features/settings/presentation/screens/privacy_settings_screen.dart';
 import 'package:foodiy/features/settings/presentation/screens/terms_of_use_screen.dart';
 import 'package:foodiy/features/settings/presentation/screens/about_screen.dart';
-import 'package:foodiy/features/playlist/application/personal_playlist_service.dart';
+import 'package:foodiy/features/legal/presentation/screens/legal_document_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
-import 'package:foodiy/core/services/current_user_service.dart';
-import 'package:foodiy/core/services/access_control_service.dart';
-import 'package:foodiy/core/models/user_type.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -31,17 +24,36 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final settings = SettingsService.instance;
+  bool _isSigningOut = false;
+
+  Future<void> _handleLogout() async {
+    if (_isSigningOut) return;
+    setState(() => _isSigningOut = true);
+    try {
+      await SessionService.instance.signOut();
+      if (!mounted) return;
+      context.go(AppRoutes.login);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.settingsLogoutFail)),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSigningOut = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
         children: [
-          const _ChefDashboardSection(),
-          const Divider(),
           SwitchListTile(
-            title: const Text('Play sound when timer finishes'),
+            title: Text(l10n.settingsPlayTimerSound),
             value: settings.playTimerSound,
             onChanged: (value) {
               setState(() {
@@ -53,16 +65,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Notifications',
+              l10n.settingsNotificationsSection,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: const Text('Notification settings'),
-            subtitle: const Text(
-              'Choose which notifications you want to receive',
-            ),
+            title: Text(l10n.settingsNotificationSettings),
+            subtitle: Text(l10n.settingsNotificationSettingsSubtitle),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -75,13 +85,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Account',
+              l10n.settingsAccountSection,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Edit personal details'),
+            title: Text(l10n.settingsEditPersonalDetails),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -92,7 +102,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.lock),
-            title: const Text('Change password'),
+            title: Text(l10n.settingsChangePassword),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
@@ -100,8 +110,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.logout),
+            title: Text(l10n.settingsLogout),
+            onTap: _isSigningOut ? null : _handleLogout,
+            trailing: _isSigningOut
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : null,
+          ),
+          ListTile(
             leading: const Icon(Icons.delete_forever),
-            title: const Text('Delete account'),
+            title: Text(l10n.settingsDeleteAccount),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const DeleteAccountScreen()),
@@ -112,14 +134,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'App preferences',
+              l10n.settingsPreferencesSection,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
           ListTile(
             leading: const Icon(Icons.language),
-            title: const Text('Language and units'),
-            subtitle: const Text('Choose app language and measurement units'),
+            title: Text(l10n.settingsLanguageUnits),
+            subtitle: Text(l10n.settingsLanguageUnitsSubtitle),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -132,28 +154,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Legal',
+              l10n.settingsLegalSection,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.privacy_tip),
-            title: const Text('Privacy policy'),
+            leading: const Icon(Icons.description),
+            title: Text(l10n.settingsTermsOfUse),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => const PrivacySettingsScreen(),
+                  builder: (_) => LegalDocumentScreen(
+                    title: l10n.settingsTermsOfUse,
+                    assetPath: 'assets/legal/terms_of_use_en.md',
+                  ),
                 ),
               );
             },
           ),
           ListTile(
-            leading: const Icon(Icons.description),
-            title: const Text('Terms of use'),
+            leading: const Icon(Icons.privacy_tip),
+            title: Text(l10n.settingsPrivacyPolicy),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => const TermsOfUseScreen(),
+                  builder: (_) => LegalDocumentScreen(
+                    title: l10n.settingsPrivacyPolicy,
+                    assetPath: 'assets/legal/privacy_policy_en.md',
+                  ),
                 ),
               );
             },
@@ -162,14 +190,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'About',
+              l10n.settingsAboutSection,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('About Foodiy'),
-            subtitle: const Text('Learn more about this app'),
+            title: Text(l10n.settingsAboutApp),
+            subtitle: Text(l10n.settingsAboutAppSubtitle),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -180,227 +208,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ChefDashboardSection extends StatelessWidget {
-  const _ChefDashboardSection();
-
-  @override
-  Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final profile = CurrentUserService.instance.currentProfile;
-    final userType = profile?.userType ?? UserType.freeUser;
-    final access = AccessControlService.instance;
-    final isPremiumChef = userType == UserType.premiumChef;
-
-    if (!isPremiumChef) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: Text(
-          'Chef dashboard is available only for Premium chef accounts.',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-      );
-    }
-
-    final uid = user?.uid ?? '';
-    final playlistService = PersonalPlaylistService.instance;
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: StreamBuilder<List<Recipe>>(
-            stream: FirebaseFirestore.instance
-                .collection('recipes')
-                .where('chefId', isEqualTo: uid)
-                .orderBy('createdAt', descending: true)
-                .snapshots()
-                .map((snapshot) => snapshot.docs.map((doc) {
-                      final data = doc.data();
-                      data['id'] = doc.id;
-                      return Recipe.fromJson(data, docId: doc.id);
-                    }).toList()),
-            builder: (context, snapshot) {
-              final recipes = snapshot.data ?? const <Recipe>[];
-              final totalRecipes = recipes.length;
-              final recipeIds = recipes.map((r) => r.id);
-              final analytics = RecipeAnalyticsService.instance;
-              final totalViews = analytics.getTotalViewsForRecipes(recipeIds);
-              final cookbooks = playlistService.getCurrentUserPlaylists();
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user?.displayName ?? (user?.email ?? 'Chef'),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      _StatCard(
-                        label: 'My recipes',
-                        value: '$totalRecipes',
-                        icon: Icons.restaurant_menu,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                _ChefRecipesListScreen(recipes: recipes),
-                          ),
-                        ),
-                      ),
-                      _StatCard(
-                        label: 'My cookbooks',
-                        value: '${cookbooks.length}',
-                        icon: Icons.menu_book,
-                        onTap: () => context.push(AppRoutes.myPlaylists),
-                      ),
-                      _StatCard(
-                        label: 'Total views',
-                        value: '$totalViews',
-                        icon: Icons.visibility,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'My recipes',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  if (snapshot.connectionState == ConnectionState.waiting)
-                    const Center(child: CircularProgressIndicator())
-                  else if (recipes.isEmpty)
-                    const Text('No recipes yet.')
-                  else
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: recipes.length > 3 ? 3 : recipes.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (context, index) {
-                        final recipe = recipes[index];
-                        return ListTile(
-                          leading: const Icon(Icons.restaurant_menu),
-                          title: Text(recipe.title),
-                          subtitle: Text('${recipe.steps.length} steps'),
-                          onTap: () {
-                            final localeCode =
-                                Localizations.localeOf(context).languageCode;
-                            context.push(
-                              AppRoutes.recipeDetails,
-                              extra: RecipeDetailsArgs(
-                                id: recipe.id,
-                                title: recipe.title,
-                                imageUrl: recipe.imageUrl,
-                                time: '${recipe.steps.length} steps',
-                                difficulty: '-',
-                                originalLanguageCode: localeCode,
-                                ingredients: recipe.ingredients,
-                                steps: recipe.steps,
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final VoidCallback? onTap;
-
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.onTap,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SizedBox(
-      width: 160,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(icon, size: 24),
-                const SizedBox(height: 8),
-                Text(value, style: theme.textTheme.headlineSmall),
-                const SizedBox(height: 4),
-                Text(label, style: theme.textTheme.bodyMedium),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ChefRecipesListScreen extends StatelessWidget {
-  const _ChefRecipesListScreen({required this.recipes});
-
-  final List<Recipe> recipes;
-
-  @override
-  Widget build(BuildContext context) {
-    final localeCode = Localizations.localeOf(context).languageCode;
-    return Scaffold(
-      appBar: AppBar(title: const Text('My recipes')),
-      body: recipes.isEmpty
-          ? const Center(child: Text('No recipes yet.'))
-          : ListView.separated(
-              itemCount: recipes.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final recipe = recipes[index];
-                return ListTile(
-                  leading: const Icon(Icons.restaurant_menu),
-                  title: Text(recipe.title),
-                  subtitle: Text('${recipe.steps.length} steps'),
-                  onTap: () {
-                    context.push(
-                      AppRoutes.recipeDetails,
-                      extra: RecipeDetailsArgs(
-                        id: recipe.id,
-                        title: recipe.title,
-                        imageUrl: recipe.imageUrl,
-                        time: '${recipe.steps.length} steps',
-                        difficulty: '-',
-                        originalLanguageCode: localeCode,
-                        ingredients: recipe.ingredients,
-                        steps: recipe.steps,
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
     );
   }
 }

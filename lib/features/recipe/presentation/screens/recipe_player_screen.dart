@@ -13,12 +13,22 @@ class RecipePlayerArgs {
   final String imageUrl;
   final List<RecipeStep> steps;
   final String languageCode;
+  final String? recipeId;
+  final int? initialStepIndex;
+  final bool? initialIsPlaying;
+  final int? initialTimerEndEpochMs;
+  final int? initialPausedRemainingMs;
 
   const RecipePlayerArgs({
     required this.title,
     required this.imageUrl,
     required this.steps,
     this.languageCode = 'he',
+    this.recipeId,
+    this.initialStepIndex,
+    this.initialIsPlaying,
+    this.initialTimerEndEpochMs,
+    this.initialPausedRemainingMs,
   });
 }
 
@@ -31,14 +41,17 @@ class RecipePlayerScreen extends StatefulWidget {
   State<RecipePlayerScreen> createState() => _RecipePlayerScreenState();
 }
 
-class _RecipePlayerScreenState extends State<RecipePlayerScreen> {
+class _RecipePlayerScreenState extends State<RecipePlayerScreen>
+    with WidgetsBindingObserver {
   int currentStepIndex = 0;
   Timer? _timer;
   bool _isPlaying = false;
-  int _remainingSeconds = 0;
+  int _remainingMs = 0;
+  int? _timerEndEpochMs;
   bool _handsFree = false;
   late stt.SpeechToText _speech;
   bool _isListening = false;
+  bool _isCompleted = false;
 
   List<RecipeStep> get _steps => widget.args.steps;
 
@@ -52,19 +65,93 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen> {
     return _steps[currentStepIndex];
   }
   int? get _currentDuration => _currentStep.durationSeconds;
+  int get _currentDurationMs => (_currentDuration ?? 0) * 1000;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _speech = stt.SpeechToText();
-    _remainingSeconds = _currentDuration ?? 0;
+    _restoreInitialState();
   }
 
   @override
   void dispose() {
     _speech.stop();
     _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  void _restoreInitialState() {
+    final initialStep = widget.args.initialStepIndex ?? 0;
+    setState(() {
+      currentStepIndex = initialStep.clamp(0, _steps.length - 1);
+    });
+    _isPlaying = widget.args.initialIsPlaying ?? false;
+    _timerEndEpochMs = widget.args.initialTimerEndEpochMs;
+    final pausedMs = widget.args.initialPausedRemainingMs;
+    if (_isPlaying && _timerEndEpochMs != null) {
+      _remainingMs = _calculateRemainingMs();
+      if (_remainingMs <= 0) {
+        _handleStepFinished();
+        return;
+      }
+      _startTicker();
+    } else if (pausedMs != null) {
+      _remainingMs = pausedMs;
+      _isPlaying = false;
+    } else {
+      _remainingMs = _currentDurationMs;
+      _isPlaying = false;
+    }
+  }
+
+  int _calculateRemainingMs() {
+    if (_timerEndEpochMs == null) return _remainingMs;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final diff = _timerEndEpochMs! - now;
+    return diff > 0 ? diff : 0;
+  }
+
+  void _startTicker() {
+    _timer?.cancel();
+    if (!_isPlaying || _timerEndEpochMs == null) return;
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
+  }
+
+  void _onTick() {
+    if (!_isPlaying || _timerEndEpochMs == null) return;
+    final remaining = _calculateRemainingMs();
+    if (remaining <= 0) {
+      _remainingMs = 0;
+      _handleStepFinished();
+    } else {
+      setState(() {
+        _remainingMs = remaining;
+      });
+    }
+  }
+
+  void _stopTicker() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void _resumeTickerIfNeeded() {
+    if (!_isPlaying || _timerEndEpochMs == null) return;
+    final remaining = _calculateRemainingMs();
+    if (remaining <= 0) {
+      _remainingMs = 0;
+      _handleStepFinished();
+      return;
+    }
+    setState(() {
+      _remainingMs = remaining;
+    });
+    if (_timer == null) {
+      _startTicker();
+    }
   }
 
   void _startTimer() {
@@ -78,29 +165,20 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen> {
       currentStepIndex = 0;
     }
     if (_currentDuration == null) return;
-    _timer?.cancel();
-    if (_remainingSeconds <= 0) {
-      _remainingSeconds = _currentDuration!;
+    _stopTicker();
+    if (_remainingMs <= 0) {
+      _remainingMs = _currentDurationMs;
     }
+    _timerEndEpochMs = DateTime.now().millisecondsSinceEpoch + _remainingMs;
     _isPlaying = true;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_remainingSeconds > 0) {
-        setState(() {
-          _remainingSeconds--;
-        });
-      } else {
-        final settings = SettingsService.instance;
-        if (settings.playTimerSound) {
-          SystemSound.play(SystemSoundType.alert);
-        }
-        _goToNextStep();
-      }
-    });
+    _startTicker();
     setState(() {});
   }
 
   void _pauseTimer() {
-    _timer?.cancel();
+    _remainingMs = _calculateRemainingMs();
+    _stopTicker();
+    _timerEndEpochMs = null;
     _isPlaying = false;
     setState(() {});
   }
@@ -111,34 +189,40 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen> {
       SystemSound.play(SystemSoundType.alert);
     }
 
-    _timer?.cancel();
+    _stopTicker();
+    _timerEndEpochMs = null;
     if (currentStepIndex < widget.args.steps.length - 1) {
       setState(() {
         currentStepIndex++;
-        _remainingSeconds = _currentDuration ?? 0;
+        _remainingMs = _currentDurationMs;
         _isPlaying = false;
+        _isCompleted = false;
       });
-      if (_currentDuration != null) {
+      if (_handsFree && _currentDuration != null) {
         _startTimer();
       }
     } else {
       setState(() {
         _isPlaying = false;
-        _remainingSeconds = 0;
+        _remainingMs = 0;
+        _isCompleted = true;
       });
     }
   }
 
   void _resetTimerForCurrentStep() {
-    _timer?.cancel();
-    _remainingSeconds = _currentDuration ?? 0;
+    _stopTicker();
+    _timerEndEpochMs = null;
+    _remainingMs = _currentDurationMs;
     _isPlaying = false;
+    _isCompleted = false;
     setState(() {});
   }
 
   String _formatRemainingTime() {
-    final minutes = _remainingSeconds ~/ 60;
-    final seconds = _remainingSeconds % 60;
+    final totalSeconds = (_remainingMs / 1000).ceil();
+    final minutes = totalSeconds ~/ 60;
+    final seconds = totalSeconds % 60;
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     return '${twoDigits(minutes)}:${twoDigits(seconds)}';
   }
@@ -182,12 +266,19 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _resumeTickerIfNeeded();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final steps = widget.args.steps;
-    final total = _currentDuration ?? 0;
+    final total = _currentDurationMs;
     final double progress =
-        (total > 0 && _remainingSeconds >= 0) ? 1 - (_remainingSeconds / total) : 0;
+        (total > 0 && _remainingMs >= 0) ? 1 - (_remainingMs / total) : 0;
 
     TextDirection _directionFromLanguage(String code) {
       const rtlLanguages = ['he', 'ar', 'fa', 'ur'];
@@ -397,31 +488,6 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen> {
     if (currentStepIndex > 0) {
       setState(() => currentStepIndex--);
       _resetTimerForCurrentStep();
-    }
-  }
-
-  void _goToNextStep() {
-    final steps = _steps;
-    if (steps.isEmpty) {
-      _timer?.cancel();
-      _isPlaying = false;
-      return;
-    }
-    _timer?.cancel();
-    _isPlaying = false;
-    if (currentStepIndex < steps.length - 1) {
-      setState(() {
-        currentStepIndex++;
-        _remainingSeconds = _currentDuration ?? 0;
-      });
-      if (_handsFree && _currentDuration != null) {
-        _startTimer();
-        return;
-      }
-    } else {
-      setState(() {
-        _remainingSeconds = 0;
-      });
     }
   }
 

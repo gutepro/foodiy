@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class PrivacySettingsScreen extends StatelessWidget {
   const PrivacySettingsScreen({super.key});
@@ -6,17 +7,16 @@ class PrivacySettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Privacy policy'),
+        title: Text(l10n.privacyTitle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Text(
-            'This is a placeholder for the Foodiy privacy policy.\n\n'
-            'Here you will describe how user data is used, stored, and protected.\n'
-            'Later we will replace this text with the real policy.',
+            l10n.privacyPlaceholder,
             style: theme.textTheme.bodyMedium,
           ),
         ),

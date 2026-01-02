@@ -16,6 +16,7 @@ import 'package:foodiy/features/playlist/domain/personal_playlist_models.dart';
 import 'package:foodiy/features/playlist/presentation/screens/personal_playlist_details_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/shared/constants/categories.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class MyPlaylistsScreen extends StatefulWidget {
   const MyPlaylistsScreen({super.key});
@@ -69,7 +70,7 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
       debugPrint(
         '[COOKBOOKS_FIRESTORE_ERROR] $msg createIndexUrl=$indexUrl\n$st',
       );
-      error = 'Cookbooks sync failed. Please try again.';
+      error = 'load_error';
     }
     debugPrint(
       '[COOKBOOKS_SCREEN] localPlaylists=${favorites == null ? 0 : 1} firestoreCookbooks=${remote.length}',
@@ -182,6 +183,7 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final playlists = _mergePlaylists(
       local: _favorites == null ? const [] : [_favorites!],
       remote: _remoteCookbooks,
@@ -195,7 +197,7 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My cookbooks')),
+      appBar: AppBar(title: Text(l10n.homeMyCookbooks)),
       body: _initializing
           ? const Center(child: CircularProgressIndicator())
           : _loadError != null
@@ -207,28 +209,28 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
                       children: [
                         const Icon(Icons.cloud_off, size: 64),
                         const SizedBox(height: 12),
-                        Text(_loadError!),
+                        Text(l10n.cookbooksLoadError),
                         const SizedBox(height: 12),
                         ElevatedButton(
                           onPressed: _loadPlaylists,
-                          child: const Text('Retry'),
+                          child: Text(l10n.tryAgain),
                         ),
                       ],
                     ),
                   ),
                 )
               : playlists.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Padding(
-                        padding: EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.menu_book, size: 64),
-                            SizedBox(height: 12),
-                            Text('You do not have any cookbooks yet'),
-                            SizedBox(height: 4),
-                            Text('Create your first personal cookbook'),
+                            const Icon(Icons.menu_book, size: 64),
+                            const SizedBox(height: 12),
+                            Text(l10n.cookbooksEmptyTitle),
+                            const SizedBox(height: 4),
+                            Text(l10n.cookbooksEmptyBody),
                           ],
                         ),
                       ),
@@ -245,7 +247,7 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
                                 final pl = playlists[index];
                                 final title = (pl.name).trim().isNotEmpty
                                     ? pl.name
-                                    : 'Untitled playlist';
+                                    : l10n.cookbooksUntitled;
                                 final entries = _service.getEntries(pl.id);
                                 final recipeCount = pl.recipeIds.isNotEmpty
                                     ? pl.recipeIds.length
@@ -275,7 +277,11 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
                                         ? Colors.green.shade800
                                         : Colors.grey.shade700,
                                   ),
-                                  label: Text(isPublic ? 'Public' : 'Private'),
+                                  label: Text(
+                                    isPublic
+                                        ? l10n.discoverPublicBadge
+                                        : l10n.cookbooksPrivateBadge,
+                                  ),
                                   backgroundColor: isPublic
                                       ? Colors.green.shade100
                                       : Colors.grey.shade200,
@@ -352,8 +358,8 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
                                       title: Text(title),
                                       subtitle: Text(
                                         pl.isChefPlaylist
-                                            ? '$recipeCount recipes • Chef cookbook'
-                                            : '$recipeCount recipes',
+                                            ? '${l10n.cookbooksRecipeCount(recipeCount)} • ${l10n.cookbooksChefCookbookSuffix}'
+                                            : l10n.cookbooksRecipeCount(recipeCount),
                                       ),
                                       trailing: isFavorite
                                           ? statusChip
@@ -383,21 +389,21 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
                                                           PopupMenuEntry<_PlaylistAction>
                                                         >[];
                                                     items.add(
-                                                      const PopupMenuItem(
+                                                      PopupMenuItem(
                                                         value: _PlaylistAction.rename,
-                                                        child: Text('Rename'),
+                                                        child: Text(l10n.cookbooksActionRename),
                                                       ),
                                                     );
                                                     items.add(
-                                                      const PopupMenuItem(
+                                                      PopupMenuItem(
                                                         value: _PlaylistAction.share,
-                                                        child: Text('Share'),
+                                                        child: Text(l10n.cookbooksActionShare),
                                                       ),
                                                     );
                                                     items.add(
-                                                      const PopupMenuItem(
+                                                      PopupMenuItem(
                                                         value: _PlaylistAction.delete,
-                                                        child: Text('Delete'),
+                                                        child: Text(l10n.cookbooksActionDelete),
                                                       ),
                                                     );
                                                     return items;
@@ -411,9 +417,9 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
                                         );
                                         if (!exists) {
                                           ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                               content: Text(
-                                                'This cookbook no longer exists',
+                                                l10n.cookbooksMissing,
                                               ),
                                             ),
                                           );
@@ -446,6 +452,7 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
   }
 
   Future<void> _onCreatePlaylistPressed() async {
+    final l10n = AppLocalizations.of(context)!;
     final draft = await Navigator.of(context).push<_CookbookDraft>(
       MaterialPageRoute(
         builder: (_) => _CreateCookbookWizard(
@@ -473,7 +480,7 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unable to create cookbook: ${e.toString()}')),
+          SnackBar(content: Text(l10n.cookbooksCreateFailed('${e.toString()}'))),
         );
       }
       return;
@@ -483,32 +490,33 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
   }
 
   Future<void> _onRenamePlaylist(PersonalPlaylist playlist) async {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(text: playlist.name);
     final result = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Rename cookbook'),
+          title: Text(l10n.cookbooksRenameTitle),
           content: TextField(
             controller: controller,
-            decoration: const InputDecoration(labelText: 'New name'),
+            decoration: InputDecoration(labelText: l10n.cookbooksRenameNewName),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.homeCancel),
             ),
             ElevatedButton(
               onPressed: () {
                 if (controller.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a name')),
+                    SnackBar(content: Text(l10n.cookbooksNameRequired)),
                   );
                   return;
                 }
                 Navigator.of(context).pop(true);
               },
-              child: const Text('Save'),
+              child: Text(l10n.cookbooksSave),
             ),
           ],
         );
@@ -522,20 +530,21 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
   }
 
   Future<void> _onDeletePlaylist(PersonalPlaylist playlist) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Delete cookbook'),
-          content: Text('Delete "${playlist.name}"?'),
+          title: Text(l10n.cookbooksDeleteTitle),
+          content: Text(l10n.cookbooksDeleteMessage(playlist.name)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.homeCancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete'),
+              child: Text(l10n.homeDelete),
             ),
           ],
         );
@@ -561,8 +570,9 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
   }
 
   void _onSharePlaylist(PersonalPlaylist playlist) {
+    final l10n = AppLocalizations.of(context)!;
     final text = PersonalPlaylistShareHelper.formatPlaylist(playlist, _service);
-    Share.share(text, subject: 'Cookbook: ${playlist.name}');
+    Share.share(text, subject: l10n.cookbooksShareSubject(playlist.name));
   }
 }
 
@@ -645,13 +655,14 @@ class _CreateCookbookWizardState extends State<_CreateCookbookWizard> {
   }
 
   void _toggleCategory(String category, bool selected) {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       if (selected) {
         if (_selectedCategories.contains(category)) return;
         if (_atCategoryLimit) {
-          _categoryError = 'You can select up to 5 categories';
+          _categoryError = l10n.cookbooksCategoryLimit;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('You can select up to 5 categories')),
+            SnackBar(content: Text(l10n.cookbooksCategoryLimit)),
           );
           return;
         }
@@ -664,15 +675,16 @@ class _CreateCookbookWizardState extends State<_CreateCookbookWizard> {
   }
 
   void _submit() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isPublic && _selectedCategories.isEmpty) {
       setState(
-        () => _categoryError = 'Select 1-5 categories for public cookbooks',
+        () => _categoryError = l10n.cookbooksCategoryPublicRequired,
       );
       return;
     }
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      setState(() => _nameError = 'Name is required');
+      setState(() => _nameError = l10n.cookbooksNameRequired);
       return;
     }
     Navigator.of(context).pop(
@@ -686,21 +698,22 @@ class _CreateCookbookWizardState extends State<_CreateCookbookWizard> {
   }
 
   Widget _buildStepContent() {
+    final l10n = AppLocalizations.of(context)!;
     if (_step == 0) {
       return SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Basics',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              l10n.cookbooksBasicsTitle,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: 'Cookbook name',
+                labelText: l10n.cookbooksNameLabel,
                 errorText: _nameError,
               ),
             ),
@@ -728,15 +741,15 @@ class _CreateCookbookWizardState extends State<_CreateCookbookWizard> {
                 TextButton.icon(
                   onPressed: _pickImage,
                   icon: const Icon(Icons.photo_library_outlined),
-                  label: const Text('Choose image'),
+                  label: Text(l10n.cookbooksChooseImage),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Public'),
-              subtitle: const Text('Public cookbooks are visible to others'),
+              title: Text(l10n.discoverPublicBadge),
+              subtitle: Text(l10n.cookbooksPublicSubtitle),
               value: _isPublic,
               onChanged: (value) {
                 setState(() {
@@ -757,20 +770,20 @@ class _CreateCookbookWizardState extends State<_CreateCookbookWizard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Categories',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            l10n.cookbooksCategoriesTitle,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             _isPublic
-                ? 'Select 1-5 categories so others can find your cookbook.'
-                : 'Optional: add up to 5 categories.',
+                ? l10n.cookbooksCategoriesPublicHint
+                : l10n.cookbooksCategoriesPrivateHint,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 8),
           Text(
-            '${_selectedCategories.length}/5 selected',
+            l10n.cookbooksCategoriesSelected(_selectedCategories.length),
             style: Theme.of(context).textTheme.labelMedium,
           ),
           const SizedBox(height: 8),
@@ -813,9 +826,10 @@ class _CreateCookbookWizardState extends State<_CreateCookbookWizard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create cookbook'),
+        title: Text(l10n.cookbooksCreateTitle),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).maybePop(),
@@ -828,12 +842,12 @@ class _CreateCookbookWizardState extends State<_CreateCookbookWizard> {
           child: Row(
             children: [
               if (_step > 0)
-                OutlinedButton(onPressed: _back, child: const Text('Back')),
+                OutlinedButton(onPressed: _back, child: Text(l10n.cookbooksBack)),
               if (_step > 0) const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
                   onPressed: _next,
-                  child: Text(_step == 0 ? 'Next' : 'Create'),
+                  child: Text(_step == 0 ? l10n.cookbooksNext : l10n.cookbooksCreate),
                 ),
               ),
             ],

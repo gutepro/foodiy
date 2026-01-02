@@ -1,0 +1,376 @@
+{
+  "homeTitle": "الصفحة الرئيسية",
+  "myRecipesTitle": "وصفاتي",
+  "backToHomeButton": "العودة إلى الصفحة الرئيسية",
+  "homeLoadErrorTitle": "واجهنا مشكلة في تحميل الوصفات.",
+  "untitledRecipe": "وصفة بدون اسم",
+  "deleteRecipeTooltip": "حذف الوصفة",
+  "noRecipesYet": "لا توجد وصفات بعد",
+  "homeLoadErrorHeadline": "واجهنا مشكلة في تحميل المحتوى الخاص بك.",
+  "homeLoadErrorDescription": "وصفاتك وكتب الطبخ آمنة. يمكنك المحاولة مرة أخرى أو العودة إلى الصفحة الرئيسية.",
+  "tryAgain": "حاول مرة أخرى",
+  "homeChefPlaceholder": "شيف",
+  "homeGreetingChef": "مرحباً {name}، جاهز للطبخ؟",
+  "@homeGreetingChef": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeGreetingUser": "مرحباً {name}، مرحباً بعودتك",
+  "@homeGreetingUser": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeUploadPromptChef": "ارفع وصفة وحولها لتجربة هادئة خطوة بخطوة.",
+  "homeUploadPromptUser": "اكتشف وصفات وكتب طبخ. الرفع مخصص للشيف.",
+  "homeUploadRecipe": "رفع وصفة",
+  "homeCreateManual": "إنشاء يدوي",
+  "homeFreeChefLimit": "الشيف المجاني يمكنه نشر حتى {limit} وصفات.",
+  "@homeFreeChefLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "homeUpgradeToChef": "كن شيف لرفع الوصفات",
+  "homeShoppingListTooltip": "قائمة التسوق",
+  "homeSearchTooltip": "بحث",
+  "homeResumeCookingTitle": "متابعة الطبخ",
+  "homeNotNow": "ليس الآن",
+  "homeStepRemaining": "الخطوة {step} • متبقي {time}",
+  "@homeStepRemaining": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "time": {}
+    }
+  },
+  "homeResumeButton": "متابعة",
+  "homeMyCookbooks": "كتب الطبخ الخاصة بي",
+  "homeSeeAll": "عرض الكل",
+  "homeNoCookbooks": "لا توجد كتب طبخ بعد",
+  "homeLoadingRecipesTimeout": "انتهى وقت تحميل الوصفات.",
+  "homeUploadsForChefsTitle": "الرفع مخصص للشيف",
+  "homeUploadsForChefsBody": "كن شيفاً لإضافة وتنظيم وصفاتك الخاصة.",
+  "homeBecomeChefButton": "كن شيفاً",
+  "homeUploadDocBody": "ارفع مستند وصفة لبدء كتابك الشخصي.",
+  "homeUploadsForChefsSnackbar": "الرفع مخصص للشيف. كن شيفاً لإضافة وصفات.",
+  "homeDeleteRecipeTitle": "حذف الوصفة",
+  "homeDeleteRecipeMessage": "هل تريد حذف \"{title}\"؟ لا يمكن التراجع.",
+  "@homeDeleteRecipeMessage": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "homeCancel": "إلغاء",
+  "homeDelete": "حذف",
+  "homeRecipeDeleted": "تم حذف الوصفة",
+  "homeDeleteRecipeFailed": "فشل حذف الوصفة: {error}",
+  "@homeDeleteRecipeFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "profileTitle": "الملف الشخصي",
+  "profileAnonymousUser": "مستخدم مجهول",
+  "profileNoEmail": "لا يوجد بريد إلكتروني",
+  "profileEditChefProfile": "تعديل ملف الشيف",
+  "profileAccountTypeChef": "حساب شيف",
+  "profileAccountTypeUser": "حساب مستخدم عادي",
+  "profilePlanBillingTitle": "الخطة والفوترة",
+  "profileSubscriptionTitle": "عرض اشتراكي",
+  "profileSubscriptionSubtitle": "اطلع على خطتك الحالية وخيارات الترقية",
+  "profileChefToolsTitle": "أدوات الشيف",
+  "profileRecentActivityTitle": "النشاط الأخير",
+  "profileSeeAll": "عرض الكل",
+  "profileNoRecentActivity": "لا يوجد نشاط حديث بعد",
+  "profileSettingsTitle": "الإعدادات",
+  "profileOpenSettings": "فتح الإعدادات",
+  "profileOpenSettingsSubtitle": "الحساب، التفضيلات والمزيد",
+  "profileUserTypeFreeUser": "مستخدم مجاني",
+  "profileUserTypePremiumUser": "مستخدم بريميوم",
+  "profileUserTypeFreeChef": "شيف مجاني",
+  "profileUserTypePremiumChef": "شيف بريميوم",
+  "profileChefDashboardUnavailable": "لوحة الشيف متاحة لحسابات الشيف فقط.",
+  "profileChefDashboardTitle": "لوحة الشيف",
+  "profileChefDashboardSubtitle": "إدارة محتواك على Foodiy",
+  "profileUploadRecipe": "رفع وصفة",
+  "profileCreateCookbook": "إنشاء كتاب طبخ",
+  "profileChefInsights": "إحصائيات الشيف",
+  "profileFreeChefLimitMessage": "يمكن للشيف المجاني نشر ما يصل إلى {limit} وصفات.\\nالوصفات: {current} / {limit}",
+  "@profileFreeChefLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      }
+    }
+  },
+  "profileUpgradeToPremiumChef": "الترقية إلى شيف بريميوم",
+  "profileStatMyRecipes": "وصفاتي",
+  "profileStatMyCookbooks": "كتب الطبخ الخاصة بي",
+  "profileStatFollowers": "متابعون",
+  "profileStatChefInsights": "إحصائيات الشيف",
+  "profileInsightsDescription": "محتواك ظاهر وقابل للاكتشاف على Foodiy.",
+  "profileInsightsRecipes": "وصفات",
+  "profileInsightsCookbooks": "كتب طبخ",
+  "profileInsightsFollowers": "متابعون",
+  "profileInsightsPremiumNote": "يتمتع الشيف البريميوم بقيود أقل وتجربة أنظف.",
+  "profileInsightsClose": "إغلاق",
+  "profileStepsCount": "{count} خطوة",
+  "@profileStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "navHome": "الرئيسية",
+  "settingsTitle": "الإعدادات",
+  "settingsPlayTimerSound": "تشغيل صوت عند انتهاء المؤقت",
+  "settingsNotificationsSection": "الإشعارات",
+  "settingsNotificationSettings": "إعدادات الإشعارات",
+  "settingsNotificationSettingsSubtitle": "اختر الإشعارات التي تريد استلامها",
+  "settingsAccountSection": "الحساب",
+  "settingsEditPersonalDetails": "تعديل التفاصيل الشخصية",
+  "settingsChangePassword": "تغيير كلمة المرور",
+  "settingsLogout": "تسجيل الخروج",
+  "settingsLogoutFail": "فشل تسجيل الخروج. حاول مرة أخرى.",
+  "settingsDeleteAccount": "حذف الحساب",
+  "settingsPreferencesSection": "تفضيلات التطبيق",
+  "settingsLanguageUnits": "اللغة والوحدات",
+  "settingsLanguageUnitsSubtitle": "اختر لغة التطبيق ووحدات القياس",
+  "settingsLegalSection": "بنود قانونية",
+  "settingsTermsOfUse": "شروط الاستخدام",
+  "settingsPrivacyPolicy": "سياسة الخصوصية",
+  "settingsAboutSection": "حول",
+  "settingsAboutApp": "حول Foodiy",
+  "settingsAboutAppSubtitle": "تعرف أكثر على هذا التطبيق",
+  "languageUnitsTitle": "اللغة والوحدات",
+  "languageSectionTitle": "اللغة",
+  "languagePickerLabel": "لغة التطبيق",
+  "languageSystemDefault": "إعدادات النظام",
+  "languageEnglish": "الإنجليزية",
+  "languageHebrew": "العبرية",
+  "languageSpanish": "الإسبانية",
+  "languageFrench": "الفرنسية",
+  "languageArabic": "العربية",
+  "languageChinese": "الصينية",
+  "languageJapanese": "اليابانية",
+  "languageItalian": "الإيطالية",
+  "unitsSectionTitle": "الوحدات",
+  "unitsMetric": "متري (غرام، سيلسيوس)",
+  "unitsImperial": "إنجليزي (أكواب، فهرنهايت)",
+  "notificationTitle": "الإشعارات",
+  "notificationPreferencesTitle": "تفضيلات الإشعارات",
+  "notificationNewChefRecipesTitle": "وصفات جديدة من الشيف",
+  "notificationNewChefRecipesSubtitle": "الحصول على إشعار عندما ينشر الشيف وصفات جديدة",
+  "notificationPlaylistSuggestionsTitle": "اقتراحات القوائم",
+  "notificationPlaylistSuggestionsSubtitle": "تلقي اقتراحات لقوائم قد تعجبك",
+  "notificationAppTipsTitle": "نصائح وتحديثات التطبيق",
+  "privacyTitle": "سياسة الخصوصية",
+  "privacyPlaceholder": "هذا نص مؤقت لسياسة الخصوصية في Foodiy.\\n\\nهنا سيُشرح كيف تُستخدم بيانات المستخدم وتُحفظ وتُحمى.\\nلاحقاً سنستبدل هذا النص بالسياسة الفعلية.",
+  "termsTitle": "شروط الاستخدام",
+  "termsPlaceholder": "هذا نص مؤقت لشروط الاستخدام في Foodiy.\\n\\nهنا ستُشرح قواعد الاستخدام وحدود المسؤولية وغيرها من التفاصيل القانونية.\\nلاحقاً سنستبدل هذا النص بالشروط الفعلية.",
+  "aboutTitle": "حول Foodiy",
+  "aboutAppName": "Foodiy",
+  "aboutVersion": "الإصدار 0.1.0 (dev)",
+  "aboutDescription": "Foodiy هو رفيقك الشخصي للطبخ وكتب الوصفات.\\n\\nأنشئ وتابع كتب الوصفات، واكتشف مجموعات الشيف، وابنِ كتبك الخاصة وأدر قوائم التسوق في مكان واحد.",
+  "aboutCopyright": "© {year} Foodiy. كل الحقوق محفوظة.",
+  "@aboutCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "navDiscover": "استكشاف",
+  "navCookbooks": "كتب الطبخ",
+  "navProfile": "الملف الشخصي",
+  "homeSectionFailed": "فشل عرض القسم",
+  "homeSectionErrorDetails": "[{tag}] {error}",
+  "@homeSectionErrorDetails": {
+    "placeholders": {
+      "tag": {},
+      "error": {}
+    }
+  },
+  "homeUiError": "خطأ في الواجهة: {error}",
+  "@homeUiError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "discoverSearchHint": "ابحث عن كتب طبخ أو شيف",
+  "discoverNoCookbooks": "لا توجد كتب طبخ عامة بعد",
+  "discoverPublicBadge": "عام",
+  "discoverCategoryBreakfast": "فطور",
+  "discoverCategoryBrunch": "فطور متأخر",
+  "discoverCategoryQuickWeeknightDinners": "عشاء سريع لأيام الأسبوع",
+  "discoverCategoryFridayLunch": "غداء الجمعة",
+  "discoverCategoryComfortFood": "طعام مريح",
+  "discoverCategoryBakingBasics": "أساسيات الخَبز",
+  "discoverCategoryBreadAndDough": "خبز وعجائن",
+  "discoverCategoryPastries": "معجنات",
+  "discoverCategoryCakesAndDesserts": "كيك وحلويات",
+  "discoverCategoryCookiesAndSmallSweets": "بسكويت وحلويات صغيرة",
+  "discoverCategoryChocolateLovers": "عشاق الشوكولاتة",
+  "discoverCategoryHealthyAndLight": "صحي وخفيف",
+  "discoverCategoryHighProtein": "عالي البروتين",
+  "discoverCategoryVegetarian": "نباتي",
+  "discoverCategoryVegan": "نباتي صارم",
+  "discoverCategoryGlutenFree": "خالٍ من الغلوتين",
+  "discoverCategoryOnePotMeals": "وجبات بقدر واحد",
+  "discoverCategorySoupsAndStews": "شوربات ويخنات",
+  "discoverCategorySalads": "سلطات",
+  "discoverCategoryPastaAndRisotto": "معكرونة وريزوتو",
+  "discoverCategoryRiceAndGrains": "أرز وحبوب",
+  "discoverCategoryMiddleEastern": "مطبخ شرق أوسطي",
+  "discoverCategoryItalianClassics": "كلاسيكيات إيطالية",
+  "discoverCategoryAsianInspired": "مستوحى من آسيا",
+  "discoverCategoryStreetFood": "أكل شارع",
+  "discoverCategoryFamilyFavorites": "مفضلات العائلة",
+  "discoverCategoryHostingAndHolidays": "ضيافة وأعياد",
+  "discoverCategoryMealPrep": "تحضير وجبات مسبقاً",
+  "discoverCategoryKidsFriendly": "مناسب للأطفال",
+  "discoverCategoryLateNightCravings": "رغبات ليلية"
+  ,
+  "cookbooksLoadError": "فشل مزامنة كتب الطبخ. حاول مرة أخرى.",
+  "cookbooksEmptyTitle": "ليس لديك كتب طبخ بعد",
+  "cookbooksEmptyBody": "أنشئ أول كتاب طبخ شخصي",
+  "cookbooksUntitled": "كتاب طبخ بدون اسم",
+  "cookbooksPrivateBadge": "خاص",
+  "cookbooksRecipeCount": "{count} وصفات",
+  "@cookbooksRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksChefCookbookSuffix": "كتاب شيف",
+  "cookbooksActionRename": "إعادة تسمية",
+  "cookbooksActionShare": "مشاركة",
+  "cookbooksActionDelete": "حذف",
+  "cookbooksMissing": "هذا الكتاب لم يعد موجوداً",
+  "cookbooksCreateFailed": "تعذر إنشاء كتاب الطبخ: {error}",
+  "@cookbooksCreateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cookbooksRenameTitle": "إعادة تسمية كتاب",
+  "cookbooksRenameNewName": "اسم جديد",
+  "cookbooksNameRequired": "الاسم مطلوب",
+  "cookbooksSave": "حفظ",
+  "cookbooksDeleteTitle": "حذف كتاب",
+  "cookbooksDeleteMessage": "حذف \"{name}\"؟",
+  "@cookbooksDeleteMessage": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksShareSubject": "كتاب طبخ: {name}",
+  "@cookbooksShareSubject": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksCategoryLimit": "يمكنك اختيار حتى 5 فئات",
+  "cookbooksCategoryPublicRequired": "اختر 1-5 فئات لكتب الطبخ العامة",
+  "cookbooksPublicSubtitle": "كتب الطبخ العامة مرئية للآخرين",
+  "cookbooksBasicsTitle": "الأساسيات",
+  "cookbooksNameLabel": "اسم كتاب الطبخ",
+  "cookbooksChooseImage": "اختر صورة",
+  "cookbooksCategoriesTitle": "الفئات",
+  "cookbooksCategoriesPublicHint": "اختر 1-5 فئات ليتمكن الآخرون من العثور على كتابك.",
+  "cookbooksCategoriesPrivateHint": "اختياري: أضف حتى 5 فئات.",
+  "cookbooksCategoriesSelected": "{count}/5 محددة",
+  "@cookbooksCategoriesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksCreateTitle": "إنشاء كتاب طبخ",
+  "cookbooksBack": "رجوع",
+  "cookbooksNext": "التالي",
+  "cookbooksCreate": "إنشاء",
+  "recipeDifficultyMedium": "متوسطة",
+  "recipeSaveSuccess": "تم حفظ الوصفة \"{title}\" وإضافتها إلى وصفاتي",
+  "@recipeSaveSuccess": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "recipeSaveFailed": "تعذر حفظ/نشر الوصفة: {error}",
+  "@recipeSaveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "recipeCreateTitle": "إنشاء وصفة",
+  "recipeEditTitle": "تعديل وصفة",
+  "recipeOnlyChefBody": "فقط حسابات الشيف يمكنها رفع الوصفات.\n\nقم بالترقية إلى خطة شيف لبدء إنشاء الوصفات.",
+  "recipeFreePlanLimitBody": "لقد وصلت إلى حد الرفع في خطة الشيف المجانية.\n\nقم بالترقية إلى شيف مميز لإنشاء المزيد من الوصفات.",
+  "recipePhotoLabel": "صورة الوصفة",
+  "recipeTakePhoto": "التقاط صورة",
+  "recipePhotoLibrary": "معرض الصور",
+  "recipePickFile": "الملفات",
+  "recipeUploadLimitBanner": "خطة الشيف المجانية - رفع الوصفات محدود.\nقم بالترقية إلى شيف مميز لإزالة الحد.",
+  "recipeTitleLabel": "عنوان الوصفة",
+  "recipeIngredientsTitle": "المكونات",
+  "recipeIngredientLabel": "مكون",
+  "recipeQuantityLabel": "الكمية",
+  "recipeUnitLabel": "الوحدة",
+  "recipeAddIngredient": "إضافة مكون",
+  "recipeToolsTitle": "أدوات / معدات",
+  "recipeToolLabel": "أداة",
+  "recipeAddTool": "إضافة أداة",
+  "recipePreCookingTitle": "التحضير قبل الطهي",
+  "recipePreCookingHint": "مثال: سخّن الفرن إلى 200 م°, غطِّ الصينية، انقع الفاصوليا طوال الليل...",
+  "recipeStepsTitle": "الخطوات",
+  "recipeAddStep": "إضافة خطوة",
+  "recipePreviewInPlayer": "معاينة في المشغل",
+  "recipeUpdateButton": "تحديث الوصفة",
+  "recipeSaveButton": "حفظ الوصفة",
+  "recipeStepLabel": "خطوة",
+  "recipeStepMinutesLabel": "دقيقة",
+  "recipeRemoveStepTooltip": "إزالة الخطوة",
+  "recipeDeleteButton": "حذف الوصفة",
+  "recipeDeleteStep1Title": "حذف الوصفة؟",
+  "recipeDeleteStep1Body": "هل أنت متأكد أنك تريد حذف هذه الوصفة؟",
+  "recipeDeleteStep1Continue": "متابعة",
+  "recipeDeleteStep2Title": "لا يمكن التراجع عن ذلك",
+  "recipeDeleteStep2Body": "حذف هذه الوصفة سيزيلها بشكل دائم.",
+  "recipeDeleteStep2Delete": "حذف",
+  "recipeDeleteFailed": "فشل حذف الوصفة: {error}",
+  "@recipeDeleteFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "importDocTitle": "استيراد وصفة من مستند",
+  "importDocHeader": "استيراد وصفة من مستند",
+  "importDocBody": "اختر ملف وصفة أو صورة واضحة. سنحافظ على ثبات العملية أثناء القراءة وإنشاء الوصفة لك.",
+  "importDocFileReady": "الملف جاهز",
+  "importDocAddDocument": "أضف مستند وصفة",
+  "importDocFormatsShort": "PDF, DOCX, JPG, PNG, WEBP",
+  "importDocProcessingNote": "سنحافظ على استقرار الرفع أثناء المعالجة.",
+  "importDocEmptyHelper": "لم يتم اختيار ملف بعد. أضف ملفاً أو صورة واضحة للمتابعة.",
+  "importDocChooseFile": "اختر ملفاً",
+  "importDocChoosePhoto": "اختر صورة",
+  "importDocTakePhoto": "التقط صورة",
+  "importDocTipsTitle": "نصائح لاستيراد هادئ",
+  "importDocTip1": "استخدم صورة مضيئة جيداً مع ظهور الوصفة كاملة.",
+  "importDocTip2": "ابقَ على هذه الشاشة حتى نأخذك إلى الوصفة.",
+  "importDocTip3": "يمكنك تعديل التفاصيل بعد اكتمال الاستيراد.",
+  "importDocUpload": "رفع واستيراد",
+  "importDocSupportedFooter": "مدعوم: PDF, DOC, DOCX, JPG, PNG, WEBP. قد تستغرق الملفات الكبيرة وقتاً أطول للمعالجة."
+}

@@ -6,10 +6,12 @@ class AppRoutes {
   static const discovery = '/';
   static const login = '/login';
   static const signUp = '/sign-up';
-  static const recipe = '/recipe';
   static const recipeDetails = '/recipe/details';
   static const recipePlayer = '/player';
   static const recipeCreate = '/create-recipe';
+  static const recipeEdit = '/edit-recipe';
+  static const recipeImportDocument = '/create-recipe-document';
+  static const recipeImportNeedsReview = '/recipe/import-needs-review';
   static const playlistDetails = '/playlist';
   static const forgotPassword = '/forgot-password';
   static const verifyEmail = '/verify-email';
@@ -28,4 +30,7 @@ class AppRoutes {
   static const publicChefPlaylist = '/public-chef-playlist';
   static const userActivity = '/user-activity';
   static const chefProfile = '/chef-profile';
+  static const editChefProfile = '/chef-profile/edit';
+  static const legalConsent = '/legal-consent';
+  static const onboarding = '/onboarding';
 }

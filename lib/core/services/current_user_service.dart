@@ -47,6 +47,7 @@ class CurrentUserService {
       final now = FieldValue.serverTimestamp();
       await docRef.set({
         'displayName': user.displayName,
+        'displayNameLower': user.displayName?.toLowerCase().trim(),
         'photoUrl': user.photoURL,
         'userType': 'homeCook',
         'tier': 'freeUser',
@@ -56,6 +57,9 @@ class CurrentUserService {
         'updatedAt': now,
         'email': user.email,
         'uid': user.uid,
+        'subscriptionPlanId': '',
+        'subscriptionStatus': 'inactive',
+        'onboardingComplete': false,
       });
       final createdSnap = await docRef.get();
       _cachedProfile = AppUserProfile.fromFirestore(
@@ -140,6 +144,40 @@ class CurrentUserService {
       '[USER_ROLE_UPDATE] written role=${_userTypeStringFromEnum(newType)} uid=${user.uid}',
     );
     profileNotifier.value = _cachedProfile;
+  }
+
+  Future<void> updateDisplayName(String displayName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final trimmed = displayName.trim();
+    if (trimmed.isEmpty) return;
+    final now = DateTime.now();
+    final data = {
+      'displayName': trimmed,
+      'displayNameLower': trimmed.toLowerCase(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    await docRef.set(data, SetOptions(merge: true));
+
+    try {
+      await user.updateDisplayName(trimmed);
+    } catch (_) {
+      // Non-fatal; Firestore remains source of truth.
+    }
+
+    if (_cachedProfile != null) {
+      _cachedProfile = _cachedProfile!.copyWith(
+        displayName: trimmed,
+        updatedAt: now,
+      );
+      profileNotifier.value = _cachedProfile;
+    } else {
+      final snap = await docRef.get();
+      _cachedProfile =
+          AppUserProfile.fromFirestore(snap.data() ?? {}, uid: user.uid);
+      profileNotifier.value = _cachedProfile;
+    }
   }
 
   void _listenToProfileChanges(String uid) {

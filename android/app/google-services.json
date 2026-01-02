@@ -12,7 +12,20 @@
           "package_name": "com.example.foodiy"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "988257088468-kj0ejlcuino7su4e9ihh4etubf5iqoql.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.foodiy",
+            "certificate_hash": "89503cb7c8f6c91dedc0d95688202be354ce62a7"
+          }
+        },
+        {
+          "client_id": "988257088468-iidgkrsbcoegos3n15nmoprh0gmaqqfg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDyiQl9KFPBMBZK0nsoGc42-xJv-Fz_fPM"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "988257088468-atmtio8368tq3u9aptftbqiaebppek32.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "988257088468-40emiipnaktcur37hl3nosivs3c4n1vd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.foodiy"
+              }
+            }
+          ]
         }
       }
     },
@@ -31,7 +56,20 @@
           "package_name": "com.foodiy.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "988257088468-92heag3bpqtqtv6r6257ag2m7s72qgea.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foodiy.app",
+            "certificate_hash": "89503cb7c8f6c91dedc0d95688202be354ce62a7"
+          }
+        },
+        {
+          "client_id": "988257088468-iidgkrsbcoegos3n15nmoprh0gmaqqfg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDyiQl9KFPBMBZK0nsoGc42-xJv-Fz_fPM"
@@ -39,7 +77,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "988257088468-atmtio8368tq3u9aptftbqiaebppek32.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "988257088468-40emiipnaktcur37hl3nosivs3c4n1vd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.foodiy"
+              }
+            }
+          ]
         }
       }
     }

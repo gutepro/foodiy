@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:foodiy/core/services/current_user_service.dart';
 
 class EditPersonalDetailsScreen extends StatefulWidget {
   const EditPersonalDetailsScreen({super.key});
@@ -13,18 +15,38 @@ class _EditPersonalDetailsScreenState extends State<EditPersonalDetailsScreen> {
   final _displayNameController = TextEditingController();
   User? _user;
   bool _isSaving = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
-    _displayNameController.text = _user?.displayName ?? '';
+    _loadDisplayName();
   }
 
   @override
   void dispose() {
     _displayNameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadDisplayName() async {
+    final cached = CurrentUserService.instance.currentProfile;
+    if (cached?.displayName?.isNotEmpty == true) {
+      _displayNameController.text = cached!.displayName!;
+      setState(() => _isLoading = false);
+      return;
+    }
+    final uid = _user?.uid;
+    if (uid == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+    final snap = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final data = snap.data() ?? {};
+    final name = (data['displayName'] as String?) ?? '';
+    _displayNameController.text = name;
+    setState(() => _isLoading = false);
   }
 
   Future<void> _onSavePressed() async {
@@ -39,9 +61,7 @@ class _EditPersonalDetailsScreenState extends State<EditPersonalDetailsScreen> {
 
     setState(() => _isSaving = true);
     try {
-      await _user!.updateDisplayName(newName);
-      await _user!.reload();
-      _user = FirebaseAuth.instance.currentUser;
+      await CurrentUserService.instance.updateDisplayName(newName);
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -67,10 +87,13 @@ class _EditPersonalDetailsScreenState extends State<EditPersonalDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: _displayNameController,
-              decoration: const InputDecoration(labelText: 'Display name'),
-            ),
+            if (_isLoading)
+              const LinearProgressIndicator(minHeight: 2)
+            else
+              TextField(
+                controller: _displayNameController,
+                decoration: const InputDecoration(labelText: 'Display name'),
+              ),
             const SizedBox(height: 12),
             if (_user?.email != null)
               Text(

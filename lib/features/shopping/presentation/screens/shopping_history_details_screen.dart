@@ -89,8 +89,9 @@ class ShoppingHistoryDetailsScreen extends StatelessWidget {
                           : Icons.check_box_outline_blank,
                     ),
                     title: Text(item.name),
-                    subtitle:
-                        item.quantity.isNotEmpty ? Text(item.quantity) : null,
+                    subtitle: item.quantityText.isNotEmpty
+                        ? Text(item.quantityText)
+                        : null,
                   );
                 },
               ),

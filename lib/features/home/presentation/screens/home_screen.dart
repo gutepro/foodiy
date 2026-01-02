@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:foodiy/core/models/user_type.dart';
 import 'package:foodiy/core/services/access_control_service.dart';
 import 'package:foodiy/core/services/current_user_service.dart';
+import 'package:foodiy/features/chef/application/chef_follow_service.dart';
 import 'package:foodiy/core/widgets/recipe_image.dart';
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/features/playlist/application/personal_playlist_service.dart';
@@ -21,6 +22,18 @@ import 'package:foodiy/features/recipe/application/recipe_player_session_service
 import 'package:foodiy/features/recipe/application/recipe_firestore_service.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_player_screen.dart';
 import 'package:foodiy/shared/widgets/banner_ad_container.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
+import 'package:foodiy/features/subscription/presentation/screens/package_selection_screen.dart';
+
+Widget safeSection({required String tag, required Widget Function() build}) {
+  try {
+    return build();
+  } catch (e, st) {
+    debugPrint('[HOME_SECTION_CRASH][$tag] $e');
+    debugPrint(st.toString());
+    return _SectionErrorCard(tag: tag, error: e);
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -101,10 +114,12 @@ class _RecipeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     debugPrint(
       'RecipeTile: id=${recipe.id}, imageUrl=${recipe.imageUrl}, coverImageUrl=${recipe.coverImageUrl}',
     );
-    final safeTitle = recipe.title.isNotEmpty ? recipe.title : 'Untitled recipe';
+    final safeTitle =
+        recipe.title.isNotEmpty ? recipe.title : l10n.untitledRecipe;
     final safeImage = recipe.coverImageUrl ?? recipe.imageUrl ?? '';
     return InkWell(
       onTap: () {
@@ -114,7 +129,7 @@ class _RecipeTile extends StatelessWidget {
             id: recipe.id,
             title: safeTitle,
             imageUrl: safeImage,
-            time: '${recipe.steps.length} steps',
+            time: l10n.profileStepsCount(recipe.steps.length),
             difficulty: '-',
             originalLanguageCode: localeCode,
             ingredients: const [],
@@ -128,6 +143,7 @@ class _RecipeTile extends StatelessWidget {
         child: Stack(
           children: [
             Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 RecipeImage(
@@ -150,17 +166,6 @@ class _RecipeTile extends StatelessWidget {
                 ),
               ],
             ),
-            if (onDelete != null)
-              Positioned(
-                top: 4,
-                right: 4,
-                child: IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  color: Colors.black54,
-                  onPressed: onDelete,
-                  tooltip: 'Delete recipe',
-                ),
-              ),
           ],
         ),
       ),
@@ -177,6 +182,7 @@ class _InlineErrorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -189,7 +195,7 @@ class _InlineErrorCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'We had trouble loading recipes.',
+            l10n.homeLoadErrorTitle,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: Colors.red.shade800,
               fontWeight: FontWeight.w600,
@@ -204,7 +210,7 @@ class _InlineErrorCard extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: Text(l10n.tryAgain),
           ),
         ],
       ),
@@ -226,7 +232,7 @@ class _RecipesLoadingSkeleton extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 0.9,
+        childAspectRatio: 0.82,
       ),
       itemBuilder: (context, index) {
         return Card(
@@ -295,23 +301,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     const darkGreen = Color(0xFF1B4332);
     const warmOrange = Color(0xFFEF8354);
+    final l10n = AppLocalizations.of(context)!;
     try {
       ErrorWidget.builder = (details) {
         debugPrint(
           'Home ErrorWidget caught: ${details.exceptionAsString()}\n${details.stack}',
         );
-        return Scaffold(
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: _HomeFallback(
-                greetingName: 'Chef',
-                isChef: false,
-                onUpload: _openImportDocument,
-                onManualCreate: null,
-                onRetry: _triggerHomeReload,
-                onBackToHome: () => context.go(AppRoutes.home),
-              ),
+        return Material(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              l10n.homeUiError(details.exceptionAsString()),
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         );
@@ -333,45 +335,54 @@ class _HomeScreenState extends State<HomeScreen> {
       final displayName = (profile?.displayName ?? '').trim();
       final greetingName = displayName.isNotEmpty
           ? displayName.split(' ').first
-          : 'Chef';
+          : l10n.homeChefPlaceholder;
       debugPrint('[Home] build normal branch reloadToken=$_homeReloadToken uid=$uid');
 
       final showAds = AdsService.adsEnabled(userType);
       return Scaffold(
-        bottomNavigationBar: BannerAdContainer(showAds: showAds),
+        bottomNavigationBar: safeSection(
+          tag: 'ads',
+          build: () => BannerAdContainer(showAds: showAds),
+        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 240),
-                        child: const FoodiyLogo(height: 56),
+                safeSection(
+                  tag: 'header',
+                  build: () => Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 240),
+                          child: const SizedBox(
+                            height: 56,
+                            child: FoodiyLogo(),
+                          ),
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () {
-                        _logNav(AppRoutes.shoppingList, 'tap:shopping');
-                        context.push(AppRoutes.shoppingList);
-                      },
-                      icon: const Icon(Icons.shopping_cart_outlined),
-                      tooltip: 'Shopping list',
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        _logNav(AppRoutes.search, 'tap:search');
-                        context.push(AppRoutes.search);
-                      },
-                      icon: const Icon(Icons.search),
-                      tooltip: 'Search',
-                    ),
-                  ],
+                      const Spacer(),
+                      IconButton(
+                        onPressed: () {
+                          _logNav(AppRoutes.shoppingList, 'tap:shopping');
+                          context.push(AppRoutes.shoppingList);
+                        },
+                        icon: const Icon(Icons.shopping_cart_outlined),
+                        tooltip: l10n.homeShoppingListTooltip,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          _logNav(AppRoutes.search, 'tap:search');
+                          context.push(AppRoutes.search);
+                        },
+                        icon: const Icon(Icons.search),
+                        tooltip: l10n.homeSearchTooltip,
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Expanded(
@@ -382,56 +393,58 @@ class _HomeScreenState extends State<HomeScreen> {
                       return ListView(
                         padding: EdgeInsets.zero,
                         children: [
-                            Directionality(
-                              textDirection: TextDirection.ltr,
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade50,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Colors.grey.shade200,
+                            safeSection(
+                              tag: 'quick_actions',
+                              build: () => Directionality(
+                                textDirection: Directionality.of(context),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.grey.shade200,
+                                    ),
                                   ),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    AutoDirectionText(
-                                      isChef
-                                          ? 'Hi $greetingName, ready to cook?'
-                                          : 'Hi $greetingName, welcome back',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    AutoDirectionText(
-                                      isChef
-                                          ? 'Upload a recipe to turn it into a calm, step-by-step experience.'
-                                          : 'Explore recipes and cookbooks. Uploads are for chefs.',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyMedium,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Wrap(
-                                      spacing: 12,
-                                      runSpacing: 8,
-                                      children: [
-                                        if (canUpload) ...[
-                                          ElevatedButton.icon(
-                                            onPressed: () {
-                                              _logNav(AppRoutes.recipeImportDocument, 'tap:upload');
-                                              _openImportDocument();
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      AutoDirectionText(
+                                        isChef
+                                            ? l10n.homeGreetingChef(greetingName)
+                                            : l10n.homeGreetingUser(greetingName),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      AutoDirectionText(
+                                        isChef
+                                            ? l10n.homeUploadPromptChef
+                                            : l10n.homeUploadPromptUser,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Wrap(
+                                        spacing: 12,
+                                        runSpacing: 8,
+                                        children: [
+                                          if (canUpload) ...[
+                                            ElevatedButton.icon(
+                                              onPressed: () {
+                                                _logNav(AppRoutes.recipeImportDocument, 'tap:upload');
+                                                _openImportDocument();
                                             },
                                             icon: const Icon(
                                               Icons.cloud_upload_outlined,
                                             ),
-                                            label: const AutoDirectionText(
-                                              'Upload recipe',
+                                            label: AutoDirectionText(
+                                              l10n.homeUploadRecipe,
                                             ),
                                           ),
                                           TextButton(
@@ -439,36 +452,38 @@ class _HomeScreenState extends State<HomeScreen> {
                                               _logNav(AppRoutes.recipeCreate, 'tap:create_manual');
                                               context.push(AppRoutes.recipeCreate);
                                             },
-                                            child: const AutoDirectionText(
-                                              'Create manually',
+                                            child: AutoDirectionText(
+                                              l10n.homeCreateManual,
                                             ),
                                           ),
                                           if (isFreeChef)
                                             AutoDirectionText(
-                                              'Free chefs can publish up to 10 recipes.',
+                                              l10n.homeFreeChefLimit(10),
                                               style: Theme.of(
                                                 context,
                                               ).textTheme.bodySmall,
                                             ),
-                                        ] else ...[
-                                          OutlinedButton.icon(
-                                            onPressed: () {
+                                          ] else ...[
+                                            OutlinedButton.icon(
+                                              onPressed: () {
                                               _logNav(AppRoutes.selectPackage, 'tap:upgrade');
                                               context.push(
-                                                AppRoutes.selectPackage,
-                                              );
-                                            },
-                                            icon: const Icon(
-                                              Icons.workspace_premium,
+                                                  AppRoutes.selectPackage,
+                                                  extra: PlanPickerEntrySource.settings,
+                                                );
+                                              },
+                                              icon: const Icon(
+                                                Icons.workspace_premium,
+                                              ),
+                                              label: AutoDirectionText(
+                                                l10n.homeUpgradeToChef,
+                                              ),
                                             ),
-                                            label: const AutoDirectionText(
-                                              'Become a Chef to upload',
-                                            ),
-                                          ),
+                                          ],
                                         ],
-                                      ],
-                                    ),
-                                  ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -483,36 +498,58 @@ class _HomeScreenState extends State<HomeScreen> {
                                   onDismiss: _dismissResume,
                                 ),
                               ),
-                            _MyRecipesSection(
-                              uid: uid,
-                              accentColor: warmOrange,
-                              darkColor: darkGreen,
-                              localeCode: localeCode,
-                              reloadToken: _homeReloadToken,
-                              canUpload: canUpload,
-                              onUpgradeToChef: () =>
-                                  context.push(AppRoutes.selectPackage),
-                              onUploadFromDoc: canUpload
-                                  ? _openImportDocument
-                                  : null,
-                              canCreateManually: canUpload,
-                              onManualCreate: canUpload
-                                  ? () => context.push(AppRoutes.recipeCreate)
-                                  : null,
-                              onSeeAll: () => _openMyRecipes(
+                            if (uid.isNotEmpty)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 4, bottom: 16),
+                                child: safeSection(
+                                  tag: 'following_chefs',
+                                  build: () => _FollowingChefsSection(
+                                    currentUid: uid,
+                                    onOpenDiscover: () =>
+                                        context.go(AppRoutes.discovery),
+                                  ),
+                                ),
+                              ),
+                            safeSection(
+                              tag: 'recipes',
+                              build: () => _MyRecipesSection(
                                 uid: uid,
                                 accentColor: warmOrange,
                                 darkColor: darkGreen,
                                 localeCode: localeCode,
+                                reloadToken: _homeReloadToken,
+                                canUpload: canUpload,
+                                onUpgradeToChef: () =>
+                                    context.push(
+                                      AppRoutes.selectPackage,
+                                      extra: PlanPickerEntrySource.settings,
+                                    ),
+                                onUploadFromDoc: canUpload
+                                    ? _openImportDocument
+                                    : null,
+                                canCreateManually: canUpload,
+                                onManualCreate: canUpload
+                                    ? () => context.push(AppRoutes.recipeCreate)
+                                    : null,
+                                onSeeAll: () => _openMyRecipes(
+                                  uid: uid,
+                                  accentColor: warmOrange,
+                                  darkColor: darkGreen,
+                                  localeCode: localeCode,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 24),
-                            _MyPlaylistsSection(
-                              playlists: _playlistService.playlists,
-                              getEntries: _playlistService.getEntries,
-                              onSeeAll: _openMyPlaylists,
-                              onOpenPlaylist: _openPlaylistDetails,
-                              onRetry: _triggerHomeReload,
+                            safeSection(
+                              tag: 'cookbooks',
+                              build: () => _MyPlaylistsSection(
+                                playlists: _playlistService.playlists,
+                                getEntries: _playlistService.getEntries,
+                                onSeeAll: _openMyPlaylists,
+                                onOpenPlaylist: _openPlaylistDetails,
+                                onRetry: _triggerHomeReload,
+                              ),
                             ),
                           ],
                         );
@@ -547,7 +584,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: _HomeFallback(
-              greetingName: 'Chef',
+              greetingName: l10n.homeChefPlaceholder,
               isChef: false,
               onUpload: _openImportDocument,
               onManualCreate: null,
@@ -602,13 +639,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openImportDocument() async {
+    final l10n = AppLocalizations.of(context)!;
     final userType = CurrentUserService.instance.currentUserType;
     if (!AccessControlService.instance.isChef(userType)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Uploads are for chefs. Become a Chef to add recipes.',
+              l10n.homeUploadsForChefsSnackbar,
             ),
           ),
         );
@@ -716,6 +754,7 @@ class _HomeFallback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -730,14 +769,14 @@ class _HomeFallback extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AutoDirectionText(
-                'Hi $greetingName',
+                isChef ? l10n.homeGreetingChef(greetingName) : l10n.homeGreetingUser(greetingName),
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 6),
               AutoDirectionText(
-                'Upload a recipe to start cooking. We will keep things calm and simple.',
+                isChef ? l10n.homeUploadPromptChef : l10n.homeUploadPromptUser,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 12),
@@ -748,12 +787,12 @@ class _HomeFallback extends StatelessWidget {
                   ElevatedButton.icon(
                     onPressed: onUpload,
                     icon: const Icon(Icons.cloud_upload_outlined),
-                    label: const AutoDirectionText('Upload recipe'),
+                    label: AutoDirectionText(l10n.homeUploadRecipe),
                   ),
                   if (isChef && onManualCreate != null)
                     TextButton(
                       onPressed: onManualCreate,
-                      child: const AutoDirectionText('Create manually'),
+                      child: AutoDirectionText(l10n.homeCreateManual),
                     ),
                 ],
               ),
@@ -801,6 +840,7 @@ class _ResumeCookingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final stepNumber = session.stepIndex + 1;
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -816,11 +856,11 @@ class _ResumeCookingCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Resume cooking',
+                    l10n.homeResumeCookingTitle,
                     style: theme.textTheme.titleMedium,
                   ),
                 ),
-                TextButton(onPressed: onDismiss, child: const Text('Not now')),
+                TextButton(onPressed: onDismiss, child: Text(l10n.homeNotNow)),
               ],
             ),
             const SizedBox(height: 8),
@@ -832,7 +872,7 @@ class _ResumeCookingCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Step $stepNumber • ${_formatRemaining()} remaining',
+              l10n.homeStepRemaining(stepNumber, _formatRemaining()),
               style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
@@ -841,7 +881,144 @@ class _ResumeCookingCard extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onResume,
                 icon: const Icon(Icons.play_arrow),
-                label: const Text('Resume'),
+                label: Text(l10n.homeResumeButton),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FollowingChefsSection extends StatelessWidget {
+  const _FollowingChefsSection({
+    required this.currentUid,
+    required this.onOpenDiscover,
+  });
+
+  final String currentUid;
+  final VoidCallback onOpenDiscover;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (currentUid.isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              AutoDirectionText(
+                'Following chefs',
+                style: theme.textTheme.titleMedium,
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: onOpenDiscover,
+                child: const Text('Discover'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          StreamBuilder<List<FollowingChef>>(
+            stream: ChefFollowService.instance.watchFollowingChefs(
+              uid: currentUid,
+              limit: 10,
+            ),
+            builder: (context, snapshot) {
+              final chefs = snapshot.data ?? const <FollowingChef>[];
+              if (snapshot.connectionState == ConnectionState.waiting &&
+                  chefs.isEmpty) {
+                return const SizedBox(
+                  height: 96,
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              if (chefs.isEmpty) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Follow chefs to see them here.',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: onOpenDiscover,
+                      child: const Text('Find chefs'),
+                    ),
+                  ],
+                );
+              }
+              return SizedBox(
+                height: 110,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: chefs.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final chef = chefs[index];
+                    return _ChefChip(
+                      chef: chef,
+                      onTap: () {
+                        context.push(AppRoutes.chefProfile, extra: chef.chefId);
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChefChip extends StatelessWidget {
+  const _ChefChip({required this.chef, required this.onTap});
+
+  final FollowingChef chef;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final avatarUrl = chef.avatarUrl;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 96,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundImage:
+                  avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
+              backgroundColor: Colors.grey.shade200,
+              child: avatarUrl.isEmpty
+                  ? Icon(Icons.person, color: Colors.grey.shade600)
+                  : null,
+              onBackgroundImageError: (_, __) {},
+            ),
+            const SizedBox(height: 8),
+            Text(
+              chef.displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -869,33 +1046,34 @@ class _MyPlaylistsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final items = playlists.take(4).toList();
     Widget content;
     try {
       if (items.isEmpty) {
-        content = const Text('No cookbooks yet');
+        content = Text(l10n.homeNoCookbooks);
       } else {
-        content = GridView.builder(
-          padding: EdgeInsets.zero,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: items.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.95,
+        content = SizedBox(
+          height: 220,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.zero,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final playlist = items[index];
+              final entries = getEntries(playlist.id);
+              return SizedBox(
+                width: 200,
+                child: _CookbookTile(
+                  playlist: playlist,
+                  entries: entries,
+                  recipeCount: entries.length,
+                  onOpen: () => onOpenPlaylist(playlist.id),
+                ),
+              );
+            },
           ),
-          itemBuilder: (context, index) {
-            final playlist = items[index];
-            final entries = getEntries(playlist.id);
-            return _CookbookTile(
-              playlist: playlist,
-              entries: entries,
-              recipeCount: entries.length,
-              onOpen: () => onOpenPlaylist(playlist.id),
-            );
-          },
         );
       }
     } catch (e, st) {
@@ -918,13 +1096,13 @@ class _MyPlaylistsSection extends StatelessWidget {
           Row(
             children: [
               AutoDirectionText(
-                'My cookbooks',
+                l10n.homeMyCookbooks,
                 style: theme.textTheme.titleMedium,
               ),
               const Spacer(),
               TextButton(
                 onPressed: onSeeAll,
-                child: const AutoDirectionText('See all'),
+                child: AutoDirectionText(l10n.homeSeeAll),
               ),
             ],
           ),
@@ -975,11 +1153,20 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
   bool _loggedError = false;
   int _retryToken = 0;
   Timer? _timeoutTimer;
+  bool _didInitDependencies = false;
 
   @override
   void initState() {
     super.initState();
-    _subscribe();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didInitDependencies) {
+      _didInitDependencies = true;
+      _subscribe();
+    }
   }
 
   @override
@@ -999,6 +1186,7 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
   }
 
   void _subscribe() {
+    final l10n = AppLocalizations.of(context)!;
     _timeoutTimer?.cancel();
     _sub?.cancel();
     debugPrint('[Home MyRecipes] subscribing for uid=${widget.uid}');
@@ -1012,7 +1200,7 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
       debugPrint('[Home MyRecipes] load timed out for uid=${widget.uid}');
       setState(() {
         _timedOut = true;
-        _error ??= 'Loading recipes timed out.';
+        _error ??= l10n.homeLoadingRecipesTimeout;
       });
     });
 
@@ -1027,7 +1215,7 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
           try {
             sanitized.add(
               r.copyWith(
-                title: (r.title).isNotEmpty ? r.title : 'Untitled recipe',
+                title: (r.title).isNotEmpty ? r.title : l10n.untitledRecipe,
                 coverImageUrl: r.coverImageUrl?.isNotEmpty == true
                     ? r.coverImageUrl
                     : r.imageUrl ?? '',
@@ -1080,16 +1268,17 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
   }
 
   Future<void> _deleteRecipeDirectly(BuildContext context, Recipe recipe) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await RecipeFirestoreService.instance.deleteRecipe(recipe.id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Recipe deleted')),
+        SnackBar(content: Text(l10n.homeRecipeDeleted)),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete recipe: $e')),
+        SnackBar(content: Text(l10n.homeDeleteRecipeFailed('$e'))),
       );
     }
   }
@@ -1097,6 +1286,7 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final currentUserType =
         CurrentUserService.instance.currentProfile?.userType ?? UserType.freeUser;
     final canUpload = widget.canUpload ||
@@ -1119,25 +1309,20 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
         children: [
           Row(
             children: [
-              AutoDirectionText(
-                'My recipes',
-                style: theme.textTheme.titleMedium,
+              Expanded(
+                child: AutoDirectionText(
+                  l10n.myRecipesTitle,
+                  style: theme.textTheme.titleMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 12),
               TextButton(
                 onPressed: widget.onSeeAll,
-                child: const AutoDirectionText('See all'),
+                child: AutoDirectionText(l10n.homeSeeAll),
               ),
             ],
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton.icon(
-              onPressed: widget.onUploadFromDoc,
-              icon: const Icon(Icons.cloud_upload_outlined),
-              label: const Text('Upload recipe'),
-            ),
           ),
           const SizedBox(height: 12),
           if (isLoading)
@@ -1146,19 +1331,19 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
             _InlineErrorCard(
               message: _error ??
                   (_timedOut
-                      ? 'Loading recipes timed out.'
-                      : 'We had trouble loading recipes.'),
+                      ? l10n.homeLoadingRecipesTimeout
+                      : l10n.homeLoadErrorTitle),
               onRetry: _retry,
             )
           else if (showEmpty)
             _EmptyPersonalCard(
-              title: canUpload ? 'No recipes yet' : 'Uploads are for chefs',
+              title: canUpload ? l10n.noRecipesYet : l10n.homeUploadsForChefsTitle,
               body: canUpload
-                  ? 'Upload a recipe document to start your personal cookbook.'
-                  : 'Become a Chef to add and organize your own recipes.',
-              primaryLabel: canUpload ? null : 'Become a Chef',
+                  ? l10n.homeUploadDocBody
+                  : l10n.homeUploadsForChefsBody,
+              primaryLabel: canUpload ? null : l10n.homeBecomeChefButton,
               onPrimary: canUpload ? null : widget.onUpgradeToChef,
-              secondaryLabel: canUpload ? 'Upload a recipe' : null,
+              secondaryLabel: canUpload ? l10n.homeUploadRecipe : null,
               onSecondary: canUpload ? widget.onUploadFromDoc : null,
             )
           else if (recipes != null)
@@ -1171,7 +1356,7 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.9,
+                childAspectRatio: 0.82,
               ),
               itemBuilder: (context, index) {
                 final recipe = recipes[index];
@@ -1180,30 +1365,6 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
                   accentColor: widget.accentColor,
                   darkColor: widget.darkColor,
                   localeCode: widget.localeCode,
-                  onDelete: () async {
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Delete recipe'),
-                        content: Text(
-                          'Are you sure you want to delete "${recipe.title}"? This cannot be undone.',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => Navigator.of(ctx).pop(true),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirmed == true) {
-                      await _deleteRecipeDirectly(context, recipe);
-                    }
-                  },
                 );
               },
             ),
@@ -1229,6 +1390,46 @@ class _InfoChip extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(color: color, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+class _SectionErrorCard extends StatelessWidget {
+  const _SectionErrorCard({required this.tag, required this.error});
+
+  final String tag;
+  final Object error;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade100),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.homeSectionFailed,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.red.shade800,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.homeSectionErrorDetails(tag, '$error'),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.red.shade700,
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -1281,6 +1482,7 @@ class HomeLoadErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
@@ -1290,25 +1492,25 @@ class HomeLoadErrorCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const AutoDirectionText(
-              'We had trouble loading your content.',
-              style: TextStyle(fontWeight: FontWeight.w700),
+            AutoDirectionText(
+              l10n.homeLoadErrorHeadline,
+              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 6),
-            const AutoDirectionText(
-              'Your recipes and cookbooks stay safe. You can try again, or go back to Home.',
+            AutoDirectionText(
+              l10n.homeLoadErrorDescription,
             ),
             const SizedBox(height: 12),
             Row(
               children: [
                 ElevatedButton(
                   onPressed: () => Future.microtask(onBackToHome),
-                  child: const Text('Back to Home'),
+                  child: Text(l10n.backToHomeButton),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton(
                   onPressed: () => Future.microtask(onTryAgain),
-                  child: const Text('Try again'),
+                  child: Text(l10n.tryAgain),
                 ),
               ],
             ),
@@ -1354,20 +1556,20 @@ class _EmptyPersonalCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(body, style: theme.textTheme.bodyMedium),
           const SizedBox(height: 12),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
               if (primaryLabel != null && onPrimary != null)
                 ElevatedButton(
                   onPressed: onPrimary,
                   child: Text(primaryLabel!),
                 ),
-              if (secondaryLabel != null && onSecondary != null) ...[
-                if (primaryLabel != null) const SizedBox(width: 8),
+              if (secondaryLabel != null && onSecondary != null)
                 OutlinedButton(
                   onPressed: onSecondary,
                   child: Text(secondaryLabel!),
                 ),
-              ],
             ],
           ),
         ],
@@ -1391,8 +1593,9 @@ class _UserRecipesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('My recipes')),
+      appBar: AppBar(title: Text(l10n.myRecipesTitle)),
       body: StreamBuilder<List<Recipe>>(
         stream: RecipeFirestoreService.instance.watchUserRecipes(uid: uid),
         builder: (context, snapshot) {
@@ -1410,7 +1613,7 @@ class _UserRecipesScreen extends StatelessWidget {
           }
           final recipes = snapshot.data ?? [];
           if (recipes.isEmpty) {
-            return const Center(child: Text('No recipes yet'));
+            return Center(child: Text(l10n.noRecipesYet));
           }
           return ListView.builder(
             itemCount: recipes.length,

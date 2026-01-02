@@ -13,6 +13,11 @@ class UserProfileService {
   List<SavedRecipeSummary> get savedRecipes => List.unmodifiable(_savedRecipes);
   List<UserActivityItem> get activity => List.unmodifiable(_activity);
 
+  void reset() {
+    _savedRecipes.clear();
+    _activity.clear();
+  }
+
   void logActivity(String description) {
     _activity.insert(
       0,

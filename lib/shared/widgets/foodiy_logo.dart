@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodiy/core/brand/brand_assets.dart';
 
 /// Centralized logo widget for the Foodiy brand.
 class FoodiyLogo extends StatelessWidget {
@@ -7,7 +8,7 @@ class FoodiyLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      'assets/images/foodiy_logo.png.png',
+      BrandAssets.foodiyLogo,
       fit: BoxFit.contain,
       // TODO: Add responsive scaling once layout breakpoints are defined.
     );

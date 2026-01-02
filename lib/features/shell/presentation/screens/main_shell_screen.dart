@@ -6,6 +6,8 @@ import 'package:foodiy/features/home/presentation/screens/home_screen.dart';
 import 'package:foodiy/features/profile/presentation/screens/user_profile_screen.dart';
 import 'package:foodiy/core/services/current_user_service.dart';
 import 'package:foodiy/core/models/user_type.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
+import 'package:foodiy/shared/theme/theme.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});
@@ -27,6 +29,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return ValueListenableBuilder(
       valueListenable: CurrentUserService.instance.profileNotifier,
       builder: (context, profile, _) {
@@ -45,25 +48,25 @@ class _MainShellScreenState extends State<MainShellScreen> {
                 _currentIndex = index;
               });
             },
-            selectedItemColor: theme.colorScheme.primary,
+            selectedItemColor: FoodiyTheme.sweetPotatoOrange,
             unselectedItemColor: theme.colorScheme.onSurface.withOpacity(0.7),
             type: BottomNavigationBarType.fixed,
-            items: const [
+            items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
+                icon: const Icon(Icons.home),
+                label: l10n.navHome,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: 'Discover',
+                icon: const Icon(Icons.search),
+                label: l10n.navDiscover,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.menu_book),
-                label: 'Cookbooks',
+                icon: const Icon(Icons.menu_book),
+                label: l10n.navCookbooks,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Profile',
+                icon: const Icon(Icons.person),
+                label: l10n.navProfile,
               ),
             ],
           ),

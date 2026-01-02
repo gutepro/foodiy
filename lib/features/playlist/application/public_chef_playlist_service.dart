@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:foodiy/core/services/current_user_service.dart';
+
 import '../domain/public_chef_playlist_models.dart';
 
 class PublicChefPlaylistService {
@@ -14,20 +16,40 @@ class PublicChefPlaylistService {
 
   final _uuid = const Uuid();
   final _firestore = FirebaseFirestore.instance;
-  static const _collectionName = 'public_chef_playlists';
+  static const _collectionName = 'chef_playlists';
   final List<PublicChefPlaylist> _playlists = [];
 
   List<PublicChefPlaylist> get playlists => List.unmodifiable(_playlists);
+
+  List<String> _normalizeCategories(List<String> categories) {
+    final seen = <String>{};
+    final result = <String>[];
+    for (final category in categories) {
+      final trimmed = category.trim();
+      if (trimmed.isEmpty || seen.contains(trimmed)) continue;
+      result.add(trimmed);
+      seen.add(trimmed);
+      if (result.length >= 5) break;
+    }
+    return result;
+  }
 
   Future<PublicChefPlaylist> createPlaylist({
     required String title,
     required String description,
     required List<PublicChefPlaylistEntry> entries,
+    required List<String> categories,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
-    final chefName = user?.displayName ?? (user?.email ?? 'Chef');
+    final chefName = CurrentUserService.instance.currentProfile?.displayName ??
+        user?.displayName ??
+        (user?.email ?? 'Chef');
     final chefId = user?.uid;
     final docRef = _firestore.collection(_collectionName).doc();
+    final normalizedCategories = _normalizeCategories(categories);
+    if (normalizedCategories.isEmpty) {
+      throw ArgumentError('Public cookbooks need at least one category');
+    }
 
     final playlist = PublicChefPlaylist(
       id: docRef.id,
@@ -35,6 +57,7 @@ class PublicChefPlaylistService {
       chefId: chefId,
       title: title,
       description: description,
+      categories: normalizedCategories,
       entries: entries,
     );
 
