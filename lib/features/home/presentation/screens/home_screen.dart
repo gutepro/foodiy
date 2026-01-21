@@ -57,7 +57,11 @@ class _CookbookTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isFavorite = playlist.name.toLowerCase() == 'favorite recipes';
+    final title = playlist.name.trim().isNotEmpty
+        ? playlist.name
+        : l10n.cookbooksUntitled;
     // Build up to 4 thumbnail urls from playlist entries
     final thumbUrls = entries
         .map((e) => e.imageUrl)
@@ -79,15 +83,21 @@ class _CookbookTile extends StatelessWidget {
             )
           else
             _PlaylistCoverCollage(imageUrls: thumbUrls, height: 120),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              playlist.name,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: AutoDirectionText(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.start,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
             ),
           ),
         ],
@@ -1048,32 +1058,36 @@ class _MyPlaylistsSection extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final items = playlists.take(4).toList();
+    final isLoading =
+        playlists.isEmpty && PersonalPlaylistService.instance.favoritesPlaylist == null;
     Widget content;
     try {
-      if (items.isEmpty) {
+      if (isLoading) {
+        content = const _CookbooksLoadingSkeleton();
+      } else if (items.isEmpty) {
         content = Text(l10n.homeNoCookbooks);
       } else {
-        content = SizedBox(
-          height: 220,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.zero,
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final playlist = items[index];
-              final entries = getEntries(playlist.id);
-              return SizedBox(
-                width: 200,
-                child: _CookbookTile(
-                  playlist: playlist,
-                  entries: entries,
-                  recipeCount: entries.length,
-                  onOpen: () => onOpenPlaylist(playlist.id),
-                ),
-              );
-            },
+        content = GridView.builder(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: items.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            mainAxisExtent: 200,
           ),
+          itemBuilder: (context, index) {
+            final playlist = items[index];
+            final entries = getEntries(playlist.id);
+            return _CookbookTile(
+              playlist: playlist,
+              entries: entries,
+              recipeCount: entries.length,
+              onOpen: () => onOpenPlaylist(playlist.id),
+            );
+          },
         );
       }
     } catch (e, st) {
@@ -1391,6 +1405,62 @@ class _InfoChip extends StatelessWidget {
         label,
         style: TextStyle(color: color, fontWeight: FontWeight.w600),
       ),
+    );
+  }
+}
+
+class _CookbooksLoadingSkeleton extends StatelessWidget {
+  const _CookbooksLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 4,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        mainAxisExtent: 200,
+      ),
+      itemBuilder: (context, index) {
+        return Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 120,
+                width: double.infinity,
+                color: Colors.grey.shade200,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 14,
+                        width: double.infinity,
+                        color: Colors.grey.shade200,
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        height: 12,
+                        width: 110,
+                        color: Colors.grey.shade200,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
