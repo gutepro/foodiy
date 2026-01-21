@@ -274,7 +274,7 @@ class PlaylistFirestoreService {
           .orderBy('updatedAt', descending: true)
           .limit(limit)
           .get();
-      return snap.docs
+      final cookbooks = snap.docs
           .map((doc) {
             final data = doc.data();
             return PersonalPlaylist(
@@ -301,6 +301,11 @@ class PlaylistFirestoreService {
             );
           })
           .toList(growable: false);
+      final first = cookbooks.isNotEmpty ? cookbooks.first : null;
+      debugPrint(
+        '[COOKBOOKS_STREAM] uid=$ownerId count=${cookbooks.length} firstId=${first?.id ?? ''} firstTitle=${first?.name ?? ''}',
+      );
+      return cookbooks;
     } on FirebaseException catch (e, st) {
       if (e.code == 'failed-precondition' && e.message != null) {
         final match = RegExp(r'https://console\\.firebase\\.google\\.com[^\\s]+')

@@ -7,10 +7,10 @@ import 'package:go_router/go_router.dart';
 import 'package:foodiy/core/models/user_type.dart';
 import 'package:foodiy/core/services/access_control_service.dart';
 import 'package:foodiy/core/services/current_user_service.dart';
-import 'package:foodiy/features/chef/application/chef_follow_service.dart';
 import 'package:foodiy/core/widgets/recipe_image.dart';
 import 'package:foodiy/router/app_routes.dart';
-import 'package:foodiy/features/playlist/application/personal_playlist_service.dart';
+import 'package:foodiy/features/playlist/application/cookbook_firestore_service.dart';
+import 'package:foodiy/features/playlist/application/playlist_firestore_service.dart';
 import 'package:foodiy/features/playlist/domain/personal_playlist_models.dart';
 import 'package:foodiy/features/playlist/presentation/screens/personal_playlist_details_screen.dart';
 import 'package:foodiy/shared/widgets/foodiy_logo.dart';
@@ -18,22 +18,16 @@ import 'package:foodiy/shared/widgets/auto_direction_text.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_details_screen.dart';
 import 'package:foodiy/features/recipe/domain/recipe.dart';
 import 'package:foodiy/shared/services/ads_service.dart';
+import 'package:foodiy/shared/widgets/ad_placeholder.dart';
+import 'package:foodiy/shared/widgets/sponsored_banner.dart';
 import 'package:foodiy/features/recipe/application/recipe_player_session_service.dart';
 import 'package:foodiy/features/recipe/application/recipe_firestore_service.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_player_screen.dart';
 import 'package:foodiy/shared/widgets/banner_ad_container.dart';
+import 'package:foodiy/core/utils/auth_guards.dart';
+import 'package:foodiy/shared/widgets/foodiy_home_logo_button.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 import 'package:foodiy/l10n/app_localizations.dart';
-import 'package:foodiy/features/subscription/presentation/screens/package_selection_screen.dart';
-
-Widget safeSection({required String tag, required Widget Function() build}) {
-  try {
-    return build();
-  } catch (e, st) {
-    debugPrint('[HOME_SECTION_CRASH][$tag] $e');
-    debugPrint(st.toString());
-    return _SectionErrorCard(tag: tag, error: e);
-  }
-}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,6 +58,9 @@ class _CookbookTile extends StatelessWidget {
         .where((url) => url.isNotEmpty)
         .take(4)
         .toList();
+    if (thumbUrls.isEmpty && playlist.imageUrl.isNotEmpty) {
+      thumbUrls.add(playlist.imageUrl);
+    }
     final card = Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       clipBehavior: Clip.antiAlias,
@@ -119,8 +116,9 @@ class _RecipeTile extends StatelessWidget {
     debugPrint(
       'RecipeTile: id=${recipe.id}, imageUrl=${recipe.imageUrl}, coverImageUrl=${recipe.coverImageUrl}',
     );
-    final safeTitle =
-        recipe.title.isNotEmpty ? recipe.title : l10n.untitledRecipe;
+    final safeTitle = recipe.title.isNotEmpty
+        ? recipe.title
+        : AppLocalizations.of(context)!.untitledRecipe;
     final safeImage = recipe.coverImageUrl ?? recipe.imageUrl ?? '';
     return InkWell(
       onTap: () {
@@ -144,29 +142,46 @@ class _RecipeTile extends StatelessWidget {
         child: Stack(
           children: [
             Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RecipeImage(
-                  imageUrl: safeImage,
-                  height: 120,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+                AspectRatio(
+                  aspectRatio: 4 / 3,
+                  child: RecipeImage(
+                    imageUrl: safeImage,
+                    fit: BoxFit.cover,
+                  ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(
-                    safeTitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: darkColor,
-                        ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        safeTitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: darkColor,
+                            ),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
+            if (onDelete != null)
+              Positioned(
+                top: 4,
+                right: 4,
+                child: IconButton(
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  color: Colors.black54,
+                  onPressed: onDelete,
+                  tooltip: AppLocalizations.of(context)!.homeDeleteRecipeTitle,
+                ),
+              ),
           ],
         ),
       ),
@@ -233,7 +248,7 @@ class _RecipesLoadingSkeleton extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 0.82,
+        childAspectRatio: 0.9,
       ),
       itemBuilder: (context, index) {
         return Card(
@@ -272,49 +287,80 @@ class _RecipesLoadingSkeleton extends StatelessWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _playlistService = PersonalPlaylistService.instance;
   PlayerSession? _resumeSession;
   Recipe? _resumeRecipe;
   int _homeReloadToken = 0;
   bool _adsLogged = false;
-  VoidCallback? _profileListener;
+  bool _openingCreateRecipe = false;
 
   void _logNav(String to, String reason) {
     debugPrint('[NAV] from=HomeScreen to=$to reason=$reason');
+  }
+
+  void _showCreateRecipeError(BuildContext context, Object error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Unable to open Create recipe: $error'),
+      ),
+    );
+  }
+
+  Future<void> _handleCreateRecipeTap() async {
+    if (_openingCreateRecipe) return;
+    setState(() => _openingCreateRecipe = true);
+    debugPrint('[CREATE_RECIPE_TAP] start');
+    try {
+      final canProceed = await ensureNotGuest(context);
+      if (!canProceed) return;
+      debugPrint('[CREATE_RECIPE_TAP] before_route');
+      _logNav(AppRoutes.recipeCreate, 'tap:create_manual');
+      await context.push(AppRoutes.recipeCreate);
+      debugPrint('[CREATE_RECIPE_TAP] after_route');
+    } catch (e, st) {
+      debugPrint('[CREATE_RECIPE_TAP] error=$e\n$st');
+      if (mounted) {
+        _showCreateRecipeError(context, e);
+        context.go(AppRoutes.home);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _openingCreateRecipe = false);
+      }
+    }
   }
 
   @override
   void initState() {
     super.initState();
     _loadResumeSession();
-    _profileListener = () {
-      if (mounted) {
-        debugPrint(
-          '[USER_ROLE_STREAM] home rebuild userType=${CurrentUserService.instance.currentProfile?.userType}',
-        );
-        setState(() {});
-      }
-    };
-    CurrentUserService.instance.profileNotifier.addListener(_profileListener!);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint('[HOME] build start');
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=Home keys=homeGreetingChef,homeGreetingUser,homeUploadRecipe',
+    );
     const darkGreen = Color(0xFF1B4332);
     const warmOrange = Color(0xFFEF8354);
-    final l10n = AppLocalizations.of(context)!;
     try {
       ErrorWidget.builder = (details) {
         debugPrint(
           'Home ErrorWidget caught: ${details.exceptionAsString()}\n${details.stack}',
         );
-        return Material(
-          color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              l10n.homeUiError(details.exceptionAsString()),
-              style: const TextStyle(color: Colors.red),
+        return Scaffold(
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: _HomeFallback(
+                greetingName: 'Chef',
+                isChef: false,
+                onUpload: _openImportDocument,
+                onManualCreate: null,
+                onRetry: _triggerHomeReload,
+                onBackToHome: () => context.go(AppRoutes.home),
+              ),
             ),
           ),
         );
@@ -341,49 +387,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final showAds = AdsService.adsEnabled(userType);
       return Scaffold(
-        bottomNavigationBar: safeSection(
-          tag: 'ads',
-          build: () => BannerAdContainer(showAds: showAds),
-        ),
+        bottomNavigationBar: BannerAdContainer(showAds: showAds),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                safeSection(
-                  tag: 'header',
-                  build: () => Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 240),
-                          child: const SizedBox(
-                            height: 56,
-                            child: FoodiyLogo(),
-                          ),
-                        ),
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 240),
+                        child: const FoodiyHomeLogoButton(height: 56, width: 56),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () {
-                          _logNav(AppRoutes.shoppingList, 'tap:shopping');
-                          context.push(AppRoutes.shoppingList);
-                        },
-                        icon: const Icon(Icons.shopping_cart_outlined),
-                        tooltip: l10n.homeShoppingListTooltip,
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          _logNav(AppRoutes.search, 'tap:search');
-                          context.push(AppRoutes.search);
-                        },
-                        icon: const Icon(Icons.search),
-                        tooltip: l10n.homeSearchTooltip,
-                      ),
-                    ],
-                  ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () {
+                        _logNav(AppRoutes.shoppingList, 'tap:shopping');
+                        context.push(AppRoutes.shoppingList);
+                      },
+                      icon: const Icon(Icons.shopping_cart_outlined),
+                      tooltip: l10n.homeShoppingListTooltip,
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        _logNav(AppRoutes.search, 'tap:search');
+                        context.push(AppRoutes.search);
+                      },
+                      icon: const Icon(Icons.search),
+                      tooltip: l10n.homeSearchTooltip,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 Expanded(
@@ -391,55 +428,91 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (context) {
                     try {
                       debugPrint('[Home] rendering main list reloadToken=$_homeReloadToken');
+                      debugPrint('[HOME] before recipes');
+                      final recipesSection = _MyRecipesSection(
+                        uid: uid,
+                        accentColor: warmOrange,
+                        darkColor: darkGreen,
+                        localeCode: localeCode,
+                        reloadToken: _homeReloadToken,
+                        canUpload: canUpload,
+                        onUpgradeToChef: () =>
+                            context.push(AppRoutes.selectPackage),
+                        onUploadFromDoc: canUpload
+                            ? _openImportDocument
+                            : null,
+                        canCreateManually: canUpload,
+                        onManualCreate: canUpload
+                            ? () => _handleCreateRecipeTap()
+                            : null,
+                        onSeeAll: () => _openMyRecipes(
+                          uid: uid,
+                          accentColor: warmOrange,
+                          darkColor: darkGreen,
+                          localeCode: localeCode,
+                        ),
+                      );
+                      debugPrint('[HOME] after recipes');
+                      debugPrint('[HOME] before chefs');
+                      const chefsSection = SizedBox.shrink();
+                      debugPrint('[HOME] after chefs');
+                      debugPrint('[HOME] before cookbooks');
+                      final cookbooksSection = _MyPlaylistsSection(
+                        uid: uid,
+                        reloadToken: _homeReloadToken,
+                        onSeeAll: _openMyPlaylists,
+                        onOpenPlaylist: _openPlaylistDetails,
+                        onRetry: _triggerHomeReload,
+                      );
+                      debugPrint('[HOME] after cookbooks');
                       return ListView(
                         padding: EdgeInsets.zero,
                         children: [
-                            safeSection(
-                              tag: 'quick_actions',
-                              build: () => Directionality(
-                                textDirection: Directionality.of(context),
-                                child: Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade50,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Colors.grey.shade200,
-                                    ),
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade50,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      AutoDirectionText(
-                                        isChef
-                                            ? l10n.homeGreetingChef(greetingName)
-                                            : l10n.homeGreetingUser(greetingName),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      AutoDirectionText(
-                                        isChef
-                                            ? l10n.homeUploadPromptChef
-                                            : l10n.homeUploadPromptUser,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodyMedium,
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Wrap(
-                                        spacing: 12,
-                                        runSpacing: 8,
-                                        children: [
-                                          if (canUpload) ...[
-                                            ElevatedButton.icon(
-                                              onPressed: () {
-                                                _logNav(AppRoutes.recipeImportDocument, 'tap:upload');
-                                                _openImportDocument();
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    AutoDirectionText(
+                                      isChef
+                                          ? l10n.homeGreetingChef(greetingName)
+                                          : l10n.homeGreetingUser(greetingName),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    AutoDirectionText(
+                                      isChef
+                                          ? l10n.homeUploadPromptChef
+                                          : l10n.homeUploadPromptUser,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Wrap(
+                                      spacing: 12,
+                                      runSpacing: 8,
+                                      children: [
+                                        if (canUpload) ...[
+                                          ElevatedButton.icon(
+                                            onPressed: () async {
+                                              if (!await ensureNotGuest(context)) return;
+                                              _logNav(AppRoutes.recipeImportDocument, 'tap:upload');
+                                              _openImportDocument();
                                             },
                                             icon: const Icon(
                                               Icons.cloud_upload_outlined,
@@ -449,9 +522,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ),
                                           ),
                                           TextButton(
-                                            onPressed: () {
-                                              _logNav(AppRoutes.recipeCreate, 'tap:create_manual');
-                                              context.push(AppRoutes.recipeCreate);
+                                            onPressed: () async {
+                                              await _handleCreateRecipeTap();
                                             },
                                             child: AutoDirectionText(
                                               l10n.homeCreateManual,
@@ -464,30 +536,35 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 context,
                                               ).textTheme.bodySmall,
                                             ),
-                                          ] else ...[
-                                            OutlinedButton.icon(
-                                              onPressed: () {
+                                        ] else ...[
+                                          OutlinedButton.icon(
+                                            onPressed: () {
                                               _logNav(AppRoutes.selectPackage, 'tap:upgrade');
                                               context.push(
-                                                  AppRoutes.selectPackage,
-                                                  extra: PlanPickerEntrySource.settings,
-                                                );
-                                              },
-                                              icon: const Icon(
-                                                Icons.workspace_premium,
-                                              ),
-                                              label: AutoDirectionText(
-                                                l10n.homeUpgradeToChef,
-                                              ),
+                                                AppRoutes.selectPackage,
+                                              );
+                                            },
+                                            icon: const Icon(
+                                              Icons.workspace_premium,
                                             ),
-                                          ],
+                                            label: AutoDirectionText(
+                                              l10n.homeUpgradeToChef,
+                                            ),
+                                          ),
                                         ],
-                                      ),
-                                    ],
-                                  ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
+                            if (_shouldShowAds(userType)) ...[
+                              const SizedBox(height: 16),
+                              AdPlaceholder(
+                                label: 'Ad slot - Home banner',
+                                logTag: 'ADS_HOME',
+                              ),
+                            ],
                             const SizedBox(height: 16),
                             if (_resumeSession != null && _resumeRecipe != null)
                               Padding(
@@ -499,59 +576,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                   onDismiss: _dismissResume,
                                 ),
                               ),
-                            if (uid.isNotEmpty)
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 4, bottom: 16),
-                                child: safeSection(
-                                  tag: 'following_chefs',
-                                  build: () => _FollowingChefsSection(
-                                    currentUid: uid,
-                                    onOpenDiscover: () =>
-                                        context.go(AppRoutes.discovery),
-                                  ),
-                                ),
-                              ),
-                            safeSection(
-                              tag: 'recipes',
-                              build: () => _MyRecipesSection(
-                                uid: uid,
-                                accentColor: warmOrange,
-                                darkColor: darkGreen,
-                                localeCode: localeCode,
-                                reloadToken: _homeReloadToken,
-                                canUpload: canUpload,
-                                onUpgradeToChef: () =>
-                                    context.push(
-                                      AppRoutes.selectPackage,
-                                      extra: PlanPickerEntrySource.settings,
-                                    ),
-                                onUploadFromDoc: canUpload
-                                    ? _openImportDocument
-                                    : null,
-                                canCreateManually: canUpload,
-                                onManualCreate: canUpload
-                                    ? () => context.push(AppRoutes.recipeCreate)
-                                    : null,
-                                onSeeAll: () => _openMyRecipes(
-                                  uid: uid,
-                                  accentColor: warmOrange,
-                                  darkColor: darkGreen,
-                                  localeCode: localeCode,
-                                ),
-                              ),
-                            ),
+                            chefsSection,
+                            recipesSection,
                             const SizedBox(height: 24),
-                            safeSection(
-                              tag: 'cookbooks',
-                              build: () => _MyPlaylistsSection(
-                                playlists: _playlistService.playlists,
-                                getEntries: _playlistService.getEntries,
-                                onSeeAll: _openMyPlaylists,
-                                onOpenPlaylist: _openPlaylistDetails,
-                                onRetry: _triggerHomeReload,
+                            if (_shouldShowAds(userType))
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 24),
+                                child: SponsoredBanner(),
                               ),
-                            ),
+                            cookbooksSection,
                           ],
                         );
                     } catch (e, st) {
@@ -564,7 +597,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           isChef: isChef,
                           onUpload: _openImportDocument,
                           onManualCreate: isChef
-                              ? () => context.push(AppRoutes.recipeCreate)
+                              ? () => _handleCreateRecipeTap()
                               : null,
                           onRetry: _triggerHomeReload,
                           onBackToHome: () => context.go(AppRoutes.home),
@@ -585,10 +618,10 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: _HomeFallback(
-              greetingName: l10n.homeChefPlaceholder,
+              greetingName: 'Chef',
               isChef: false,
               onUpload: _openImportDocument,
-              onManualCreate: null,
+              onManualCreate: () => _handleCreateRecipeTap(),
               onRetry: _triggerHomeReload,
               onBackToHome: () => context.go(AppRoutes.home),
             ),
@@ -596,15 +629,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     }
-  }
-
-  @override
-  void dispose() {
-    if (_profileListener != null) {
-      CurrentUserService.instance.profileNotifier
-          .removeListener(_profileListener!);
-    }
-    super.dispose();
   }
 
   void _triggerHomeReload() {
@@ -640,16 +664,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openImportDocument() async {
-    final l10n = AppLocalizations.of(context)!;
     final userType = CurrentUserService.instance.currentUserType;
     if (!AccessControlService.instance.isChef(userType)) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              l10n.homeUploadsForChefsSnackbar,
-            ),
-          ),
+          SnackBar(content: Text(l10n.homeUploadsForChefsSnackbar)),
         );
       }
       return;
@@ -770,14 +790,14 @@ class _HomeFallback extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AutoDirectionText(
-                isChef ? l10n.homeGreetingChef(greetingName) : l10n.homeGreetingUser(greetingName),
+                l10n.homeGreetingUser(greetingName),
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 6),
               AutoDirectionText(
-                isChef ? l10n.homeUploadPromptChef : l10n.homeUploadPromptUser,
+                l10n.homeUploadPromptChef,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 12),
@@ -861,7 +881,10 @@ class _ResumeCookingCard extends StatelessWidget {
                     style: theme.textTheme.titleMedium,
                   ),
                 ),
-                TextButton(onPressed: onDismiss, child: Text(l10n.homeNotNow)),
+                TextButton(
+                  onPressed: onDismiss,
+                  child: Text(l10n.homeNotNow),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -892,196 +915,111 @@ class _ResumeCookingCard extends StatelessWidget {
   }
 }
 
-class _FollowingChefsSection extends StatelessWidget {
-  const _FollowingChefsSection({
-    required this.currentUid,
-    required this.onOpenDiscover,
-  });
-
-  final String currentUid;
-  final VoidCallback onOpenDiscover;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (currentUid.isEmpty) return const SizedBox.shrink();
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              AutoDirectionText(
-                'Following chefs',
-                style: theme.textTheme.titleMedium,
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: onOpenDiscover,
-                child: const Text('Discover'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          StreamBuilder<List<FollowingChef>>(
-            stream: ChefFollowService.instance.watchFollowingChefs(
-              uid: currentUid,
-              limit: 10,
-            ),
-            builder: (context, snapshot) {
-              final chefs = snapshot.data ?? const <FollowingChef>[];
-              if (snapshot.connectionState == ConnectionState.waiting &&
-                  chefs.isEmpty) {
-                return const SizedBox(
-                  height: 96,
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-              if (chefs.isEmpty) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Follow chefs to see them here.',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: onOpenDiscover,
-                      child: const Text('Find chefs'),
-                    ),
-                  ],
-                );
-              }
-              return SizedBox(
-                height: 110,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: chefs.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final chef = chefs[index];
-                    return _ChefChip(
-                      chef: chef,
-                      onTap: () {
-                        context.push(AppRoutes.chefProfile, extra: chef.chefId);
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ChefChip extends StatelessWidget {
-  const _ChefChip({required this.chef, required this.onTap});
-
-  final FollowingChef chef;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final avatarUrl = chef.avatarUrl;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: 96,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundImage:
-                  avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
-              backgroundColor: Colors.grey.shade200,
-              child: avatarUrl.isEmpty
-                  ? Icon(Icons.person, color: Colors.grey.shade600)
-                  : null,
-              onBackgroundImageError: (_, __) {},
-            ),
-            const SizedBox(height: 8),
-            Text(
-              chef.displayName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MyPlaylistsSection extends StatelessWidget {
+class _MyPlaylistsSection extends StatefulWidget {
   const _MyPlaylistsSection({
-    required this.playlists,
-    required this.getEntries,
+    required this.uid,
+    required this.reloadToken,
     required this.onSeeAll,
     required this.onOpenPlaylist,
     required this.onRetry,
   });
 
-  final List<PersonalPlaylist> playlists;
-  final List<PersonalPlaylistEntry> Function(String playlistId) getEntries;
+  final String uid;
+  final int reloadToken;
   final VoidCallback onSeeAll;
   final void Function(String playlistId) onOpenPlaylist;
   final VoidCallback onRetry;
 
   @override
+  State<_MyPlaylistsSection> createState() => _MyPlaylistsSectionState();
+}
+
+class _MyPlaylistsSectionState extends State<_MyPlaylistsSection> {
+  final _remote = PlaylistFirestoreService.instance;
+  Future<List<PersonalPlaylist>>? _cookbooksFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _cookbooksFuture = _loadCookbooks();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MyPlaylistsSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.uid != widget.uid ||
+        oldWidget.reloadToken != widget.reloadToken) {
+      _cookbooksFuture = _loadCookbooks();
+    }
+  }
+
+  Future<List<PersonalPlaylist>> _loadCookbooks() async {
+    final uid = widget.uid;
+    if (uid.isEmpty) return const [];
+    await CookbookFirestoreService.instance.ensureFavoritesCookbook(
+      ownerId: uid,
+    );
+    return _remote.fetchUserCookbooks(ownerId: uid);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final items = playlists.take(4).toList();
     Widget content;
-    try {
-      if (items.isEmpty) {
-        content = Text(l10n.homeNoCookbooks);
-      } else {
-        content = SizedBox(
-          height: 220,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.zero,
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final playlist = items[index];
-              final entries = getEntries(playlist.id);
-              return SizedBox(
-                width: 200,
-                child: _CookbookTile(
-                  playlist: playlist,
-                  entries: entries,
-                  recipeCount: entries.length,
-                  onOpen: () => onOpenPlaylist(playlist.id),
-                ),
-              );
-            },
-          ),
-        );
-      }
-    } catch (e, st) {
-      debugPrint('[Home MyPlaylists] error: $e\n$st');
-      content = HomeLoadErrorCard(
-        onBackToHome: () => context.go(AppRoutes.home),
-        onTryAgain: onRetry,
+    if (widget.uid.isEmpty) {
+      content = Text(l10n.homeNoCookbooks);
+    } else {
+      content = FutureBuilder<List<PersonalPlaylist>>(
+        future: _cookbooksFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            debugPrint('[Home MyPlaylists] error: ${snapshot.error}');
+            return HomeLoadErrorCard(
+              onBackToHome: () => context.go(AppRoutes.home),
+              onTryAgain: widget.onRetry,
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
+            return const SizedBox(
+              height: 220,
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          final allItems = snapshot.data ?? const <PersonalPlaylist>[];
+          assert(() {
+            debugPrint(
+              '[HOME_COOKBOOKS] uid=${widget.uid} receivedCount=${allItems.length}',
+            );
+            return true;
+          }());
+          final items = allItems.take(4).toList();
+          if (items.isEmpty) {
+            return Text(l10n.homeNoCookbooks);
+          }
+          return SizedBox(
+            height: 220,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.zero,
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final playlist = items[index];
+                return SizedBox(
+                  width: 200,
+                  child: _CookbookTile(
+                    playlist: playlist,
+                    entries: playlist.entries,
+                    recipeCount: playlist.recipeIds.length,
+                    onOpen: () => widget.onOpenPlaylist(playlist.id),
+                  ),
+                );
+              },
+            ),
+          );
+        },
       );
     }
     return Container(
@@ -1102,7 +1040,7 @@ class _MyPlaylistsSection extends StatelessWidget {
               ),
               const Spacer(),
               TextButton(
-                onPressed: onSeeAll,
+                onPressed: widget.onSeeAll,
                 child: AutoDirectionText(l10n.homeSeeAll),
               ),
             ],
@@ -1154,20 +1092,11 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
   bool _loggedError = false;
   int _retryToken = 0;
   Timer? _timeoutTimer;
-  bool _didInitDependencies = false;
 
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_didInitDependencies) {
-      _didInitDependencies = true;
-      _subscribe();
-    }
+    _subscribe();
   }
 
   @override
@@ -1187,7 +1116,6 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
   }
 
   void _subscribe() {
-    final l10n = AppLocalizations.of(context)!;
     _timeoutTimer?.cancel();
     _sub?.cancel();
     debugPrint('[Home MyRecipes] subscribing for uid=${widget.uid}');
@@ -1201,7 +1129,7 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
       debugPrint('[Home MyRecipes] load timed out for uid=${widget.uid}');
       setState(() {
         _timedOut = true;
-        _error ??= l10n.homeLoadingRecipesTimeout;
+        _error ??= null;
       });
     });
 
@@ -1216,7 +1144,7 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
           try {
             sanitized.add(
               r.copyWith(
-                title: (r.title).isNotEmpty ? r.title : l10n.untitledRecipe,
+                title: r.title,
                 coverImageUrl: r.coverImageUrl?.isNotEmpty == true
                     ? r.coverImageUrl
                     : r.imageUrl ?? '',
@@ -1269,15 +1197,16 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
   }
 
   Future<void> _deleteRecipeDirectly(BuildContext context, Recipe recipe) async {
-    final l10n = AppLocalizations.of(context)!;
     try {
       await RecipeFirestoreService.instance.deleteRecipe(recipe.id);
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.homeRecipeDeleted)),
       );
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.homeDeleteRecipeFailed('$e'))),
       );
@@ -1310,20 +1239,25 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
         children: [
           Row(
             children: [
-              Expanded(
-                child: AutoDirectionText(
-                  l10n.myRecipesTitle,
-                  style: theme.textTheme.titleMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              AutoDirectionText(
+                l10n.myRecipesTitle,
+                style: theme.textTheme.titleMedium,
               ),
-              const SizedBox(width: 12),
+              const Spacer(),
               TextButton(
                 onPressed: widget.onSeeAll,
                 child: AutoDirectionText(l10n.homeSeeAll),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: widget.onUploadFromDoc,
+              icon: const Icon(Icons.cloud_upload_outlined),
+              label: Text(l10n.homeUploadRecipe),
+            ),
           ),
           const SizedBox(height: 12),
           if (isLoading)
@@ -1357,7 +1291,7 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.82,
+                childAspectRatio: 0.9,
               ),
               itemBuilder: (context, index) {
                 final recipe = recipes[index];
@@ -1366,6 +1300,30 @@ class _MyRecipesSectionState extends State<_MyRecipesSection> {
                   accentColor: widget.accentColor,
                   darkColor: widget.darkColor,
                   localeCode: widget.localeCode,
+                  onDelete: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(l10n.homeDeleteRecipeTitle),
+                        content: Text(
+                          l10n.homeDeleteRecipeMessage(recipe.title),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: Text(l10n.homeCancel),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: Text(l10n.homeDelete),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      await _deleteRecipeDirectly(context, recipe);
+                    }
+                  },
                 );
               },
             ),
@@ -1391,46 +1349,6 @@ class _InfoChip extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(color: color, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-}
-
-class _SectionErrorCard extends StatelessWidget {
-  const _SectionErrorCard({required this.tag, required this.error});
-
-  final String tag;
-  final Object error;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.shade100),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.homeSectionFailed,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.red.shade800,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.homeSectionErrorDetails(tag, '$error'),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.red.shade700,
-                ),
-          ),
-        ],
       ),
     );
   }
@@ -1495,12 +1413,10 @@ class HomeLoadErrorCard extends StatelessWidget {
           children: [
             AutoDirectionText(
               l10n.homeLoadErrorHeadline,
-              style: const TextStyle(fontWeight: FontWeight.w700),
+              style: TextStyle(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 6),
-            AutoDirectionText(
-              l10n.homeLoadErrorDescription,
-            ),
+            AutoDirectionText(l10n.homeLoadErrorDescription),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -1557,20 +1473,20 @@ class _EmptyPersonalCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(body, style: theme.textTheme.bodyMedium),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          Row(
             children: [
               if (primaryLabel != null && onPrimary != null)
                 ElevatedButton(
                   onPressed: onPrimary,
                   child: Text(primaryLabel!),
                 ),
-              if (secondaryLabel != null && onSecondary != null)
+              if (secondaryLabel != null && onSecondary != null) ...[
+                if (primaryLabel != null) const SizedBox(width: 8),
                 OutlinedButton(
                   onPressed: onSecondary,
                   child: Text(secondaryLabel!),
                 ),
+              ],
             ],
           ),
         ],
@@ -1596,7 +1512,7 @@ class _UserRecipesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.myRecipesTitle)),
+      appBar: FoodiyAppBar(title: Text(l10n.myRecipesTitle)),
       body: StreamBuilder<List<Recipe>>(
         stream: RecipeFirestoreService.instance.watchUserRecipes(uid: uid),
         builder: (context, snapshot) {
