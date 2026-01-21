@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:foodiy/features/recipe/domain/recipe.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class ImportNeedsReviewScreen extends StatelessWidget {
   const ImportNeedsReviewScreen({super.key, this.recipe});
@@ -12,11 +14,15 @@ class ImportNeedsReviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=ImportNeedsReview keys=recipeImportNeedsReviewTitle,goHomeButton',
+    );
     final ocrPreview = recipe?.ocrRawText ?? '';
+    final ocrLength = ocrPreview.length;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Import needs review'),
-        leading: const BackButton(),
+      appBar: FoodiyAppBar(
+        title: Text(l10n.recipeImportNeedsReviewTitle),
       ),
       body: SafeArea(
         child: Column(
@@ -29,15 +35,20 @@ class ImportNeedsReviewScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "We couldn't scan this document correctly. Please try again with a clearer photo or different document.",
+                      l10n.recipeImportNeedsReviewBody,
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
-                    if (ocrPreview.isNotEmpty)
+                    if (recipe != null)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('OCR text preview:', style: theme.textTheme.bodyMedium),
+                          Text(
+                            'OCR text extracted: $ocrLength chars',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(l10n.recipeOcrPreviewLabel, style: theme.textTheme.bodyMedium),
                           const SizedBox(height: 6),
                           Container(
                             padding: const EdgeInsets.all(8),
@@ -71,7 +82,17 @@ class ImportNeedsReviewScreen extends StatelessWidget {
                       onPressed: () {
                         context.go(AppRoutes.home);
                       },
-                      child: const Text('Back to Home'),
+                      child: Text(l10n.goHomeButton),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        context.go(AppRoutes.recipeImportDocument);
+                      },
+                      child: Text(l10n.tryAgain),
                     ),
                   ),
                 ],

@@ -17,10 +17,13 @@ import 'package:foodiy/features/playlist/application/playlist_firestore_service.
 import 'package:foodiy/features/recipe/presentation/screens/import_needs_review_screen.dart';
 import 'package:foodiy/features/recipe/presentation/screens/import_failed_screen.dart';
 import 'package:foodiy/features/playlist/domain/personal_playlist_models.dart';
+import 'package:foodiy/core/utils/auth_guards.dart';
 import 'package:foodiy/features/shopping/application/shopping_list_service.dart';
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/shared/widgets/foodiy_logo.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 import 'package:uuid/uuid.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class RecipeDetailsArgs {
   final String id;
@@ -230,10 +233,18 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
     bool showProcessing = false,
     String? translatedFrom,
   }) {
-    final safeTitle = recipe.title.isNotEmpty ? recipe.title : 'Imported recipe';
+    final l10n = AppLocalizations.of(context)!;
+    final safeTitle = recipe.title.isNotEmpty
+        ? recipe.title
+        : l10n.importedRecipeTitle;
     final ingredients = recipe.ingredients;
     final steps = recipe.steps;
     final tools = recipe.tools;
+    final ocrPreview = recipe.ocrRawText ?? '';
+    final showOcrDebug = recipe.importStatus == 'needs_review' ||
+        ingredients.isEmpty ||
+        steps.isEmpty ||
+        tools.isEmpty;
     final canEdit =
         recipe.chefId.isNotEmpty &&
         recipe.chefId == FirebaseAuth.instance.currentUser?.uid;
@@ -244,14 +255,13 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
     return Directionality(
       textDirection: _directionFromLanguage(recipe.originalLanguageCode),
       child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: true,
+        appBar: FoodiyAppBar(
           title: Text(safeTitle),
           actions: [
             IconButton(
               tooltip: _isFavorited
-                  ? 'Remove from favorites'
-                  : 'Add to favorites',
+                  ? l10n.recipeRemoveFromFavorites
+                  : l10n.recipeAddToFavorites,
               icon: Icon(
                 _isFavorited ? Icons.favorite : Icons.favorite_border,
                 color: _isFavorited ? Colors.redAccent : null,
@@ -264,7 +274,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                   context.push(AppRoutes.recipeEdit, extra: recipe.id);
                 },
                 icon: const Icon(Icons.edit, size: 18),
-                label: const Text('Edit'),
+                label: Text(l10n.recipeEditButton),
               ),
           ],
         ),
@@ -309,7 +319,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                         child: Text(
                           (recipe.chefName?.isNotEmpty ?? false)
                               ? recipe.chefName!
-                              : 'View chef',
+                              : l10n.recipeViewChef,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w600,
@@ -346,8 +356,8 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                                 : const Icon(Icons.translate),
                             label: Text(
                               isTranslatedView
-                                  ? 'View original recipe'
-                                  : 'Translate to English',
+                                  ? l10n.recipeViewOriginal
+                                  : l10n.recipeTranslateToEnglish,
                             ),
                           ),
                         ),
@@ -361,14 +371,18 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                               ? null
                               : () => _showAddToCookbooks(recipe),
                           icon: const Icon(Icons.library_add_outlined),
-                          label: const Text('Add to cookbook'),
+                          label: Text(l10n.recipeAddToCookbook),
                         ),
                       ),
                     ),
                     if (isTranslatedView) ...[
                       const SizedBox(height: 6),
                       Text(
-                        'Translated from ${translatedFrom.isNotEmpty ? translatedFrom : 'the original language'}',
+                        l10n.recipeTranslatedFrom(
+                          translatedFrom.isNotEmpty
+                              ? translatedFrom
+                              : l10n.recipeOriginalLanguageLabel,
+                        ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.hintColor,
                         ),
@@ -377,7 +391,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                     if (_isTranslating) ...[
                       const SizedBox(height: 6),
                       Text(
-                        'Translating…',
+                        l10n.recipeTranslating,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.hintColor,
                         ),
@@ -399,16 +413,45 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                     ),
                     const SizedBox(height: 16),
                     if (showProcessing) ...[
-                      const Row(
+                      Row(
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
-                          SizedBox(width: 8),
-                          Text('Processing recipe...'),
+                          const SizedBox(width: 8),
+                          Text(l10n.recipeProcessing),
                         ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    if (showOcrDebug) ...[
+                      Text(
+                        'OCR text extracted: ${ocrPreview.length} chars',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        l10n.recipeOcrPreviewLabel,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        height: 160,
+                        child: SingleChildScrollView(
+                          child: Text(
+                            ocrPreview.length > 2000
+                                ? '${ocrPreview.substring(0, 2000)}...'
+                                : ocrPreview,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -416,7 +459,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.play_arrow),
-                        label: const Text('Start cooking'),
+                        label: Text(l10n.recipeStartCooking),
                         onPressed: () {
                           final playerArgs = RecipePlayerArgs(
                             title: recipe.title,
@@ -435,20 +478,20 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text('Ingredients', style: theme.textTheme.titleMedium),
+                    Text(l10n.recipeIngredientsTitle, style: theme.textTheme.titleMedium),
                     const SizedBox(height: 8),
                     if (ingredients.isNotEmpty)
                       Align(
                         alignment: Alignment.centerLeft,
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.add_shopping_cart),
-                          label: const Text('Add ingredients to cart'),
+                          label: Text(l10n.recipeAddIngredientsToCart),
                           onPressed: () => _onAddIngredientsToCart(recipe),
                         ),
                       ),
                     const SizedBox(height: 12),
                     if (ingredients.isEmpty)
-                      const Text('No ingredients provided')
+                      Text(l10n.recipeNoIngredients)
                     else
                       Column(
                         children: ingredients
@@ -463,10 +506,10 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                             .toList(),
                       ),
                     const SizedBox(height: 24),
-                    Text('Steps', style: theme.textTheme.titleMedium),
+                    Text(l10n.recipeStepsTitle, style: theme.textTheme.titleMedium),
                     const SizedBox(height: 12),
                     if (steps.isEmpty)
-                      const Text('No steps provided')
+                      Text(l10n.recipeNoSteps)
                     else
                       Column(
                         children: steps.asMap().entries.map((entry) {
@@ -544,10 +587,10 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                         }).toList(),
                       ),
                     const SizedBox(height: 24),
-                    Text('Tools', style: theme.textTheme.titleMedium),
+                    Text(l10n.recipeToolsTitle, style: theme.textTheme.titleMedium),
                     const SizedBox(height: 12),
                     if (tools.isEmpty)
-                      const Text('No tools listed')
+                      Text(l10n.recipeNoTools)
                     else
                       Wrap(
                         spacing: 8,
@@ -567,6 +610,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
 
   Widget _buildProcessingScreen(ThemeData theme, Recipe recipe,
       {bool timedOut = false}) {
+    final l10n = AppLocalizations.of(context)!;
     final status = recipe.importStatus;
     bool isOneOf(Set<String> values) => values.contains(status);
 
@@ -580,16 +624,17 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
     final finalizingDone = understandingDone;
 
     final steps = [
-      {'label': 'Upload complete', 'done': uploadDone},
-      {'label': 'Extracting text', 'done': extractingTextDone},
-      {'label': 'Understanding ingredients and steps', 'done': understandingDone},
-      {'label': 'Finalizing recipe', 'done': finalizingDone},
+      {'label': l10n.recipeImportStepUploadComplete, 'done': uploadDone},
+      {'label': l10n.recipeImportStepExtractingText, 'done': extractingTextDone},
+      {'label': l10n.recipeImportStepUnderstanding, 'done': understandingDone},
+      {'label': l10n.recipeImportStepFinalizing, 'done': finalizingDone},
     ];
 
     final isFailed = recipe.importStatus == 'failed';
     final showTimeout = timedOut;
 
     return Scaffold(
+      appBar: const FoodiyAppBar(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -607,34 +652,34 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
               const SizedBox(height: 16),
               Text(
                 isFailed
-                    ? 'Import failed'
+                    ? l10n.recipeImportFailedTitle
                     : showTimeout
-                        ? 'We could not finish processing'
-                        : 'Foodiy is building your recipe',
+                        ? l10n.recipeImportTimeoutTitle
+                        : l10n.recipeImportProcessingTitle,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
               if (showTimeout)
                 Column(
                   children: [
-                    const Text(
-                      'We could not finish processing. Please try again.',
+                    Text(
+                      l10n.recipeImportTimeoutBody,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        OutlinedButton(
+                        ElevatedButton(
                           onPressed: () => context.go(AppRoutes.home),
-                          child: const Text('Back to Home'),
+                          child: Text(l10n.goHomeButton),
                         ),
                         const SizedBox(width: 12),
-                        ElevatedButton(
+                        OutlinedButton(
                           onPressed: () => context.go(
                             AppRoutes.recipeImportDocument,
                           ),
-                          child: const Text('Try again'),
+                          child: Text(l10n.tryAgain),
                         ),
                       ],
                     ),
@@ -646,16 +691,28 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                     Text(
                       recipe.errorMessage ??
                           recipe.importError ??
-                          'Unknown error',
+                          l10n.recipeImportUnknownError,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.red,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Try again'),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => context.go(AppRoutes.home),
+                          child: Text(l10n.goHomeButton),
+                        ),
+                        const SizedBox(width: 12),
+                        OutlinedButton(
+                          onPressed: () => context.go(
+                            AppRoutes.recipeImportDocument,
+                          ),
+                          child: Text(l10n.tryAgain),
+                        ),
+                      ],
                     ),
                   ],
                 )
@@ -685,6 +742,13 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                       )
                       .toList(),
                 ),
+              if (!showTimeout && !isFailed) ...[
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => context.go(AppRoutes.home),
+                  child: Text(l10n.goHomeButton),
+                ),
+              ],
             ],
           ),
         ),
@@ -693,14 +757,15 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
   }
 
   Widget _buildImportFailedScreen(BuildContext context, {Recipe? recipe}) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Recipe could not be opened')),
+      appBar: FoodiyAppBar(title: Text(l10n.recipeImportFailedScreenTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('The document was not scanned properly. Please try again.'),
+            Text(l10n.recipeImportFailedBody),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
@@ -708,7 +773,17 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                 onPressed: () {
                   Future.microtask(() => context.go(AppRoutes.home));
                 },
-                child: const Text('Back to Home'),
+                child: Text(l10n.goHomeButton),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
+                  Future.microtask(() => context.go(AppRoutes.recipeImportDocument));
+                },
+                child: Text(l10n.tryAgain),
               ),
             ),
           ],
@@ -725,23 +800,26 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
   }
 
   Widget _buildNeedsReviewScreen(ThemeData theme, Recipe recipe) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Import needs review'),
-        leading: const BackButton(),
-      ),
+      appBar: FoodiyAppBar(title: Text(l10n.recipeImportNeedsReviewTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'We could not confidently parse this recipe. Please review and edit.',
+              l10n.recipeImportNeedsReviewBody,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
-            if (recipe.ocrRawText != null && recipe.ocrRawText!.isNotEmpty) ...[
-              Text('OCR text preview:', style: theme.textTheme.bodyMedium),
+            if (recipe.ocrRawText != null) ...[
+              Text(
+                'OCR text extracted: ${recipe.ocrRawText!.length} chars',
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: 6),
+              Text(l10n.recipeOcrPreviewLabel, style: theme.textTheme.bodyMedium),
               const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.all(8),
@@ -763,13 +841,23 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  context.go(AppRoutes.home);
+                },
+                child: Text(l10n.goHomeButton),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
                   context.push(
                     AppRoutes.recipeEdit,
                     extra: RecipeDetailsArgs(
                       id: recipe.id,
                       title: recipe.title,
                       imageUrl: recipe.coverImageUrl ?? recipe.imageUrl ?? '',
-                      time: '${recipe.steps.length} steps',
+                      time: l10n.profileStepsCount(recipe.steps.length),
                       difficulty: '-',
                       originalLanguageCode: recipe.originalLanguageCode,
                       ingredients: recipe.ingredients,
@@ -777,7 +865,17 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                     ),
                   );
                 },
-                child: const Text('Edit recipe'),
+                child: Text(l10n.recipeEditButton),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
+                  context.go(AppRoutes.recipeImportDocument);
+                },
+                child: Text(l10n.tryAgain),
               ),
             ),
           ],
@@ -787,6 +885,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
   }
 
   void _trackImportStatus(String recipeId, String status) {
+    final l10n = AppLocalizations.of(context)!;
     final uid = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
     final now = DateTime.now();
     final isTerminal = status == 'parsed' ||
@@ -810,9 +909,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
               _timedOut = true;
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('We could not finish processing. Please try again.'),
-              ),
+              SnackBar(content: Text(l10n.recipeImportTimeoutBody)),
             );
           }
         });
@@ -824,14 +921,15 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
   }
 
   Widget _buildRecipeErrorFallback(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Recipe unavailable')),
+      appBar: FoodiyAppBar(title: Text(l10n.recipeUnavailableTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('We could not open this recipe'),
+            Text(l10n.recipeUnavailableBody),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
@@ -839,7 +937,17 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                 onPressed: () {
                   Future.microtask(() => context.go(AppRoutes.home));
                 },
-                child: const Text('Back to Home'),
+                child: Text(l10n.goHomeButton),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
+                  Future.microtask(() => context.go(AppRoutes.recipeImportDocument));
+                },
+                child: Text(l10n.tryAgain),
               ),
             ),
           ],
@@ -851,6 +959,10 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=RecipeDetails keys=recipeIngredientsTitle,recipeStepsTitle,recipeToolsTitle',
+    );
     final args = widget.args;
 
     if (_isLoading) {
@@ -968,11 +1080,9 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
 
   Widget _buildRecipeNotFoundView() {
     _maybePopMissingRecipe();
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recipe not found'),
-        leading: const BackButton(),
-      ),
+      appBar: FoodiyAppBar(title: Text(l10n.recipeNotFoundTitle)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -981,14 +1091,25 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
             children: [
               const Icon(Icons.error_outline, size: 48),
               const SizedBox(height: 12),
-              const Text(
-                'This recipe is no longer available.',
+              Text(
+                l10n.recipeNotFoundBody,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).maybePop(),
-                child: const Text('Back'),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => context.go(AppRoutes.home),
+                  child: Text(l10n.goHomeButton),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => context.go(AppRoutes.recipeImportDocument),
+                  child: Text(l10n.tryAgain),
+                ),
               ),
             ],
           ),
@@ -1007,11 +1128,12 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
   }
 
   Future<void> _onAddIngredientsToCart(Recipe recipe) async {
+    final l10n = AppLocalizations.of(context)!;
     if (recipe.ingredients.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('No ingredients to add')));
+      ).showSnackBar(SnackBar(content: Text(l10n.recipeNoIngredientsToAdd)));
       return;
     }
     final selections = List<bool>.filled(
@@ -1025,7 +1147,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Add ingredients to cart'),
+              title: Text(l10n.recipeAddIngredientsToCart),
               content: SizedBox(
                 width: double.maxFinite,
                 child: ListView.builder(
@@ -1051,11 +1173,11 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Add selected'),
+                  child: Text(l10n.addSelected),
                 ),
               ],
             );
@@ -1090,12 +1212,12 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
       await ShoppingListService.instance.addItems(items);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Added ${items.length} item(s) to cart')),
+        SnackBar(content: Text(l10n.recipeAddedToCart(items.length))),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not add to cart. Please try again.')),
+        SnackBar(content: Text(l10n.recipeAddToCartFailed)),
       );
     }
   }
@@ -1113,10 +1235,9 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
         _isTranslating = false;
         _showingTranslation = false;
       });
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Translation unavailable. Showing original recipe.'),
-        ),
+        SnackBar(content: Text(l10n.recipeTranslationUnavailable)),
       );
       return;
     }
@@ -1128,6 +1249,11 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
   }
 
   Future<void> _showAddToCookbooks(Recipe recipe) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (isGuestUser) {
+      await ensureNotGuest(context);
+      return;
+    }
     if (_isAddingToCookbook) return;
     setState(() => _isAddingToCookbook = true);
     try {
@@ -1156,15 +1282,13 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Could not load cookbooks')));
+        ).showSnackBar(SnackBar(content: Text(l10n.recipeCookbooksLoadFailed)));
         return;
       }
       if (playlists.isEmpty) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Create a cookbook first in My cookbooks'),
-          ),
+          SnackBar(content: Text(l10n.recipeCreateCookbookFirst)),
         );
         return;
       }
@@ -1187,7 +1311,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                   builder: (dialogCtx, setDialogState) {
                     final maxHeight = MediaQuery.of(dialogCtx).size.height * 0.6;
                     return AlertDialog(
-                      title: const Text('Add to cookbooks'),
+                      title: Text(l10n.recipeAddToCookbooksTitle),
                       insetPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 20,
@@ -1216,7 +1340,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(dialogCtx).pop(false),
-                          child: const Text('Cancel'),
+                          child: Text(l10n.cancel),
                         ),
                         ElevatedButton(
                           onPressed: isSaving
@@ -1230,7 +1354,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text('Add selected'),
+                              : Text(l10n.addSelected),
                         ),
                       ],
                     );
@@ -1250,7 +1374,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Attach dialog failed')));
+        ).showSnackBar(SnackBar(content: Text(l10n.recipeAttachDialogFailed)));
         return;
       }
       if (confirmed != true) return;
@@ -1281,7 +1405,9 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
           debugPrint('[ATTACH_FLOW][error] write playlist=${pl.id}: $e\n$st');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to add to cookbook')),
+              SnackBar(
+                content: Text(l10n.recipeAddToCookbookFailed('$e')),
+              ),
             );
           }
         } finally {
@@ -1299,7 +1425,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Added to selected cookbooks')),
+        SnackBar(content: Text(l10n.recipeAddedToCookbooks)),
       );
       if (playlists.any((p) => _isFavoritesCookbook(p, uid))) {
         setState(() {
@@ -1316,6 +1442,10 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
   }
 
   void _toggleFavorite(Recipe recipe) {
+    if (isGuestUser) {
+      ensureNotGuest(context);
+      return;
+    }
     final service = PersonalPlaylistService.instance;
     final fav = service.favoritesPlaylist ?? service.ensureFavoritesPlaylist();
     final isCurrentlyFav = _isFavorited;
@@ -1328,8 +1458,10 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
           recipeId: recipe.id,
           title: recipe.title,
           imageUrl: recipe.coverImageUrl ?? recipe.imageUrl ?? '',
-          time: '${recipe.steps.length} steps',
-          difficulty: 'Medium',
+          time: AppLocalizations.of(context)!.profileStepsCount(
+            recipe.steps.length,
+          ),
+          difficulty: AppLocalizations.of(context)!.recipeDifficultyMedium,
         ),
       );
     }
@@ -1341,8 +1473,8 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
       SnackBar(
         content: Text(
           _isFavorited
-              ? 'Added to Favorite Recipes'
-              : 'Removed from Favorite Recipes',
+              ? AppLocalizations.of(context)!.recipeAddedToFavorites
+              : AppLocalizations.of(context)!.recipeRemovedFromFavorites,
         ),
       ),
     );
@@ -1352,14 +1484,14 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
     if (seconds <= 0) return '';
     final minutes = (seconds / 60).ceil();
     if (minutes < 60) {
-      return '$minutes min';
+      return AppLocalizations.of(context)!.durationMinutes(minutes);
     }
     final hours = minutes ~/ 60;
     final remMinutes = minutes % 60;
     if (remMinutes == 0) {
-      return '$hours h';
+      return AppLocalizations.of(context)!.durationHours(hours);
     }
-    return '$hours h $remMinutes min';
+    return AppLocalizations.of(context)!.durationHoursMinutes(hours, remMinutes);
   }
 
   String _cleanIngredientName(RecipeIngredient ingredient) {

@@ -36,6 +36,11 @@ function normalizeForMatch(s) {
   return (s || "")
     .toString()
     .replace(/\u200F|\u200E|\u202A|\u202B|\u202C|\u2066|\u2067|\u2068|\u2069/g, "")
+    .replace(/[“”„‟]/g, '"')
+    .replace(/[‘’‚‛]/g, "'")
+    .replace(/\.\.\.+/g, ".")
+    .replace(/([!?,;:\-–—])\1+/g, "$1")
+    .replace(/[!?,;:\-–—]{2,}/g, (m) => m[0])
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -52,7 +57,7 @@ function normalizeForTitle(s) {
 function includesEvidence(ocrText, evidence) {
   const ocr = normalizeForMatch(ocrText);
   const ev = normalizeForMatch(evidence);
-  if (!ev || ev.length < 2) return false;
+  if (!ev || ev.length < 6) return false;
   return ocr.includes(ev);
 }
 
@@ -172,6 +177,11 @@ function gateByEvidence(parsed, ocrText) {
     const kept = [];
     for (const item of arr) {
       const ev = item?.evidence || item?.evidenceSnippet || item?.source || "";
+      if (!ev) {
+        needsReview = true;
+        issues.push("missing evidence");
+        continue;
+      }
       if (includesEvidence(ocrText, ev)) {
         kept.push(item);
       } else {
@@ -197,6 +207,15 @@ function gateByEvidence(parsed, ocrText) {
   parsed.ingredients = dropIfNoEvidence(parsed.ingredients, "ingredient");
   parsed.tools = dropIfNoEvidence(parsed.tools, "tool");
   parsed.steps = dropIfNoEvidence(parsed.steps, "step");
+
+  if ((parsed.ingredients?.length || 0) < 3) {
+    needsReview = true;
+    issues.push("too_few_ingredients");
+  }
+  if ((parsed.steps?.length || 0) < 3) {
+    needsReview = true;
+    issues.push("too_few_steps");
+  }
 
   parsed.needsReview = needsReview;
   parsed.issues = issues;
@@ -352,18 +371,59 @@ function buildStepDrafts(lines) {
     .filter((s) => s.text.length > 0);
 }
 
-async function extractTextWithVision(bucketName, filePath, contentType) {
+async function extractTextWithVision(bucketName, filePath, contentType, isPdf = false) {
   const gcsUri = `gs://${bucketName}/${filePath}`;
   console.log("[extractTextWithVision] gcsUri =", gcsUri, "contentType =", contentType);
 
   try {
-    if (contentType === "application/pdf") {
-      const [result] = await visionClient.documentTextDetection({
-        image: { source: { imageUri: gcsUri } },
+    const treatAsPdf = isPdf || contentType === "application/pdf";
+    if (treatAsPdf) {
+      const outputPrefix = `vision_output/${filePath.replace(/[^a-zA-Z0-9_-]/g, "_")}_${Date.now()}/`;
+      const outputUri = `gs://${bucketName}/${outputPrefix}`;
+      const request = {
+        inputConfig: {
+          gcsSource: { uri: gcsUri },
+          mimeType: "application/pdf",
+        },
+        features: [{ type: "DOCUMENT_TEXT_DETECTION" }],
         imageContext: { languageHints: LANGUAGE_HINTS },
-      });
-      const { text, lines, avgConfidence } = reconstructTextFromAnnotation(
-        result.fullTextAnnotation,
+        outputConfig: { gcsDestination: { uri: outputUri }, batchSize: 20 },
+      };
+      const [operation] = await visionClient.asyncBatchAnnotateFiles({ requests: [request] });
+      await operation.promise();
+
+      const bucket = admin.storage().bucket(bucketName);
+      const [files] = await bucket.getFiles({ prefix: outputPrefix });
+      let text = "";
+      let lines = [];
+      let avgConfidence = 0;
+      let pages = 0;
+
+      for (const file of files) {
+        if (!file.name.endsWith(".json")) continue;
+        const [contents] = await file.download();
+        const json = JSON.parse(contents.toString());
+        const responses = json.responses || [];
+        pages += responses.length;
+        for (const response of responses) {
+          const parsed = reconstructTextFromAnnotation(response.fullTextAnnotation);
+          if (parsed.text) {
+            text = text ? `${text}\n${parsed.text}` : parsed.text;
+          } else if (response.textAnnotations?.[0]?.description) {
+            const desc = response.textAnnotations[0].description;
+            text = text ? `${text}\n${desc}` : desc;
+          }
+          if (Array.isArray(parsed.lines) && parsed.lines.length > 0) {
+            lines = lines.concat(parsed.lines);
+          }
+          if (parsed.avgConfidence) {
+            avgConfidence = Math.max(avgConfidence, parsed.avgConfidence);
+          }
+        }
+      }
+
+      console.log(
+        `[PDF_OCR] pages=${pages} textLength=${text.length} previewFirst200=${text.slice(0, 200)}`,
       );
       return {
         text,
@@ -420,6 +480,10 @@ const recipeExtractionFunction = {
     type: "object",
     properties: {
       title: { type: "string", description: "Recipe title exactly as written; empty if missing." },
+      titleEvidence: {
+        type: "string",
+        description: "Exact substring from OCR that supports the title; omit if not present.",
+      },
       preCookingNotes: {
         type: "string",
         description: "Any notes before cooking; empty if missing.",
@@ -434,7 +498,7 @@ const recipeExtractionFunction = {
             unit: { type: "string" },
             evidence: {
               type: "string",
-              description: "Exact substring from OCR that supports this ingredient.",
+              description: "Exact substring from OCR (10-80 chars) that supports this ingredient.",
             },
           },
           required: ["name", "quantity", "unit", "evidence"],
@@ -448,7 +512,7 @@ const recipeExtractionFunction = {
             name: { type: "string" },
             evidence: {
               type: "string",
-              description: "Exact substring from OCR that supports this tool.",
+              description: "Exact substring from OCR (10-80 chars) that supports this tool.",
             },
           },
           required: ["name", "evidence"],
@@ -463,7 +527,7 @@ const recipeExtractionFunction = {
             durationMinutes: { type: ["number", "null"] },
             evidence: {
               type: "string",
-              description: "Exact substring from OCR that supports this step text.",
+              description: "Exact substring from OCR (10-80 chars) that supports this step text.",
             },
           },
           required: ["text", "durationMinutes", "evidence"],
@@ -494,7 +558,7 @@ async function parseRecipeWithLLM(text) {
     {
       role: "system",
       content:
-        "You extract structured recipes from OCR. Only extract information explicitly present in the OCR text. Do NOT infer, normalize, translate, or add missing items. Evidence snippets must be copied verbatim from OCR and must appear as an exact substring in OCR. If exact evidence is not available, omit the field and set needsReview=true with issues. If title is not explicitly present, set title=null. Always respond via the function call schema.",
+        "You extract structured recipes from OCR. Only extract information explicitly present in the OCR text. Do NOT infer, normalize, translate, or add missing items. For EVERY ingredient/tool/step, include evidence as a verbatim substring from OCR (10-80 chars) and ensure it appears exactly in the OCR. If you cannot find exact evidence, OMIT the item and add an issue. If title is not explicitly present, set title=null. Always respond via the function call schema.",
     },
     {
       role: "user",
@@ -534,6 +598,11 @@ async function parseRecipeWithLLM(text) {
         continue;
       }
       const parsedRecipe = parsed;
+      console.log("[PARSE] before", {
+        ing: parsedRecipe.ingredients?.length || 0,
+        steps: parsedRecipe.steps?.length || 0,
+        tools: parsedRecipe.tools?.length || 0,
+      });
       console.log("[EVIDENCE_GATE] before", {
         ing: parsedRecipe.ingredients?.length || 0,
         steps: parsedRecipe.steps?.length || 0,
@@ -541,6 +610,12 @@ async function parseRecipeWithLLM(text) {
         title: parsedRecipe.title,
       });
       const final = gateByEvidence(parsedRecipe, text);
+      console.log("[PARSE] after", {
+        ing: final.ingredients?.length || 0,
+        steps: final.steps?.length || 0,
+        tools: final.tools?.length || 0,
+        issues: final.issues || [],
+      });
       console.log("[EVIDENCE_GATE] after", {
         ing: final.ingredients?.length || 0,
         steps: final.steps?.length || 0,
@@ -1017,8 +1092,17 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   const filePath = object.name || "";
   const bucketName = object.bucket;
   const contentType = object.contentType || "";
+  const metadataContentType = object.metadata?.contentType || "";
+  const lowerPath = filePath.toLowerCase();
+  const extMatch = lowerPath.match(/\.[^./]+$/);
+  const ext = extMatch ? extMatch[0] : "";
+  const isPdf =
+    contentType === "application/pdf" ||
+    lowerPath.endsWith(".pdf") ||
+    String(metadataContentType).toLowerCase().includes("pdf");
 
   console.log("[onRecipeDocUploaded] START", filePath, bucketName, contentType);
+  console.log(`[OCR_DETECT] contentType=${contentType} ext=${ext} isPdf=${isPdf}`);
 
   if (!filePath.startsWith("recipe_docs/")) {
     console.log("[onRecipeDocUploaded] ignoring", filePath);
@@ -1066,8 +1150,19 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
       columnDivider,
       width,
       height,
-    } = await extractTextWithVision(bucketName, filePath, contentType);
+    } = await extractTextWithVision(bucketName, filePath, contentType, isPdf);
     const ocrRawText = (visionText || "").slice(0, MAX_TEXT_LENGTH);
+    const ocrSavePayload = {
+      ocrRawText,
+      ocrStatus: "done",
+      ocrLength: ocrRawText.length,
+      ocrPreview: ocrRawText.substring(0, 200),
+      ocrUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    console.log(`[OCR_SAVE] recipeId=${recipeId} ocrLen=${ocrRawText.length}`);
+    console.log(`[OCR_PREVIEW] first200=${JSON.stringify(ocrRawText.substring(0, 200))}`);
+    logWrite("ocr_save", ocrSavePayload);
+    await recipeRef.set(ocrSavePayload, { merge: true });
     const garbageCharRatio =
       ocrRawText.length === 0
         ? 1
@@ -1090,7 +1185,7 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
         status: "needs_review",
         debugStage: "ocr_empty",
         progress: 90,
-        ocrRawText: cleanedText,
+        ocrRawText,
         ocrMeta: {
           engine: "vision_document",
           languageHints: LANGUAGE_HINTS,
@@ -1105,10 +1200,10 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
         },
         parseMeta: {
           needsReview: true,
-          issues: ["ocr_empty"],
+          issues: ["OCR empty/too short", "ocr_empty"],
         },
         needsReview: true,
-        issues: ["ocr_empty"],
+        issues: ["OCR empty/too short", "ocr_empty"],
         errorMessage: "No text detected in upload",
         validationReport: {
           firstLineNoise,
@@ -1134,7 +1229,7 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
       debugStage: "ocr_done",
       ocrStatus: "done",
       progress: 55,
-      ocrRawText: cleanedText,
+      ocrRawText,
       ocrLines: Array.isArray(lines)
         ? lines.slice(0, 500).map((l) => ({
             lineId: l.lineId,
@@ -1350,7 +1445,7 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
       ingredients: ingredients || [],
       tools: tools || [],
       steps: stepsFinal || [],
-      ocrRawText: cleanedText,
+      ocrRawText,
       importStatus: needsReview ? "needs_review" : "parsed",
       importStage: needsReview ? "needs_review" : "parsed",
       ocrStatus: needsReview ? "needs_review" : "done",
