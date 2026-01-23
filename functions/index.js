@@ -9,6 +9,7 @@ if (!admin.apps.length) {
 
 const visionClient = new ImageAnnotatorClient();
 const IMPORT_FN_VERSION = "2026-01-23-pdf-ocr-v1";
+const IMPORT_FN_BUILD = "8fd1a7f5";
 const openaiApiKey = process.env.OPENAI_API_KEY || functions.config().openai?.key;
 console.log("[LLM] has key on init:", !!openaiApiKey);
 const LLM_MODEL = "gpt-4o-mini";
@@ -389,6 +390,7 @@ async function extractTextWithVision(
   try {
     const treatAsPdf = isPdf || String(contentType).toLowerCase().includes("pdf");
     if (treatAsPdf) {
+      console.log("[PDF_OCR_PATH] using AsyncBatchAnnotateFiles");
       const safeRecipeId = recipeId ? String(recipeId).replace(/[^a-zA-Z0-9_-]/g, "_") : "";
       const safeOwnerId = ownerId ? String(ownerId).replace(/[^a-zA-Z0-9_-]/g, "_") : "";
       const outputPrefix =
@@ -409,7 +411,7 @@ async function extractTextWithVision(
         outputConfig: { gcsDestination: { uri: outputUri }, batchSize: 10 },
       };
       const [operation] = await visionClient.asyncBatchAnnotateFiles({ requests: [request] });
-      await operation.promise();
+      const [operationResult] = await operation.promise();
 
       const bucket = admin.storage().bucket(bucketName);
       const [files] = await bucket.getFiles({ prefix: outputPrefix });
@@ -475,6 +477,9 @@ async function extractTextWithVision(
         console.log(
           `[PDF_OCR] empty_text responsesWithFullText=${responsesWithFullText} errorsCount=${errors.length}`,
         );
+        console.log(
+          `[PDF_OCR_OP] recipeId=${recipeId} operationResult=${JSON.stringify(operationResult)}`,
+        );
       }
       return {
         text,
@@ -499,6 +504,7 @@ async function extractTextWithVision(
       };
     }
 
+    console.log("[IMG_OCR_PATH] using BatchAnnotateImages");
     const [result] = await visionClient.documentTextDetection({
       image: { source: { imageUri: gcsUri } },
       imageContext: { languageHints: LANGUAGE_HINTS },
@@ -1212,6 +1218,7 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   const metadataContentType = object.metadata?.contentType || "";
   const lowerPath = filePath.toLowerCase();
   const sourceExt = lowerPath.includes(".") ? lowerPath.split(".").pop() || "" : "";
+  const gcsUri = `gs://${bucketName}/${filePath}`;
   const isPdf =
     String(contentType).toLowerCase().includes("pdf") ||
     lowerPath.endsWith(".pdf") ||
@@ -1221,6 +1228,9 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   console.log("[onRecipeDocUploaded] START", filePath, bucketName, contentType);
   console.log(
     `[IMPORT_START] recipeId=unknown path=${filePath} bucket=${bucketName} contentType=${contentType} size=${sizeBytes} md5=${md5Hash}`,
+  );
+  console.log(
+    `[PDF_OCR_FIX] build=${IMPORT_FN_BUILD} ext=${sourceExt} contentType=${contentType} gcsUri=${gcsUri}`,
   );
   console.log(`[IMPORT_FN_VERSION] ${IMPORT_FN_VERSION} recipeId=unknown`);
   console.log(
@@ -1244,6 +1254,9 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   console.log("[onRecipeDocUploaded] recipeId =", recipeId);
   console.log(
     `[IMPORT_START] recipeId=${recipeId} path=${filePath} bucket=${bucketName} contentType=${contentType} size=${sizeBytes} md5=${md5Hash}`,
+  );
+  console.log(
+    `[PDF_OCR_FIX] build=${IMPORT_FN_BUILD} ext=${sourceExt} contentType=${contentType} gcsUri=${gcsUri}`,
   );
   console.log(`[IMPORT_FN_VERSION] ${IMPORT_FN_VERSION} recipeId=${recipeId}`);
   console.log(
