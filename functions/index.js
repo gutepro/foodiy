@@ -8,8 +8,12 @@ if (!admin.apps.length) {
 }
 
 const visionClient = new ImageAnnotatorClient();
+const IMPORT_FN_VERSION = "2026-01-23-pdf-ocr-v1";
 const openaiApiKey = process.env.OPENAI_API_KEY || functions.config().openai?.key;
 console.log("[LLM] has key on init:", !!openaiApiKey);
+const LLM_MODEL = "gpt-4o-mini";
+const DEBUG_IMPORT =
+  process.env.NODE_ENV !== "production" || functions.config().debug?.import === "true";
 const openai = openaiApiKey
   ? new OpenAIApi(
       new Configuration({
@@ -371,15 +375,30 @@ function buildStepDrafts(lines) {
     .filter((s) => s.text.length > 0);
 }
 
-async function extractTextWithVision(bucketName, filePath, contentType, isPdf = false) {
+async function extractTextWithVision(
+  bucketName,
+  filePath,
+  contentType,
+  isPdf = false,
+  recipeId = "",
+  ownerId = "",
+) {
   const gcsUri = `gs://${bucketName}/${filePath}`;
   console.log("[extractTextWithVision] gcsUri =", gcsUri, "contentType =", contentType);
 
   try {
-    const treatAsPdf = isPdf || contentType === "application/pdf";
+    const treatAsPdf = isPdf || String(contentType).toLowerCase().includes("pdf");
     if (treatAsPdf) {
-      const outputPrefix = `vision_output/${filePath.replace(/[^a-zA-Z0-9_-]/g, "_")}_${Date.now()}/`;
+      const safeRecipeId = recipeId ? String(recipeId).replace(/[^a-zA-Z0-9_-]/g, "_") : "";
+      const safeOwnerId = ownerId ? String(ownerId).replace(/[^a-zA-Z0-9_-]/g, "_") : "";
+      const outputPrefix =
+        safeOwnerId && safeRecipeId
+          ? `ocr_outputs/${safeOwnerId}/${safeRecipeId}/`
+          : safeRecipeId
+            ? `ocr_outputs/${safeRecipeId}/`
+            : `ocr_outputs/${filePath.replace(/[^a-zA-Z0-9_-]/g, "_")}_${Date.now()}/`;
       const outputUri = `gs://${bucketName}/${outputPrefix}`;
+      console.log(`[PDF_OCR] recipeId=${recipeId} input=${gcsUri} outputPrefix=${outputUri}`);
       const request = {
         inputConfig: {
           gcsSource: { uri: gcsUri },
@@ -387,31 +406,55 @@ async function extractTextWithVision(bucketName, filePath, contentType, isPdf = 
         },
         features: [{ type: "DOCUMENT_TEXT_DETECTION" }],
         imageContext: { languageHints: LANGUAGE_HINTS },
-        outputConfig: { gcsDestination: { uri: outputUri }, batchSize: 20 },
+        outputConfig: { gcsDestination: { uri: outputUri }, batchSize: 10 },
       };
       const [operation] = await visionClient.asyncBatchAnnotateFiles({ requests: [request] });
       await operation.promise();
 
       const bucket = admin.storage().bucket(bucketName);
       const [files] = await bucket.getFiles({ prefix: outputPrefix });
+      files.sort((a, b) => a.name.localeCompare(b.name));
       let text = "";
       let lines = [];
       let avgConfidence = 0;
       let pages = 0;
+      let extractedChars = 0;
+      let responsesWithText = 0;
+      let responsesWithFullText = 0;
+      const errors = [];
+      console.log(
+        `[PDF_OCR_OUTPUT] recipeId=${recipeId} filesCount=${files.length} firstFiles=${files
+          .slice(0, 3)
+          .map((f) => f.name)
+          .join(",")}`,
+      );
 
       for (const file of files) {
         if (!file.name.endsWith(".json")) continue;
         const [contents] = await file.download();
         const json = JSON.parse(contents.toString());
         const responses = json.responses || [];
+        console.log(
+          `[PDF_OCR] recipeId=${recipeId} file=${file.name} bytes=${contents.length} responsesCount=${responses.length}`,
+        );
         pages += responses.length;
         for (const response of responses) {
+          if (response.error) {
+            errors.push(response.error);
+          }
+          if (response.fullTextAnnotation?.text) {
+            responsesWithFullText += 1;
+          }
           const parsed = reconstructTextFromAnnotation(response.fullTextAnnotation);
           if (parsed.text) {
             text = text ? `${text}\n${parsed.text}` : parsed.text;
+            extractedChars += parsed.text.length;
+            responsesWithText += 1;
           } else if (response.textAnnotations?.[0]?.description) {
             const desc = response.textAnnotations[0].description;
             text = text ? `${text}\n${desc}` : desc;
+            extractedChars += desc.length;
+            responsesWithText += 1;
           }
           if (Array.isArray(parsed.lines) && parsed.lines.length > 0) {
             lines = lines.concat(parsed.lines);
@@ -423,8 +466,16 @@ async function extractTextWithVision(bucketName, filePath, contentType, isPdf = 
       }
 
       console.log(
-        `[PDF_OCR] pages=${pages} textLength=${text.length} previewFirst200=${text.slice(0, 200)}`,
+        `[PDF_OCR_TEXT] recipeId=${recipeId} extractedChars=${extractedChars} previewFirst200=${text.slice(
+          0,
+          200,
+        )} hasAnyFullText=${responsesWithFullText > 0} errorsCount=${errors.length}`,
       );
+      if (files.length > 0 && extractedChars === 0) {
+        console.log(
+          `[PDF_OCR] empty_text responsesWithFullText=${responsesWithFullText} errorsCount=${errors.length}`,
+        );
+      }
       return {
         text,
         lines,
@@ -433,6 +484,18 @@ async function extractTextWithVision(bucketName, filePath, contentType, isPdf = 
         height: null,
         hasTwoColumns: false,
         columnDivider: null,
+        ocrDebug: {
+          route: "pdf_async",
+          outputFilesCount: files.length,
+          extractedChars,
+          previewFirst200: text.slice(0, 200),
+          responsesWithText,
+          responsesWithFullText,
+          errors,
+          errorsCount: errors.length,
+        },
+        pagesCount: pages,
+        ocrGcsOutputPrefix: outputUri,
       };
     }
 
@@ -443,18 +506,40 @@ async function extractTextWithVision(bucketName, filePath, contentType, isPdf = 
     const { text, lines, avgConfidence, hasTwoColumns, columnDivider } =
       reconstructTextFromAnnotation(result.fullTextAnnotation);
     console.log("[extractTextWithVision] docText length =", text.length, "twoCols=", hasTwoColumns);
-      return {
-        text,
-        lines,
-        avgConfidence,
-        hasTwoColumns,
-        columnDivider,
-        width: null,
-        height: null,
-      };
+    return {
+      text,
+      lines,
+      avgConfidence,
+      hasTwoColumns,
+      columnDivider,
+      width: null,
+      height: null,
+      ocrDebug: {
+        route: "image",
+        extractedChars: text.length,
+        previewFirst200: text.slice(0, 200),
+      },
+      pagesCount: 1,
+      ocrGcsOutputPrefix: null,
+    };
   } catch (err) {
     console.error("[extractTextWithVision] Vision error for", gcsUri, err);
-    return { text: "", lines: [], avgConfidence: 0, width: null, height: null, hasTwoColumns: false };
+    return {
+      text: "",
+      lines: [],
+      avgConfidence: 0,
+      width: null,
+      height: null,
+      hasTwoColumns: false,
+      ocrDebug: {
+        route: isPdf ? "pdf_async" : "image",
+        extractedChars: 0,
+        previewFirst200: "",
+        errors: [String(err)],
+      },
+      pagesCount: 0,
+      ocrGcsOutputPrefix: null,
+    };
   }
 }
 
@@ -470,6 +555,21 @@ function validateParsedRecipe(parsed) {
   if (typeof parsed.needsReview !== "boolean") issues.push("needsReview_missing");
   if (!Array.isArray(parsed.issues)) issues.push("issues_not_array");
   return { valid: issues.length === 0, issues };
+}
+
+function logImportStage(recipeId, stage, data = {}) {
+  const payload = {
+    recipeId,
+    stage,
+    ocrLen: data.ocrLen ?? null,
+    llmInputLen: data.llmInputLen ?? null,
+    afterIng: data.afterIng ?? null,
+    afterSteps: data.afterSteps ?? null,
+    afterTools: data.afterTools ?? null,
+    needsReview: data.needsReview ?? null,
+    issuesCount: data.issuesCount ?? null,
+  };
+  console.log(JSON.stringify(payload));
 }
 
 const recipeExtractionFunction = {
@@ -570,7 +670,7 @@ async function parseRecipeWithLLM(text) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const completion = await openai.createChatCompletion({
-        model: "gpt-4o-mini",
+        model: LLM_MODEL,
         temperature: 0,
         messages:
           attempt === 0
@@ -603,6 +703,11 @@ async function parseRecipeWithLLM(text) {
         steps: parsedRecipe.steps?.length || 0,
         tools: parsedRecipe.tools?.length || 0,
       });
+      const debugBefore = {
+        beforeIng: parsedRecipe.ingredients?.length || 0,
+        beforeSteps: parsedRecipe.steps?.length || 0,
+        beforeTools: parsedRecipe.tools?.length || 0,
+      };
       console.log("[EVIDENCE_GATE] before", {
         ing: parsedRecipe.ingredients?.length || 0,
         steps: parsedRecipe.steps?.length || 0,
@@ -624,7 +729,17 @@ async function parseRecipeWithLLM(text) {
         needsReview: final.needsReview,
         issuesCount: final.issues?.length || 0,
       });
-      return { parsed: final, rawResponse: rawArgs };
+      const debugAfter = {
+        afterIng: final.ingredients?.length || 0,
+        afterSteps: final.steps?.length || 0,
+        afterTools: final.tools?.length || 0,
+        issuesCount: final.issues?.length || 0,
+      };
+      return {
+        parsed: final,
+        rawResponse: rawArgs,
+        debug: { ...debugBefore, ...debugAfter },
+      };
     } catch (err) {
       lastError = err;
       console.error("[LLM] attempt failed", attempt + 1, err);
@@ -1092,17 +1207,26 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   const filePath = object.name || "";
   const bucketName = object.bucket;
   const contentType = object.contentType || "";
+  const sizeBytes = object.size || 0;
+  const md5Hash = object.md5Hash || "";
   const metadataContentType = object.metadata?.contentType || "";
   const lowerPath = filePath.toLowerCase();
-  const extMatch = lowerPath.match(/\.[^./]+$/);
-  const ext = extMatch ? extMatch[0] : "";
+  const sourceExt = lowerPath.includes(".") ? lowerPath.split(".").pop() || "" : "";
   const isPdf =
-    contentType === "application/pdf" ||
+    String(contentType).toLowerCase().includes("pdf") ||
     lowerPath.endsWith(".pdf") ||
     String(metadataContentType).toLowerCase().includes("pdf");
+  let currentStage = "uploaded";
 
   console.log("[onRecipeDocUploaded] START", filePath, bucketName, contentType);
-  console.log(`[OCR_DETECT] contentType=${contentType} ext=${ext} isPdf=${isPdf}`);
+  console.log(
+    `[IMPORT_START] recipeId=unknown path=${filePath} bucket=${bucketName} contentType=${contentType} size=${sizeBytes} md5=${md5Hash}`,
+  );
+  console.log(`[IMPORT_FN_VERSION] ${IMPORT_FN_VERSION} recipeId=unknown`);
+  console.log(
+    `[OCR_ROUTE] recipeId=unknown route=${isPdf ? "pdf_async" : "image"} contentType=${contentType} ext=${sourceExt}`,
+  );
+  console.log("[OCR_DETECT] contentType=", contentType, "filePath=", filePath, "isPdf=", isPdf);
 
   if (!filePath.startsWith("recipe_docs/")) {
     console.log("[onRecipeDocUploaded] ignoring", filePath);
@@ -1116,7 +1240,15 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   }
 
   const recipeId = parts[2];
+  const ownerId = parts[1] || "";
   console.log("[onRecipeDocUploaded] recipeId =", recipeId);
+  console.log(
+    `[IMPORT_START] recipeId=${recipeId} path=${filePath} bucket=${bucketName} contentType=${contentType} size=${sizeBytes} md5=${md5Hash}`,
+  );
+  console.log(`[IMPORT_FN_VERSION] ${IMPORT_FN_VERSION} recipeId=${recipeId}`);
+  console.log(
+    `[OCR_ROUTE] recipeId=${recipeId} route=${isPdf ? "pdf_async" : "image"} contentType=${contentType} ext=${sourceExt}`,
+  );
 
   const recipeRef = db.collection("recipes").doc(recipeId);
   console.log("[onRecipeDocUploaded] target doc path =", recipeRef.path);
@@ -1124,6 +1256,11 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   const logWrite = (label, payload) => {
     console.log(
       `[onRecipeDocUploaded] writing to path=${recipeRef.path} recipeId=${recipeId} label=${label} keys=${Object.keys(payload || {})}`,
+    );
+  };
+  const stageWrite = (stage, payload) => {
+    console.log(
+      `[STAGE_WRITE] recipeId=${recipeId} stage=${stage} fieldsWritten=${Object.keys(payload || {}).join(",")}`,
     );
   };
 
@@ -1137,9 +1274,24 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
     needsReview: false,
     issues: [],
     errorMessage: admin.firestore.FieldValue.delete(),
+    ...(DEBUG_IMPORT
+      ? {
+          importDebug: {
+            stage: "uploaded",
+            timestamps: {
+              uploadedAt: admin.firestore.FieldValue.serverTimestamp(),
+            },
+          },
+        }
+      : {}),
+    stageTimestamps: {
+      uploadedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
   };
   logWrite("start_uploading", startPayload);
+  stageWrite("start", startPayload);
   await recipeRef.set(startPayload, { merge: true });
+  logImportStage(recipeId, "uploaded", {});
 
   try {
     const {
@@ -1150,75 +1302,102 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
       columnDivider,
       width,
       height,
-    } = await extractTextWithVision(bucketName, filePath, contentType, isPdf);
-    const ocrRawText = (visionText || "").slice(0, MAX_TEXT_LENGTH);
+      ocrDebug,
+      pagesCount,
+      ocrGcsOutputPrefix,
+    } = await extractTextWithVision(bucketName, filePath, contentType, isPdf, recipeId, ownerId);
+    const ocrText = sanitizeText(visionText || "");
+    const extractedChars = ocrDebug?.extractedChars ?? ocrText.length;
+    const firstLineNoise = firstLineNoiseInfo(ocrText);
+    const ocrMethod = isPdf ? "pdf_async" : "vision_image";
     const ocrSavePayload = {
-      ocrRawText,
+      ocrRawText: ocrText,
       ocrStatus: "done",
-      ocrLength: ocrRawText.length,
-      ocrPreview: ocrRawText.substring(0, 200),
-      ocrUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      ocrMeta: {
+        charCount: ocrText.length,
+        previewFirst200: ocrText.slice(0, 200),
+        contentType,
+        ext: sourceExt,
+        method: ocrMethod,
+      },
+      ocrLength: ocrText.length,
+      ocrPreview: ocrText.slice(0, 400),
+      ocrSourceType: isPdf ? "pdf" : "image",
+      ocrPagesCount: pagesCount || 0,
+      ocrGcsOutputPrefix: ocrGcsOutputPrefix || null,
+      ocrDebug: {
+        route: ocrDebug?.route || (isPdf ? "pdf_async" : "image"),
+        contentType,
+        sizeBytes,
+        outputFilesCount: ocrDebug?.outputFilesCount ?? null,
+        extractedChars,
+        previewFirst200: ocrText.slice(0, 200),
+        errorsCount: ocrDebug?.errorsCount ?? (ocrDebug?.errors || []).length,
+      },
+      importDebug: {
+        version: IMPORT_FN_VERSION,
+        lastStage: "ocr_extracted",
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      stageTimestamps: {
+        ocrAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
-    console.log(`[OCR_SAVE] recipeId=${recipeId} ocrLen=${ocrRawText.length}`);
-    console.log(`[OCR_PREVIEW] first200=${JSON.stringify(ocrRawText.substring(0, 200))}`);
+    console.log("[OCR_SAVE] recipeId=", recipeId, "len=", (ocrText || "").length);
+    console.log("[OCR_SAVE] preview=", JSON.stringify((ocrText || "").slice(0, 200)));
     logWrite("ocr_save", ocrSavePayload);
+    stageWrite("ocr", ocrSavePayload);
     await recipeRef.set(ocrSavePayload, { merge: true });
+    currentStage = "ocr_saved";
+    logImportStage(recipeId, "ocr_saved", { ocrLen: ocrText.length });
+    const ocrRawText = ocrText;
     const garbageCharRatio =
       ocrRawText.length === 0
         ? 1
         : (ocrRawText.match(/[^A-Za-z0-9א-תء-ي\s\.\,\-\:\;\(\)\[\]\{\}]/g) || []).length /
           ocrRawText.length;
-    const cleanedText = sanitizeText(ocrRawText);
+    const cleanedText = ocrRawText;
     const detectedLangs = detectLanguages(cleanedText);
-    const firstLineNoise = firstLineNoiseInfo(ocrRawText);
     const titleCandidates = titleCandidatesFromText(cleanedText);
 
     console.log("[onRecipeDocUploaded] OCR length =", cleanedText.length);
     console.log("[onRecipeDocUploaded] OCR preview =", cleanedText.slice(0, 200));
 
-    if (!cleanedText.trim() || cleanedText.length < 40) {
+    if (!cleanedText.trim() || cleanedText.length < 50) {
       console.warn("[onRecipeDocUploaded] OCR empty/short; needs_review");
+      const issueExt = sourceExt || (isPdf ? "pdf" : "image");
+      const ocrIssue = isPdf ? "OCR_EMPTY_PDF" : "OCR_EMPTY_IMAGE";
       const payload = {
         importStatus: "needs_review",
-        importStage: "needs_review",
-        ocrStatus: "needs_review",
-        status: "needs_review",
-        debugStage: "ocr_empty",
-        progress: 90,
+        needsReview: true,
+        issues: [ocrIssue, "OCR_EMPTY", `OCR returned 0 chars for ${issueExt}`],
+        errorMessage: isPdf
+          ? "We could not extract text from this PDF. Please try a clearer scan or photo."
+          : "We could not extract text from this image. Please try a clearer scan or photo.",
         ocrRawText,
         ocrMeta: {
-          engine: "vision_document",
-          languageHints: LANGUAGE_HINTS,
-          avgConfidence: avgConfidence || 0,
-          garbageCharRatio: 1,
-          lineCount: lines?.length || 0,
-          hasTwoColumns: !!hasTwoColumns,
-          columnDivider: columnDivider || null,
-          width,
-          height,
-          languages: detectedLangs,
+          charCount: ocrRawText.length,
+          contentType,
+          ext: sourceExt,
+          method: ocrMethod,
         },
-        parseMeta: {
-          needsReview: true,
-          issues: ["OCR empty/too short", "ocr_empty"],
+        importDebug: {
+          version: IMPORT_FN_VERSION,
+          lastStage: "ocr_empty",
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         },
-        needsReview: true,
-        issues: ["OCR empty/too short", "ocr_empty"],
-        errorMessage: "No text detected in upload",
-        validationReport: {
-          firstLineNoise,
-          garbageCharRatio,
-          titleCandidates,
+        stageTimestamps: {
+          ocrAt: admin.firestore.FieldValue.serverTimestamp(),
         },
-        importCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
-        parsedAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       };
       logWrite("ocr_empty", payload);
-      await recipeRef.set(
-        payload,
-        { merge: true },
+      stageWrite("ocr_empty", payload);
+      console.log(
+        `[PDF_OCR_EMPTY] recipeId=${recipeId} chars=${ocrRawText.length} contentType=${contentType} ext=${sourceExt}`,
       );
+      await recipeRef.set(payload, { merge: true });
       return;
     }
 
@@ -1255,9 +1434,12 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
       needsReview: false,
       issues: [],
       errorMessage: admin.firestore.FieldValue.delete(),
+      "importDebug.stage": "ocr_done",
     };
     logWrite("ocr_done", parsePayload);
+    stageWrite("ocr_done", parsePayload);
     await recipeRef.set(parsePayload, { merge: true });
+    logImportStage(recipeId, "ocr_done", { ocrLen: ocrRawText.length });
 
     const sections = detectSectionCandidates(lines || [], hasTwoColumns, columnDivider);
     const stepDrafts = buildStepDrafts(sections.stepsLines);
@@ -1275,9 +1457,70 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
       [...sections.ingredientsLines, "---", ...sections.stepsLines].join("\n").trim() ||
       cleanedText;
 
+    currentStage = "llm_started";
+    await recipeRef.set(
+      {
+        "importDebug.lastStage": "llm_started",
+        "importDebug.version": IMPORT_FN_VERSION,
+        "importDebug.updatedAt": admin.firestore.FieldValue.serverTimestamp(),
+        "stageTimestamps.llmAt": admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
+    if (DEBUG_IMPORT) {
+      await recipeRef.set(
+        {
+          "importDebug.stage": "llm_started",
+          "importDebug.timestamps.llmAt": admin.firestore.FieldValue.serverTimestamp(),
+          "importDebug.llm.inputChars": llmInputText.length,
+          "importDebug.llm.model": LLM_MODEL,
+        },
+        { merge: true },
+      );
+      stageWrite("llm", {
+        "importDebug.stage": "llm_started",
+        "importDebug.timestamps.llmAt": "serverTimestamp",
+        "importDebug.llm.inputChars": llmInputText.length,
+      });
+    }
+    logImportStage(recipeId, "llm_started", { ocrLen: ocrRawText.length, llmInputLen: llmInputText.length });
+
     const llmResult = await parseRecipeWithLLM(llmInputText);
     const parsed = llmResult.parsed;
     const llmRawResponse = llmResult.rawResponse;
+    const llmOutputLen = llmRawResponse ? llmRawResponse.length : 0;
+    const gateDebug = llmResult.debug || {};
+    if (DEBUG_IMPORT) {
+      await recipeRef.set(
+        {
+          "importDebug.stage": "llm_done",
+          "importDebug.timestamps.llmDoneAt": admin.firestore.FieldValue.serverTimestamp(),
+          "importDebug.llm.inputChars": llmInputText.length,
+          "importDebug.llm.outputChars": llmOutputLen,
+          "importDebug.llm.model": LLM_MODEL,
+          "importDebug.llm.parseOk": true,
+          "importDebug.llm.outputCounts": {
+            ingredients: gateDebug.beforeIng ?? 0,
+            steps: gateDebug.beforeSteps ?? 0,
+            tools: gateDebug.beforeTools ?? 0,
+          },
+        },
+        { merge: true },
+      );
+      stageWrite("llm_done", {
+        "importDebug.stage": "llm_done",
+        "importDebug.llm.outputChars": llmOutputLen,
+      });
+    }
+    logImportStage(recipeId, "llm_done", {
+      ocrLen: ocrRawText.length,
+      llmInputLen: llmInputText.length,
+      afterIng: gateDebug.afterIng ?? null,
+      afterSteps: gateDebug.afterSteps ?? null,
+      afterTools: gateDebug.afterTools ?? null,
+      needsReview: parsed.needsReview,
+      issuesCount: parsed.issues?.length || 0,
+    });
 
     const hallucinationIssues = [];
     const ingredients = (parsed.ingredients || []).reduce((acc, ing) => {
@@ -1417,6 +1660,51 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
       ...(needsReviewSteps ? ["Steps could not be reliably extracted"] : []),
       ...(tools.length === 0 ? ["tools_missing"] : []),
     ];
+    const beforeTotal =
+      (gateDebug.beforeIng || 0) + (gateDebug.beforeSteps || 0) + (gateDebug.beforeTools || 0);
+    const afterTotal = ingredients.length + stepsFinal.length + tools.length;
+    const gateRemovedAll = beforeTotal > 0 && afterTotal === 0;
+    if (gateRemovedAll) {
+      issues.push("GATE_DROPPED_ALL");
+      issues.push("gate_removed_all_content");
+    }
+    const hasStageIssue = issues.some((issue) =>
+      String(issue || "").match(/^(OCR_EMPTY|GATE_DROPPED_ALL|OVERWRITE_AFTER_PARSE|NEEDS_REVIEW_STAGE_)/),
+    );
+    if (needsReview && !hasStageIssue) {
+      issues.push("NEEDS_REVIEW_STAGE_GATE");
+    }
+    if (needsReview && (!issues || issues.length === 0)) {
+      issues.push("UNKNOWN_IMPORT_FAILURE_NO_ISSUES");
+    }
+    if (ingredients.length === 0 && stepsFinal.length === 0) {
+      needsReview = true;
+      issues.push("NO_INGREDIENTS_OR_STEPS_PARSED");
+    }
+    if (DEBUG_IMPORT) {
+      await recipeRef.set(
+        {
+          "importDebug.gate.issuesAdded": issues,
+        },
+        { merge: true },
+      );
+    }
+
+    const existingSnap = await recipeRef.get();
+    const existingData = existingSnap.data() || {};
+    const existingIngredients = Array.isArray(existingData.ingredients)
+      ? existingData.ingredients
+      : null;
+    const existingSteps = Array.isArray(existingData.steps) ? existingData.steps : null;
+    const existingTools = Array.isArray(existingData.tools) ? existingData.tools : null;
+    const pickArray = (nextArr, fallbackArr) => {
+      if (Array.isArray(nextArr) && nextArr.length > 0) return nextArr;
+      if (Array.isArray(fallbackArr)) return fallbackArr;
+      return Array.isArray(nextArr) ? nextArr : [];
+    };
+    const finalIngredients = pickArray(ingredients, existingIngredients);
+    const finalSteps = pickArray(stepsFinal, existingSteps);
+    const finalTools = pickArray(tools, existingTools);
 
     const fallbackTitleCandidate =
       (titleCandidates || []).find((cand) => titleMatches(cand, cleanedText)) || null;
@@ -1429,6 +1717,54 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
         ? fallbackTitleCandidate || defaultTitle
         : parsed.title ?? fallbackTitleCandidate ?? defaultTitle;
 
+    currentStage = "gate_done";
+    await recipeRef.set(
+      {
+        "importDebug.lastStage": "gate_done",
+        "importDebug.version": IMPORT_FN_VERSION,
+        "importDebug.updatedAt": admin.firestore.FieldValue.serverTimestamp(),
+        "stageTimestamps.mappedAt": admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
+    if (DEBUG_IMPORT) {
+      await recipeRef.set(
+        {
+          "importDebug.stage": "gate_done",
+          "importDebug.timestamps.gateAt": admin.firestore.FieldValue.serverTimestamp(),
+          "importDebug.gate": {
+            before: {
+              ing: gateDebug.beforeIng ?? null,
+              steps: gateDebug.beforeSteps ?? null,
+              tools: gateDebug.beforeTools ?? null,
+              titlePresent: !!parsed.title,
+            },
+            after: {
+              ing: gateDebug.afterIng ?? ingredients.length,
+              steps: gateDebug.afterSteps ?? stepsFinal.length,
+              tools: gateDebug.afterTools ?? tools.length,
+              titlePresent: !!title,
+            },
+            issuesAdded: [],
+          },
+        },
+        { merge: true },
+      );
+      stageWrite("gate", {
+        "importDebug.stage": "gate_done",
+        "importDebug.gate": "counts",
+      });
+    }
+    logImportStage(recipeId, "gate_done", {
+      ocrLen: ocrRawText.length,
+      llmInputLen: llmInputText.length,
+      afterIng: ingredients.length,
+      afterSteps: stepsFinal.length,
+      afterTools: tools.length,
+      needsReview,
+      issuesCount: issues.length,
+    });
+
     console.log("[onRecipeDocUploaded] MAPPED", {
       ing: ingredients.length,
       steps: steps.length,
@@ -1439,18 +1775,19 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
       hallucinationRate,
     });
 
+    currentStage = "firestore_saved";
     const finalPayload = {
-      title: title ?? "",
+      title: title ?? null,
       preCookingNotes: parsed.preCookingNotes || "",
-      ingredients: ingredients || [],
-      tools: tools || [],
-      steps: stepsFinal || [],
+      ingredients: finalIngredients,
+      tools: finalTools,
+      steps: finalSteps,
       ocrRawText,
-      importStatus: needsReview ? "needs_review" : "parsed",
-      importStage: needsReview ? "needs_review" : "parsed",
+      importStatus: needsReview ? "needs_review" : "ready",
+      importStage: needsReview ? "needs_review" : "ready",
       ocrStatus: needsReview ? "needs_review" : "done",
-      status: needsReview ? "needs_review" : "parsed",
-      debugStage: needsReview ? "needs_review" : "parsed",
+      status: needsReview ? "needs_review" : "ready",
+      debugStage: needsReview ? "needs_review" : "ready",
       progress: needsReview ? 90 : 100,
       needsReview,
       issues,
@@ -1491,12 +1828,37 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
       importCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
       parsedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      importDebug: {
+        version: IMPORT_FN_VERSION,
+        lastStage: "firestore_saved",
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      stageTimestamps: {
+        savedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
     };
     logWrite("final_write", finalPayload);
+    stageWrite("final", finalPayload);
     await recipeRef.set(finalPayload, { merge: true });
+    logImportStage(recipeId, "firestore_saved", {
+      ocrLen: ocrRawText.length,
+      llmInputLen: llmInputText.length,
+      afterIng: finalIngredients.length,
+      afterSteps: finalSteps.length,
+      afterTools: finalTools.length,
+      needsReview,
+      issuesCount: issues.length,
+    });
 
     const writtenSnap = await recipeRef.get();
     const written = writtenSnap.data() || {};
+    const countList = (value) => (Array.isArray(value) ? value.length : 0);
+    const writtenCounts = {
+      ingredients: countList(written.ingredients),
+      steps: countList(written.steps),
+      tools: countList(written.tools),
+    };
     console.log("[onRecipeDocUploaded] summary after write", {
       importStatus: written.importStatus,
       importStage: written.importStage,
@@ -1508,24 +1870,87 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
       titleLen: (written.title || "").length || 0,
       issuesCount: issues.length,
     });
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    const laterSnap = await recipeRef.get();
+    const later = laterSnap.data() || {};
+    const laterCounts = {
+      ingredients: countList(later.ingredients),
+      steps: countList(later.steps),
+      tools: countList(later.tools),
+    };
+    const writtenTotal = writtenCounts.ingredients + writtenCounts.steps + writtenCounts.tools;
+    const laterTotal = laterCounts.ingredients + laterCounts.steps + laterCounts.tools;
+    if (writtenTotal > 0 && laterTotal === 0) {
+      console.warn(
+        "client_overwrite_suspected",
+        JSON.stringify({ recipeId, writtenCounts, laterCounts }),
+      );
+      await recipeRef.set(
+        {
+          needsReview: true,
+          importStatus: "needs_review",
+          issues: admin.firestore.FieldValue.arrayUnion("OVERWRITE_AFTER_PARSE"),
+          ...(DEBUG_IMPORT
+            ? {
+                "importDebug.stage": "overwrite_suspected",
+                "importDebug.timestamps.overwriteAt": admin.firestore.FieldValue.serverTimestamp(),
+              }
+            : {}),
+        },
+        { merge: true },
+      );
+    }
     console.log("[onRecipeDocUploaded] SUCCESS for recipe", recipeId);
   } catch (err) {
     console.error("[onRecipeDocUploaded] ERROR", err);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    const stackSnippet =
+      err instanceof Error && err.stack ? err.stack.split("\n").slice(0, 3).join("\n") : "";
+    const errorEntry = {
+      stage: currentStage,
+      message: errorMessage,
+      code: err?.code || null,
+      stackSnippet,
+    };
+    const existingSnap = await recipeRef.get();
+    const existingData = existingSnap.data() || {};
+    const existingTitle = typeof existingData.title === "string" ? existingData.title : null;
+    const existingIngredients = Array.isArray(existingData.ingredients)
+      ? existingData.ingredients
+      : [];
+    const existingSteps = Array.isArray(existingData.steps) ? existingData.steps : [];
+    const existingTools = Array.isArray(existingData.tools) ? existingData.tools : [];
     const errorPayload = {
-      importStatus: "failed",
-      importStage: "failed",
-      ocrStatus: "failed",
-      status: "failed",
+      importStatus: "needs_review",
+      importStage: "needs_review",
+      ocrStatus: "done",
+      status: "ready",
       debugStage: "failed",
-      needsReview: false,
-      issues: [],
-      errorMessage: err instanceof Error ? err.message : String(err),
-      importError: err instanceof Error ? err.message : String(err),
+      needsReview: true,
+      issues: [`${currentStage} error: ${errorMessage}`],
+      errorMessage,
+      importError: errorMessage,
       importCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      title: existingTitle ?? null,
+      ingredients: existingIngredients,
+      steps: existingSteps,
+      tools: existingTools,
+      ...(DEBUG_IMPORT
+        ? {
+            "importDebug.stage": "error",
+            "importDebug.timestamps.savedAt": admin.firestore.FieldValue.serverTimestamp(),
+            "importDebug.errors": admin.firestore.FieldValue.arrayUnion(errorEntry),
+          }
+        : {}),
     };
     logWrite("error_failed", errorPayload);
     await recipeRef.set(errorPayload, {merge: true});
+    logImportStage(recipeId, "error", {
+      needsReview: true,
+      issuesCount: errorPayload.issues.length,
+    });
   }
 });
 
