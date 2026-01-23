@@ -9,7 +9,7 @@ if (!admin.apps.length) {
 
 const visionClient = new ImageAnnotatorClient();
 const IMPORT_FN_VERSION = "2026-01-23-pdf-ocr-v1";
-const IMPORT_FN_BUILD = "8fd1a7f5";
+const IMPORT_FN_BUILD = "a3105ac1";
 const openaiApiKey = process.env.OPENAI_API_KEY || functions.config().openai?.key;
 console.log("[LLM] has key on init:", !!openaiApiKey);
 const LLM_MODEL = "gpt-4o-mini";
