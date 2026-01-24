@@ -14,6 +14,7 @@ import 'package:foodiy/features/recipe/domain/recipe.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_details_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/shared/widgets/foodiy_logo.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 import 'package:foodiy/l10n/app_localizations.dart';
 
 class RecipeImportDocumentScreen extends StatefulWidget {
@@ -34,10 +35,10 @@ class _RecipeImportDocumentScreenState
   int _progressStep = 0;
   bool _navigating = false;
 
-  final List<String> _progressSteps = const [
-    'Uploading securely',
-    'Understanding the recipe',
-    'Saving to your cookbook',
+  List<String> _progressSteps(AppLocalizations l10n) => [
+    l10n.importDocStepUploading,
+    l10n.importDocStepUnderstanding,
+    l10n.importDocStepSaving,
   ];
 
   @override
@@ -48,6 +49,9 @@ class _RecipeImportDocumentScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=RecipeImport keys=importDocTitle,importDocUpload',
+    );
     final theme = Theme.of(context);
     final hasSelection =
         _selectedBytes != null && _selectedExtension.isNotEmpty;
@@ -58,9 +62,8 @@ class _RecipeImportDocumentScreenState
     return WillPopScope(
       onWillPop: () async => !_isBusy,
       child: Scaffold(
-        appBar: AppBar(
+        appBar: FoodiyAppBar(
           title: Text(l10n.importDocTitle),
-          leading: _isBusy ? Container() : null,
         ),
         body: Stack(
           children: [
@@ -336,6 +339,7 @@ class _RecipeImportDocumentScreenState
   }
 
   Future<void> _onPickFile() async {
+    final l10n = AppLocalizations.of(context)!;
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: [
@@ -368,7 +372,7 @@ class _RecipeImportDocumentScreenState
     }
 
     if (bytes == null || bytes.isEmpty) {
-      _showMessage('Failed to read file bytes. Please pick a local file.');
+      _showMessage(l10n.importDocEmptyFile);
       return;
     }
 
@@ -382,6 +386,7 @@ class _RecipeImportDocumentScreenState
   }
 
   Future<void> _onTakePhoto() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final picker = ImagePicker();
       final picked = await picker.pickImage(
@@ -398,11 +403,12 @@ class _RecipeImportDocumentScreenState
       });
     } catch (e) {
       debugPrint('Failed to take photo: $e');
-      _showMessage('Failed to take photo');
+      _showMessage(l10n.importDocTakePhotoFailed('$e'));
     }
   }
 
   Future<void> _onPickGallery() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final picker = ImagePicker();
       final picked = await picker.pickImage(
@@ -423,22 +429,23 @@ class _RecipeImportDocumentScreenState
       });
     } catch (e) {
       debugPrint('Failed to pick photo: $e');
-      _showMessage('Failed to pick photo');
+      _showMessage(l10n.importDocPickPhotoFailed('$e'));
     }
   }
 
   Future<void> _onUploadPressed() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_isBusy || _navigating) return;
     final bytes = _selectedBytes;
     if (bytes == null || _selectedExtension.isEmpty) return;
     if (bytes.isEmpty) {
-      _showMessage('Selected file is empty. Please choose another file.');
+      _showMessage(l10n.importDocEmptyFile);
       return;
     }
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.uid.isEmpty) {
-      _showMessage('Please sign in to import recipes');
+      _showMessage(l10n.importDocSignInRequired);
       return;
     }
 
@@ -450,6 +457,15 @@ class _RecipeImportDocumentScreenState
 
       final ext = _selectedExtension;
       final safeExt = ext.isNotEmpty ? ext : 'bin';
+      final isDocx = safeExt.toLowerCase() == 'docx';
+      if (isDocx) {
+        _setPhase(
+          _ImportPhase.error,
+          error: 'DOCX not supported yet. Upload PDF/JPG/PNG.',
+        );
+        _showMessage('DOCX not supported yet. Upload PDF/JPG/PNG.');
+        return;
+      }
       final path = 'recipe_docs/$uid/$recipeId/source.$safeExt';
 
       // Use the same bucket where existing assets live.
@@ -462,54 +478,34 @@ class _RecipeImportDocumentScreenState
         'UPLOAD PATH (Flutter) = $path | size=${bytes.length} bytes | ext=$safeExt | uid=$uid',
       );
 
-      await _uploadWithRetry(ref, bytes, ext);
+      await _uploadWithRetry(ref, bytes, ext, recipeId: recipeId);
 
       _setPhase(_ImportPhase.processing);
 
       final downloadUrl = await ref.getDownloadURL();
 
       final localeCode = Localizations.localeOf(context).languageCode;
-      final profile = CurrentUserService.instance.currentProfile;
 
       final title = _selectedFileName.isNotEmpty
           ? _selectedFileName.replaceAll(RegExp(r'\.[^.]+$'), '')
-          : 'Imported recipe';
-
-      final recipe = Recipe(
-        id: recipeId,
-        originalLanguageCode: localeCode,
-        title: title,
-        imageUrl: null,
-        coverImageUrl: null,
-        categories: const [],
-        sourceType: 'document',
-        originalDocumentUrl: downloadUrl,
-        sourceFilePath: path,
-        status: 'uploading',
-        progress: 0,
-        debugStage: 'uploaded',
-        importStatus: 'uploading',
-        importStage: 'uploading',
-        steps: const [],
-        ingredients: const [],
-        tools: const [],
-        preCookingNotes: '',
-        chefId: uid,
-        chefName: profile?.displayName ?? user.displayName,
-        chefAvatarUrl: profile?.photoUrl ?? user.photoURL,
-        isPublic: false,
-        views: 0,
-        playlistAdds: 0,
-      );
+          : l10n.importedRecipeTitle;
 
       _setPhase(_ImportPhase.saving);
-      await RecipeFirestoreService.instance.saveRecipe(recipe);
+      await RecipeFirestoreService.instance.saveImportStub(
+        recipeId: recipeId,
+        sourceFilePath: path,
+        sourceType: 'document',
+        originalDocumentUrl: downloadUrl,
+        importStatus: 'uploading',
+        importStage: 'uploading',
+        progress: 0,
+      );
       debugPrint('RecipeImportDocumentScreen: listening path recipes/$recipeId');
 
       if (!mounted) return;
 
       _setPhase(_ImportPhase.success);
-      _showMessage('Document uploaded. Recipe created.');
+      _showMessage(l10n.importDocUploaded);
 
       // Navigate to recipe details - the recipe may still be processing.
       _navigating = true;
@@ -519,9 +515,9 @@ class _RecipeImportDocumentScreenState
         AppRoutes.recipeDetails,
         extra: RecipeDetailsArgs(
           id: recipeId,
-          title: recipe.title,
+          title: title,
           imageUrl: '',
-          time: '0 steps',
+          time: l10n.profileStepsCount(0),
           difficulty: '-',
           originalLanguageCode: localeCode,
           ingredients: const [],
@@ -533,15 +529,15 @@ class _RecipeImportDocumentScreenState
       debugPrint('RecipeImportDocumentScreen: upload failed: $e\n$st');
       _setPhase(
         _ImportPhase.error,
-        error: 'Failed to upload document. Please try again.',
+        error: l10n.importDocUploadFailed,
       );
       if (mounted) {
         if (e is FirebaseException) {
           _showMessage(
-            'Failed to upload: ${e.code}. Tap Retry or pick another file.',
+            l10n.importDocUploadFailedCode(e.code),
           );
         } else {
-          _showMessage('Failed to upload document: $e');
+          _showMessage(l10n.importDocUploadFailedWithError('$e'));
         }
       }
     } finally {
@@ -553,6 +549,7 @@ class _RecipeImportDocumentScreenState
     Reference ref,
     Uint8List bytes,
     String ext, {
+    required String recipeId,
     int maxAttempts = 2,
   }) async {
     FirebaseException? lastError;
@@ -572,7 +569,10 @@ class _RecipeImportDocumentScreenState
           );
         }
         // Confirm object exists before moving on.
-        await ref.getMetadata();
+        final metadata = await ref.getMetadata();
+        debugPrint(
+          '[UPLOAD_META] recipeId=$recipeId ext=$ext contentType=${metadata.contentType} size=${metadata.size}',
+        );
         return;
       } on FirebaseException catch (e) {
         lastError = e;
@@ -640,8 +640,10 @@ class _RecipeImportDocumentScreenState
   }
 
   Widget _buildOverlay(BuildContext context, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     final isError = _phase == _ImportPhase.error;
-    final stepIndex = _progressStep.clamp(0, _progressSteps.length - 1);
+    final steps = _progressSteps(l10n);
+    final stepIndex = _progressStep.clamp(0, steps.length - 1);
     return Positioned.fill(
       child: Stack(
         children: [
@@ -666,10 +668,10 @@ class _RecipeImportDocumentScreenState
                     const SizedBox(height: 16),
                     Text(
                       isError
-                          ? 'Something went wrong'
+                          ? l10n.importDocOverlayErrorTitle
                           : (_phase == _ImportPhase.uploading
-                              ? 'Uploading…'
-                              : 'Processing…'),
+                              ? l10n.importDocOverlayUploading
+                              : l10n.importDocOverlayProcessing),
                       style: theme.textTheme.titleMedium,
                       textAlign: TextAlign.center,
                     ),
@@ -677,8 +679,8 @@ class _RecipeImportDocumentScreenState
                     if (!isError)
                       Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: List.generate(_progressSteps.length, (index) {
-                          final label = _progressSteps[index];
+                        children: List.generate(steps.length, (index) {
+                          final label = steps[index];
                           final isDone = index < stepIndex;
                           final isActive = index == stepIndex;
                           return Padding(
@@ -724,12 +726,12 @@ class _RecipeImportDocumentScreenState
                         children: [
                           OutlinedButton(
                             onPressed: () => _setPhase(_ImportPhase.idle),
-                            child: const Text('Back'),
+                            child: Text(l10n.backButton),
                           ),
                           const SizedBox(width: 12),
                           ElevatedButton(
                             onPressed: _onUploadPressed,
-                            child: const Text('Retry'),
+                            child: Text(l10n.tryAgain),
                           ),
                         ],
                       ),

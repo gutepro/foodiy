@@ -1220,9 +1220,14 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   const sourceExt = lowerPath.includes(".") ? lowerPath.split(".").pop() || "" : "";
   const gcsUri = `gs://${bucketName}/${filePath}`;
   const isPdf =
-    String(contentType).toLowerCase().includes("pdf") ||
+    contentType === "application/pdf" ||
     lowerPath.endsWith(".pdf") ||
-    String(metadataContentType).toLowerCase().includes("pdf");
+    String(metadataContentType).toLowerCase().includes("application/pdf");
+  const isDocx =
+    sourceExt === "docx" ||
+    String(contentType)
+      .toLowerCase()
+      .includes("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
   let currentStage = "uploaded";
 
   console.log("[onRecipeDocUploaded] START", filePath, bucketName, contentType);
@@ -1234,7 +1239,7 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   );
   console.log(`[IMPORT_FN_VERSION] ${IMPORT_FN_VERSION} recipeId=unknown`);
   console.log(
-    `[OCR_ROUTE] recipeId=unknown route=${isPdf ? "pdf_async" : "image"} contentType=${contentType} ext=${sourceExt}`,
+    `[OCR_ROUTE] recipeId=unknown route=${isPdf ? "pdf_async" : isDocx ? "docx_unsupported" : "image"} contentType=${contentType} ext=${sourceExt}`,
   );
   console.log("[OCR_DETECT] contentType=", contentType, "filePath=", filePath, "isPdf=", isPdf);
 
@@ -1260,7 +1265,7 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   );
   console.log(`[IMPORT_FN_VERSION] ${IMPORT_FN_VERSION} recipeId=${recipeId}`);
   console.log(
-    `[OCR_ROUTE] recipeId=${recipeId} route=${isPdf ? "pdf_async" : "image"} contentType=${contentType} ext=${sourceExt}`,
+    `[OCR_ROUTE] recipeId=${recipeId} route=${isPdf ? "pdf_async" : isDocx ? "docx_unsupported" : "image"} contentType=${contentType} ext=${sourceExt}`,
   );
 
   const recipeRef = db.collection("recipes").doc(recipeId);
@@ -1307,6 +1312,32 @@ exports.onRecipeDocUploaded = functions.storage.object().onFinalize(async (objec
   logImportStage(recipeId, "uploaded", {});
 
   try {
+    if (isDocx) {
+      const payload = {
+        importStatus: "needs_review",
+        needsReview: true,
+        issues: ["DOCX_UNSUPPORTED"],
+        errorMessage: "DOCX not supported yet. Upload PDF/JPG/PNG.",
+        ocrRawText: "",
+        ocrMeta: {
+          charCount: 0,
+          contentType,
+          ext: sourceExt,
+          method: "docx_unsupported",
+        },
+        importDebug: {
+          version: IMPORT_FN_VERSION,
+          lastStage: "docx_unsupported",
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+      console.log(`[DOCX_UNSUPPORTED] recipeId=${recipeId} contentType=${contentType} ext=${sourceExt}`);
+      logWrite("docx_unsupported", payload);
+      stageWrite("docx_unsupported", payload);
+      await recipeRef.set(payload, { merge: true });
+      return;
+    }
     const {
       text: visionText,
       avgConfidence,
