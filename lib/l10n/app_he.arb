@@ -372,5 +372,302 @@
   "importDocTip2": "הישאר במסך זה עד שנעביר אותך למתכון.",
   "importDocTip3": "תוכל לערוך פרטים לאחר סיום היבוא.",
   "importDocUpload": "העלה וייבא",
-  "importDocSupportedFooter": "נתמך: PDF, DOC, DOCX, JPG, PNG, WEBP. קבצים גדולים עשויים לקחת זמן רב יותר לעיבוד."
+  "importDocSupportedFooter": "נתמך: PDF, DOC, DOCX, JPG, PNG, WEBP. קבצים גדולים עשויים לקחת זמן רב יותר לעיבוד.",
+  "addButton": "הוסף",
+  "addSelected": "הוסף נבחרים",
+  "backButton": "חזרה",
+  "cancel": "ביטול",
+  "chefByLine": "מאת {name}",
+  "@chefByLine": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "chefFollowLabel": "עקוב",
+  "chefFollowSignInRequired": "התחבר כדי לעקוב אחרי שפים",
+  "chefFollowUpdateFailed": "עדכון מעקב נכשל: {error}",
+  "@chefFollowUpdateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "chefFollowingLabel": "עוקב",
+  "chefMyRecipesSubtitle": "נהל את המתכונים שלך",
+  "chefNoCookbooks": "אין ספרי בישול עדיין",
+  "chefNotEnabledBody": "כלי השף זמינים רק לחשבונות שף.",
+  "chefNotEnabledTitle": "כלי שף אינם זמינים",
+  "chefNotFound": "שף לא נמצא",
+  "chefPremiumFeaturesBody": "שדרג לשף פרימיום כדי לפתוח פרסום, ספרי בישול ותובנות.",
+  "chefPremiumFeaturesTitle": "תכונות פרימיום",
+  "chefPublicCookbook": "ציבורי",
+  "chefUploadNewRecipe": "העלה מתכון חדש",
+  "chefUploadNewRecipeSubtitle": "ייבא מסמך מתכון או צור ידנית.",
+  "cookbooksAddRecipeFailed": "הוספת מתכון נכשלה: {error}",
+  "@cookbooksAddRecipeFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cookbooksAddRecipes": "הוסף מתכונים",
+  "cookbooksAddingRecipes": "מוסיף מתכונים...",
+  "cookbooksCoverImage": "תמונת עטיפה",
+  "cookbooksDeleteWarning": "למחוק את ספר הבישול? פעולה זו אינה ניתנת לביטול.",
+  "cookbooksDescriptionLabel": "תיאור",
+  "cookbooksEditTitle": "ערוך ספר בישול",
+  "cookbooksLoadRecipesFailed": "טעינת מתכונים נכשלה: {error}",
+  "@cookbooksLoadRecipesFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cookbooksLoadRecipesFailedDetail": "טעינת מתכונים נכשלה. נסה שוב.",
+  "cookbooksLoadRecipesFailedSimple": "טעינת מתכונים נכשלה",
+  "cookbooksNoRecipesAvailable": "אין מתכונים זמינים בספר הבישול הזה.",
+  "cookbooksNoRecipesToAdd": "אין מתכונים זמינים להוספה.",
+  "cookbooksNoRecipesYet": "עדיין אין מתכונים בספר הבישול הזה.",
+  "cookbooksPlaylistTitleLabel": "כותרת פלייליסט",
+  "cookbooksPlaylistTitleRequired": "נא להזין כותרת פלייליסט",
+  "cookbooksPublicCreateTitle": "צור ספר בישול ציבורי",
+  "cookbooksPublicCreated": "פלייליסט ציבורי נוצר",
+  "cookbooksPublicLabel": "ציבורי",
+  "cookbooksPublicNoRecipesBody": "אין לך מתכונים להוספה עדיין.\nהעלה מתכונים כדי ליצור ספר בישול ציבורי.",
+  "cookbooksRecipesAdded": "המתכונים נוספו לספר הבישול",
+  "cookbooksSaveChanges": "שמור שינויים",
+  "cookbooksSaveFailed": "השמירה נכשלה: {error}",
+  "@cookbooksSaveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cookbooksSaveToMy": "שמור בספרי הבישול שלי",
+  "cookbooksSavedToMy": "שמרת את {name} בספרי הבישול שלך",
+  "@cookbooksSavedToMy": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cookbooksSelectAtLeastOneRecipe": "בחר לפחות מתכון אחד",
+  "cookbooksSelectRecipes": "בחר מתכונים",
+  "cookbooksSelectRecipesToInclude": "בחר מתכונים לכלול",
+  "cookbooksUpdated": "ספר הבישול עודכן",
+  "discoverChefsToFollow": "שפים לעקוב אחריהם",
+  "discoverFollowersCount": "{count} עוקבים",
+  "@discoverFollowersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "discoverNoChefsYet": "אין שפים לעקוב אחריהם עדיין",
+  "durationHours": "{hours} שעות",
+  "@durationHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours} שעות {minutes} דק׳",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{minutes} דק׳",
+  "@durationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "goHomeButton": "לדף הבית",
+  "importDocEmptyFile": "הקובץ ריק. בחר קובץ אחר.",
+  "importDocOverlayErrorTitle": "לא הצלחנו לעבד את הקובץ",
+  "importDocOverlayProcessing": "מעבד...",
+  "importDocOverlayUploading": "מעלה...",
+  "importDocPickPhotoFailed": "בחירת תמונה נכשלה: {error}",
+  "@importDocPickPhotoFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "importDocReadBytesFailed": "קריאת הקובץ נכשלה: {error}",
+  "@importDocReadBytesFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "importDocSignInRequired": "התחבר כדי להעלות מתכונים.",
+  "importDocStepSaving": "שומר מתכון",
+  "importDocStepUnderstanding": "מבין את המתכון",
+  "importDocStepUploading": "מעלה קובץ",
+  "importDocTakePhotoFailed": "צילום נכשל: {error}",
+  "@importDocTakePhotoFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "importDocUploadFailed": "ההעלאה נכשלה",
+  "importDocUploadFailedCode": "ההעלאה נכשלה ({code})",
+  "@importDocUploadFailedCode": {
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "importDocUploadFailedWithError": "ההעלאה נכשלה: {error}",
+  "@importDocUploadFailedWithError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "importDocUploaded": "ההעלאה הושלמה",
+  "importedRecipeTitle": "מתכון מיובא",
+  "playlistPlayAll": "נגן הכל",
+  "playlistPlayAllNotImplemented": "נגן הכל עדיין לא נתמך",
+  "playlistPlayerTitle": "פלייליסט - {title}",
+  "@playlistPlayerTitle": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "playlistStepCookFirstRecipe": "בשל את המתכון הראשון לפי ההוראות שלו.",
+  "playlistStepCookRemaining": "בשל את שאר הפלייליסט.",
+  "playlistStepPrepIngredients": "הכן מרכיבים למתכון הראשון.",
+  "playlistStepPrepNextRecipe": "הכן את המתכון הבא בפלייליסט.",
+  "recipeAddIngredientsToCart": "הוסף מרכיבים לעגלה",
+  "recipeAddToCartFailed": "ההוספה לעגלה נכשלה",
+  "recipeAddToCookbook": "הוסף לספר בישול",
+  "recipeAddToCookbookFailed": "הוספה לספר בישול נכשלה: {error}",
+  "@recipeAddToCookbookFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "recipeAddToCookbooksTitle": "הוסף לספרי בישול",
+  "recipeAddToFavorites": "הוסף למועדפים",
+  "recipeAddedToCart": "נוספו {count} פריטים לעגלה",
+  "@recipeAddedToCart": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeAddedToCookbooks": "נוסף לספרי בישול",
+  "recipeAddedToFavorites": "נוסף למועדפים",
+  "recipeAttachDialogFailed": "לא ניתן לטעון ספרי בישול",
+  "recipeCookbooksLoadFailed": "טעינת ספרי בישול נכשלה",
+  "recipeCoverUploadFailed": "העלאת תמונת עטיפה נכשלה: {error}",
+  "@recipeCoverUploadFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "recipeCreateCookbookFirst": "צור ספר בישול קודם",
+  "recipeDifficultyEasy": "קל",
+  "recipeEditButton": "ערוך",
+  "recipeImportFailedBody": "לא הצלחנו לייבא את המתכון. נסה שוב או חזור לדף הבית.",
+  "recipeImportFailedScreenTitle": "הייבוא נכשל",
+  "recipeImportFailedTitle": "הייבוא נכשל",
+  "recipeImportNeedsReviewBody": "ייבאנו את המתכון אך הוא דורש בדיקה. אפשר לערוך עכשיו.",
+  "recipeImportNeedsReviewTitle": "דורש בדיקה",
+  "recipeImportProcessingTitle": "עדיין עובדים על זה",
+  "recipeImportStepExtractingText": "מחלץ טקסט",
+  "recipeImportStepFinalizing": "מסיים",
+  "recipeImportStepUnderstanding": "מבין את המתכון",
+  "recipeImportStepUploadComplete": "ההעלאה הושלמה",
+  "recipeImportTimeoutBody": "זה לוקח יותר זמן מהצפוי. אפשר לנסות שוב או לחזור לדף הבית.",
+  "recipeImportTimeoutTitle": "זמן הייבוא פג",
+  "recipeImportUnknownError": "שגיאה לא ידועה בייבוא",
+  "recipeNoIngredients": "אין מרכיבים עדיין",
+  "recipeNoIngredientsToAdd": "אין מרכיבים להוספה",
+  "recipeNoSteps": "אין שלבים עדיין",
+  "recipeNoTools": "אין כלים רשומים",
+  "recipeNotFoundBody": "לא הצלחנו למצוא את המתכון הזה.",
+  "recipeNotFoundTitle": "המתכון לא נמצא",
+  "recipeOcrPreviewLabel": "תצוגה מקדימה של OCR",
+  "recipeOriginalLanguageLabel": "מקורי",
+  "recipePlayerHandsFreeMode": "מצב ידיים חופשיות",
+  "recipePlayerHandsFreeOn": "מצב ידיים חופשיות פועל",
+  "recipePlayerNoSteps": "אין שלבים זמינים",
+  "recipePlayerStepOf": "שלב {current} מתוך {total}",
+  "@recipePlayerStepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "recipePlayerStepPlaceholder": "שלב {number}",
+  "@recipePlayerStepPlaceholder": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "recipePlayerVoiceControl": "שליטה קולית",
+  "recipeProcessing": "מעבד",
+  "recipeRemoveFromFavorites": "הסר מהמועדפים",
+  "recipeRemovedFromFavorites": "הוסר מהמועדפים",
+  "recipeSignInToSave": "התחבר כדי לשמור מתכונים.",
+  "recipeStartCooking": "התחל לבשל",
+  "recipeStepRequired": "יש למלא שלב",
+  "recipeTitleRequired": "יש למלא כותרת",
+  "recipeTranslateToEnglish": "תרגם לאנגלית",
+  "recipeTranslatedFrom": "תורגם מ-{language}",
+  "@recipeTranslatedFrom": {
+    "placeholders": {
+      "language": {}
+    }
+  },
+  "recipeTranslating": "מתרגם",
+  "recipeTranslationUnavailable": "תרגום אינו זמין",
+  "recipeUnavailableBody": "המתכון הזה אינו זמין כרגע.",
+  "recipeUnavailableTitle": "מתכון לא זמין",
+  "recipeViewChef": "צפה בשף",
+  "recipeViewOriginal": "צפה במקור",
+  "recipesLabel": "מתכונים",
+  "chefSaveFailed": "שמירת הפרופיל נכשלה",
+  "chefEditOwnOnly": "אפשר לערוך רק את הפרופיל שלך.",
+  "chefEditAvatarLabel": "תמונת פרופיל",
+  "chefEditChangePhoto": "החלף תמונה",
+  "chefEditBioLabel": "ביוגרפיה",
+  "chefEditBioHint": "ספר לעוקבים על סגנון הבישול, ההתמחויות וההשראות שלך.",
+  "chefEditMakeChangeToSave": "בצע שינוי כדי לאפשר שמירה.",
+  "chefNoRecipesYet": "עדיין לא פרסמת מתכונים",
+  "chefLoadRecipesFailed": "טעינת המתכונים נכשלה. נסה שוב.",
+  "chefRecipeStats": "צפיות: {views} • שמירות: {saves}",
+  "@chefRecipeStats": {
+    "placeholders": {
+      "views": {
+        "type": "int"
+      },
+      "saves": {
+        "type": "int"
+      }
+    }
+  },
+  "chefRecipeDeleted": "המתכון \"{title}\" נמחק",
+  "@chefRecipeDeleted": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "discoverFeaturedCookbooks": "ספרי בישול מובילים",
+  "discoverCookbookLoadFailed": "טעינת ספר הבישול נכשלה",
+  "discoverCookbookNotFound": "ספר הבישול לא נמצא",
+  "discoverCookbookNoRecipes": "עדיין אין מתכונים בספר הבישול הזה.",
+  "discoverCookbookNoRecipesAvailable": "אין מתכונים זמינים.",
+  "discoverRecipesLoadFailed": "טעינת מתכונים נכשלה"
 }

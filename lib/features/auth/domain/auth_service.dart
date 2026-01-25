@@ -15,5 +15,7 @@ abstract class AuthService {
     required String password,
   });
 
+  Future<void> signInAsGuest();
+
   Future<void> signOut();
 }

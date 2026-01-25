@@ -12,6 +12,8 @@ import 'package:foodiy/core/widgets/recipe_image.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_details_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/shared/constants/categories.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class DiscoveryRepository {
   DiscoveryRepository({FirebaseFirestore? firestore})
@@ -184,11 +186,11 @@ class DiscoveryRepository {
     return DiscoveryCookbook(
       id: doc.id,
       ownerId: (data['ownerId'] ?? '').toString(),
-      title: (data['title'] ?? data['name'] ?? 'Cookbook').toString(),
+      title: (data['title'] ?? data['name'] ?? '').toString(),
       categories: categories,
       imageUrl: image,
       coverImageUrl: chosen,
-      ownerName: (data['ownerName'] ?? data['chefName'] ?? 'Chef').toString(),
+      ownerName: (data['ownerName'] ?? data['chefName'] ?? '').toString(),
       views: _toInt(viewsValue),
     );
   }
@@ -532,6 +534,7 @@ class _FeaturedCookbooksSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final query = FirebaseFirestore.instance
         .collection('cookbooks')
         .where('isPublic', isEqualTo: true)
@@ -550,17 +553,17 @@ class _FeaturedCookbooksSection extends StatelessWidget {
           debugPrint(
             'DISCOVER auth uid: ${FirebaseAuth.instance.currentUser?.uid}',
           );
-          return const _EmptyState(message: 'No public cookbooks yet');
+          return _EmptyState(message: l10n.discoverNoCookbooks);
         }
         final docs = snapshot.data?.docs ?? const [];
         if (docs.isEmpty) {
-          return const _EmptyState(message: 'No public cookbooks yet');
+          return _EmptyState(message: l10n.discoverNoCookbooks);
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Featured cookbooks',
+              l10n.discoverFeaturedCookbooks,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -577,21 +580,20 @@ class _FeaturedCookbooksSection extends StatelessWidget {
                   final cookbook = DiscoveryCookbook(
                     id: docs[index].id,
                     ownerId: (data['ownerId'] ?? '').toString(),
-                    title: (data['title'] ?? data['name'] ?? 'Cookbook')
-                        .toString(),
+                    title: (data['title'] ?? data['name'] ?? '').toString(),
                     categories: const [],
                     imageUrl: (data['imageUrl'] ?? data['coverImageUrl'] ?? '')
                         .toString(),
                     coverImageUrl:
                         (data['coverImageUrl'] ?? data['imageUrl'] ?? '')
                             .toString(),
-                    ownerName: (data['chefName'] ?? data['ownerName'] ?? 'Chef')
+                    ownerName: (data['chefName'] ?? data['ownerName'] ?? '')
                         .toString(),
                     views: _safeInt(data['viewsCount'] ?? data['views']),
                   );
                   return _CookbookCard(
                     cookbook: cookbook,
-                    category: 'Featured',
+                    category: l10n.discoverFeaturedCookbooks,
                   );
                 },
               ),
@@ -611,6 +613,7 @@ class _CategoryCarouselRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final title = kCategoryTitleByKey[row.category] ?? row.category;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -635,7 +638,7 @@ class _CategoryCarouselRow extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
-              'No public cookbooks yet',
+              l10n.discoverNoCookbooks,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: Colors.grey.shade700,
               ),
@@ -848,6 +851,7 @@ class _CookbookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final width = min(MediaQuery.sizeOf(context).width * 0.55, 170.0);
     final chosenImage =
         cookbook.coverImageUrl.isNotEmpty ? cookbook.coverImageUrl : cookbook.imageUrl;
@@ -902,7 +906,9 @@ class _CookbookCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      cookbook.title,
+                      cookbook.title.isNotEmpty
+                          ? cookbook.title
+                          : l10n.cookbooksUntitled,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleSmall?.copyWith(
@@ -911,7 +917,11 @@ class _CookbookCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'By ${cookbook.ownerName}',
+                      l10n.chefByLine(
+                        cookbook.ownerName.isNotEmpty
+                            ? cookbook.ownerName
+                            : l10n.homeChefPlaceholder,
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.grey.shade700,
                       ),
@@ -955,6 +965,7 @@ class PublicCookbookScreen extends StatelessWidget {
   final String ownerId;
 
   Future<List<RecipeDetailsArgs>> _loadRecipesByIds(
+    AppLocalizations l10n,
     List<String> ids,
   ) async {
     if (ids.isEmpty) return const [];
@@ -977,10 +988,10 @@ class PublicCookbookScreen extends StatelessWidget {
         final steps = (data['steps'] as List<dynamic>?) ?? const [];
         byId[doc.id] = RecipeDetailsArgs(
           id: doc.id,
-          title: (data['title'] ?? 'Untitled recipe').toString(),
+          title: (data['title'] ?? '').toString(),
           imageUrl: (data['coverImageUrl'] ?? data['imageUrl'] ?? '')
               .toString(),
-          time: '${steps.length} steps',
+          time: l10n.profileStepsCount(steps.length),
           difficulty: '-',
           originalLanguageCode:
               (data['originalLanguageCode'] as String?) ?? 'en',
@@ -1000,6 +1011,7 @@ class PublicCookbookScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final viewerUid = FirebaseAuth.instance.currentUser?.uid ?? '';
     final viewerIsOwner = viewerUid.isNotEmpty && viewerUid == ownerId;
 
@@ -1011,9 +1023,8 @@ class PublicCookbookScreen extends StatelessWidget {
         .snapshots();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title.isNotEmpty ? title : 'Cookbook'),
-        leading: const BackButton(),
+      appBar: FoodiyAppBar(
+        title: Text(title.isNotEmpty ? title : l10n.cookbooksUntitled),
       ),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: cookbookStream,
@@ -1022,11 +1033,11 @@ class PublicCookbookScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (cookbookSnapshot.hasError) {
-            return const Center(child: Text('Failed to load cookbook'));
+            return Center(child: Text(l10n.discoverCookbookLoadFailed));
           }
           final data = cookbookSnapshot.data?.data();
           if (data == null) {
-            return const Center(child: Text('Cookbook not found'));
+            return Center(child: Text(l10n.discoverCookbookNotFound));
           }
           final recipeIds = (data['recipeIds'] as List<dynamic>? ?? const [])
               .whereType<String>()
@@ -1037,25 +1048,25 @@ class PublicCookbookScreen extends StatelessWidget {
             '[DISCOVER_COOKBOOK_DETAILS] snapshot recipeIdsCount=${recipeIds.length} updatedAt=$updatedAt',
           );
           if (recipeIds.isEmpty) {
-            return const Center(
-              child: Text('No recipes in this cookbook yet.'),
+            return Center(
+              child: Text(l10n.discoverCookbookNoRecipes),
             );
           }
           return FutureBuilder<List<RecipeDetailsArgs>>(
-            future: _loadRecipesByIds(recipeIds),
+            future: _loadRecipesByIds(l10n, recipeIds),
             builder: (context, recipesSnapshot) {
               if (recipesSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
               if (recipesSnapshot.hasError) {
-                return const Center(child: Text('Failed to load recipes'));
+                return Center(child: Text(l10n.discoverRecipesLoadFailed));
               }
               final recipes = recipesSnapshot.data ?? const [];
               if (recipes.isEmpty) {
-                return const Center(
+                return Center(
                   child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text('No recipes available.'),
+                    padding: const EdgeInsets.all(16),
+                    child: Text(l10n.discoverCookbookNoRecipesAvailable),
                   ),
                 );
               }
@@ -1077,7 +1088,9 @@ class PublicCookbookScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                       title: Text(
-                        recipe.title,
+                        recipe.title.isNotEmpty
+                            ? recipe.title
+                            : l10n.untitledRecipe,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

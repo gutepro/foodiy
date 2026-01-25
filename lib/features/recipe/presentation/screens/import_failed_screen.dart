@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:foodiy/features/recipe/domain/recipe.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class ImportFailedScreen extends StatelessWidget {
   const ImportFailedScreen({super.key, this.recipe});
@@ -12,11 +14,14 @@ class ImportFailedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=ImportFailed keys=recipeImportFailedTitle,goHomeButton',
+    );
     final ocrPreview = recipe?.ocrRawText ?? '';
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Import failed'),
-        leading: const BackButton(),
+      appBar: FoodiyAppBar(
+        title: Text(l10n.recipeImportFailedTitle),
       ),
       body: SafeArea(
         child: Column(
@@ -29,7 +34,7 @@ class ImportFailedScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "We couldn't scan this document correctly. Please try again with a clearer photo or different document.",
+                      l10n.recipeImportFailedBody,
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
@@ -37,7 +42,7 @@ class ImportFailedScreen extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('OCR text preview:', style: theme.textTheme.bodyMedium),
+                          Text(l10n.recipeOcrPreviewLabel, style: theme.textTheme.bodyMedium),
                           const SizedBox(height: 6),
                           Container(
                             padding: const EdgeInsets.all(8),
@@ -71,7 +76,7 @@ class ImportFailedScreen extends StatelessWidget {
                       onPressed: () {
                         context.go(AppRoutes.home);
                       },
-                      child: const Text('Back to Home'),
+                      child: Text(l10n.goHomeButton),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -81,7 +86,7 @@ class ImportFailedScreen extends StatelessWidget {
                       onPressed: () {
                         context.go(AppRoutes.recipeImportDocument);
                       },
-                      child: const Text('Try again'),
+                      child: Text(l10n.tryAgain),
                     ),
                   ),
                 ],

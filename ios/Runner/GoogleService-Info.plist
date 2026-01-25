@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>988257088468-40emiipnaktcur37hl3nosivs3c4n1vd.apps.googleusercontent.com</string>
+	<string>988257088468-4sketjakb8q1jgupujnlsi1t0coqam5u.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.988257088468-40emiipnaktcur37hl3nosivs3c4n1vd</string>
+	<string>com.googleusercontent.apps.988257088468-4sketjakb8q1jgupujnlsi1t0coqam5u</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>988257088468-92heag3bpqtqtv6r6257ag2m7s72qgea.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBGCUU6U0ADY7y5fwwJ1QDAPl1kB7X09hU</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.foodiy</string>
+	<string>com.foodiy.app</string>
 	<key>PROJECT_ID</key>
 	<string>foodiy-6a9d9</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:988257088468:ios:6b44a5803ff3f26b20dc41</string>
+	<string>1:988257088468:ios:e6321b287269ee8120dc41</string>
 </dict>
 </plist>

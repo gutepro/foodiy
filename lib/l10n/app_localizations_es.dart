@@ -864,4 +864,523 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get importDocSupportedFooter =>
       'Compatibles: PDF, DOC, DOCX, JPG, PNG, WEBP. Los archivos grandes pueden tardar más en procesarse.';
+
+  @override
+  String get addButton => 'Add';
+
+  @override
+  String get addSelected => 'Add selected';
+
+  @override
+  String get backButton => 'Back';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String chefByLine(Object name) {
+    return 'By $name';
+  }
+
+  @override
+  String get chefFollowLabel => 'Follow';
+
+  @override
+  String get chefFollowSignInRequired => 'Sign in to follow chefs';
+
+  @override
+  String chefFollowUpdateFailed(Object error) {
+    return 'Failed to update follow: $error';
+  }
+
+  @override
+  String get chefFollowingLabel => 'Following';
+
+  @override
+  String get chefMyRecipesSubtitle => 'Manage your recipes';
+
+  @override
+  String get chefNoCookbooks => 'No cookbooks yet';
+
+  @override
+  String get chefNotEnabledBody =>
+      'Chef tools are available for chef accounts.';
+
+  @override
+  String get chefNotEnabledTitle => 'Chef tools unavailable';
+
+  @override
+  String get chefNotFound => 'Chef not found';
+
+  @override
+  String get chefPremiumFeaturesBody =>
+      'Upgrade to Premium Chef to unlock publishing, cookbooks, and insights.';
+
+  @override
+  String get chefPremiumFeaturesTitle => 'Premium features';
+
+  @override
+  String get chefPublicCookbook => 'Public';
+
+  @override
+  String get chefUploadNewRecipe => 'Upload new recipe';
+
+  @override
+  String get chefUploadNewRecipeSubtitle =>
+      'Import a recipe document or create manually.';
+
+  @override
+  String cookbooksAddRecipeFailed(Object error) {
+    return 'Failed to add recipe: $error';
+  }
+
+  @override
+  String get cookbooksAddRecipes => 'Add recipes';
+
+  @override
+  String get cookbooksAddingRecipes => 'Adding recipes...';
+
+  @override
+  String get cookbooksCoverImage => 'Cover image';
+
+  @override
+  String get cookbooksDeleteWarning =>
+      'Delete this cookbook? This cannot be undone.';
+
+  @override
+  String get cookbooksDescriptionLabel => 'Description';
+
+  @override
+  String get cookbooksEditTitle => 'Edit cookbook';
+
+  @override
+  String cookbooksLoadRecipesFailed(Object error) {
+    return 'Failed to load recipes: $error';
+  }
+
+  @override
+  String get cookbooksLoadRecipesFailedDetail =>
+      'Failed to load recipes. Please try again.';
+
+  @override
+  String get cookbooksLoadRecipesFailedSimple => 'Failed to load recipes';
+
+  @override
+  String get cookbooksNoRecipesAvailable =>
+      'This cookbook has no recipes available.';
+
+  @override
+  String get cookbooksNoRecipesToAdd => 'No recipes available to add.';
+
+  @override
+  String get cookbooksNoRecipesYet => 'This cookbook has no recipes yet.';
+
+  @override
+  String get cookbooksPlaylistTitleLabel => 'Playlist title';
+
+  @override
+  String get cookbooksPlaylistTitleRequired => 'Please enter a playlist title';
+
+  @override
+  String get cookbooksPublicCreateTitle => 'Create public cookbook';
+
+  @override
+  String get cookbooksPublicCreated => 'Public playlist created';
+
+  @override
+  String get cookbooksPublicLabel => 'Public';
+
+  @override
+  String get cookbooksPublicNoRecipesBody =>
+      'You have no recipes to add yet.\nUpload recipes to create a public cookbook.';
+
+  @override
+  String get cookbooksRecipesAdded => 'Recipes added to cookbook';
+
+  @override
+  String get cookbooksSaveChanges => 'Save changes';
+
+  @override
+  String cookbooksSaveFailed(Object error) {
+    return 'Failed to save: $error';
+  }
+
+  @override
+  String get cookbooksSaveToMy => 'Save to my cookbooks';
+
+  @override
+  String cookbooksSavedToMy(Object name) {
+    return 'Saved $name to your cookbooks';
+  }
+
+  @override
+  String get cookbooksSelectAtLeastOneRecipe => 'Select at least one recipe';
+
+  @override
+  String get cookbooksSelectRecipes => 'Select recipes';
+
+  @override
+  String get cookbooksSelectRecipesToInclude => 'Select recipes to include';
+
+  @override
+  String get cookbooksUpdated => 'Cookbook updated';
+
+  @override
+  String get discoverChefsToFollow => 'Chefs to follow';
+
+  @override
+  String discoverFollowersCount(int count) {
+    return '$count followers';
+  }
+
+  @override
+  String get discoverNoChefsYet => 'No chefs to follow yet';
+
+  @override
+  String durationHours(int hours) {
+    return '$hours hr';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours hr $minutes min';
+  }
+
+  @override
+  String durationMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get goHomeButton => 'Go Home';
+
+  @override
+  String get importDocEmptyFile => 'File is empty. Choose another file.';
+
+  @override
+  String get importDocOverlayErrorTitle => 'We couldn\'t process this file';
+
+  @override
+  String get importDocOverlayProcessing => 'Processing...';
+
+  @override
+  String get importDocOverlayUploading => 'Uploading...';
+
+  @override
+  String importDocPickPhotoFailed(Object error) {
+    return 'Failed to pick photo: $error';
+  }
+
+  @override
+  String importDocReadBytesFailed(Object error) {
+    return 'Failed to read file: $error';
+  }
+
+  @override
+  String get importDocSignInRequired => 'Sign in to upload recipes.';
+
+  @override
+  String get importDocStepSaving => 'Saving recipe';
+
+  @override
+  String get importDocStepUnderstanding => 'Understanding recipe';
+
+  @override
+  String get importDocStepUploading => 'Uploading file';
+
+  @override
+  String importDocTakePhotoFailed(Object error) {
+    return 'Failed to take photo: $error';
+  }
+
+  @override
+  String get importDocUploadFailed => 'Upload failed';
+
+  @override
+  String importDocUploadFailedCode(Object code) {
+    return 'Upload failed ($code)';
+  }
+
+  @override
+  String importDocUploadFailedWithError(Object error) {
+    return 'Upload failed: $error';
+  }
+
+  @override
+  String get importDocUploaded => 'Upload complete';
+
+  @override
+  String get importedRecipeTitle => 'Imported recipe';
+
+  @override
+  String get playlistPlayAll => 'Play all';
+
+  @override
+  String get playlistPlayAllNotImplemented => 'Play all is not implemented yet';
+
+  @override
+  String playlistPlayerTitle(Object title) {
+    return 'Playlist - $title';
+  }
+
+  @override
+  String get playlistStepCookFirstRecipe =>
+      'Cook the first recipe according to its instructions.';
+
+  @override
+  String get playlistStepCookRemaining => 'Cook the rest of the playlist.';
+
+  @override
+  String get playlistStepPrepIngredients =>
+      'Prepare ingredients for the first recipe.';
+
+  @override
+  String get playlistStepPrepNextRecipe =>
+      'Prepare the next recipe in the playlist.';
+
+  @override
+  String get recipeAddIngredientsToCart => 'Add ingredients to cart';
+
+  @override
+  String get recipeAddToCartFailed => 'Failed to add to cart';
+
+  @override
+  String get recipeAddToCookbook => 'Add to cookbook';
+
+  @override
+  String recipeAddToCookbookFailed(Object error) {
+    return 'Failed to add to cookbook: $error';
+  }
+
+  @override
+  String get recipeAddToCookbooksTitle => 'Add to cookbooks';
+
+  @override
+  String get recipeAddToFavorites => 'Add to favorites';
+
+  @override
+  String recipeAddedToCart(int count) {
+    return 'Added $count items to cart';
+  }
+
+  @override
+  String get recipeAddedToCookbooks => 'Added to cookbooks';
+
+  @override
+  String get recipeAddedToFavorites => 'Added to favorites';
+
+  @override
+  String get recipeAttachDialogFailed => 'Unable to load cookbooks';
+
+  @override
+  String get recipeCookbooksLoadFailed => 'Failed to load cookbooks';
+
+  @override
+  String recipeCoverUploadFailed(Object error) {
+    return 'Failed to upload cover: $error';
+  }
+
+  @override
+  String get recipeCreateCookbookFirst => 'Create a cookbook first';
+
+  @override
+  String get recipeDifficultyEasy => 'Easy';
+
+  @override
+  String get recipeEditButton => 'Edit';
+
+  @override
+  String get recipeImportFailedBody =>
+      'We couldn\'t import this recipe. Try again or go Home.';
+
+  @override
+  String get recipeImportFailedScreenTitle => 'Import failed';
+
+  @override
+  String get recipeImportFailedTitle => 'Import failed';
+
+  @override
+  String get recipeImportNeedsReviewBody =>
+      'We imported the recipe but it needs review. You can edit it now.';
+
+  @override
+  String get recipeImportNeedsReviewTitle => 'Needs review';
+
+  @override
+  String get recipeImportProcessingTitle => 'Still working on it';
+
+  @override
+  String get recipeImportStepExtractingText => 'Extracting text';
+
+  @override
+  String get recipeImportStepFinalizing => 'Finalizing';
+
+  @override
+  String get recipeImportStepUnderstanding => 'Understanding recipe';
+
+  @override
+  String get recipeImportStepUploadComplete => 'Upload complete';
+
+  @override
+  String get recipeImportTimeoutBody =>
+      'This is taking longer than expected. You can try again or go Home.';
+
+  @override
+  String get recipeImportTimeoutTitle => 'Import timeout';
+
+  @override
+  String get recipeImportUnknownError => 'Unknown import error';
+
+  @override
+  String get recipeNoIngredients => 'No ingredients yet';
+
+  @override
+  String get recipeNoIngredientsToAdd => 'No ingredients to add';
+
+  @override
+  String get recipeNoSteps => 'No steps yet';
+
+  @override
+  String get recipeNoTools => 'No tools listed';
+
+  @override
+  String get recipeNotFoundBody => 'We couldn\'t find this recipe.';
+
+  @override
+  String get recipeNotFoundTitle => 'Recipe not found';
+
+  @override
+  String get recipeOcrPreviewLabel => 'OCR preview';
+
+  @override
+  String get recipeOriginalLanguageLabel => 'Original';
+
+  @override
+  String get recipePlayerHandsFreeMode => 'Hands-free mode';
+
+  @override
+  String get recipePlayerHandsFreeOn => 'Hands-free mode ON';
+
+  @override
+  String get recipePlayerNoSteps => 'No steps available';
+
+  @override
+  String recipePlayerStepOf(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String recipePlayerStepPlaceholder(int number) {
+    return 'Step $number';
+  }
+
+  @override
+  String get recipePlayerVoiceControl => 'Voice control';
+
+  @override
+  String get recipeProcessing => 'Processing';
+
+  @override
+  String get recipeRemoveFromFavorites => 'Remove from favorites';
+
+  @override
+  String get recipeRemovedFromFavorites => 'Removed from favorites';
+
+  @override
+  String get recipeSignInToSave => 'Sign in to save recipes.';
+
+  @override
+  String get recipeStartCooking => 'Start cooking';
+
+  @override
+  String get recipeStepRequired => 'Step is required';
+
+  @override
+  String get recipeTitleRequired => 'Title is required';
+
+  @override
+  String get recipeTranslateToEnglish => 'Translate to English';
+
+  @override
+  String recipeTranslatedFrom(Object language) {
+    return 'Translated from $language';
+  }
+
+  @override
+  String get recipeTranslating => 'Translating';
+
+  @override
+  String get recipeTranslationUnavailable => 'Translation is unavailable';
+
+  @override
+  String get recipeUnavailableBody => 'This recipe isn\'t available right now.';
+
+  @override
+  String get recipeUnavailableTitle => 'Recipe unavailable';
+
+  @override
+  String get recipeViewChef => 'View chef';
+
+  @override
+  String get recipeViewOriginal => 'View original';
+
+  @override
+  String get recipesLabel => 'Recipes';
+
+  @override
+  String get chefSaveFailed => 'Failed to save profile';
+
+  @override
+  String get chefEditOwnOnly => 'You can only edit your own profile.';
+
+  @override
+  String get chefEditAvatarLabel => 'Avatar';
+
+  @override
+  String get chefEditChangePhoto => 'Change photo';
+
+  @override
+  String get chefEditBioLabel => 'Bio';
+
+  @override
+  String get chefEditBioHint =>
+      'Tell followers about your cooking style, specialties, and inspirations.';
+
+  @override
+  String get chefEditMakeChangeToSave => 'Make a change to enable Save.';
+
+  @override
+  String get chefNoRecipesYet => 'You have not published any recipes yet';
+
+  @override
+  String get chefLoadRecipesFailed =>
+      'Failed to load recipes. Please try again.';
+
+  @override
+  String chefRecipeStats(int views, int saves) {
+    return 'Views: $views • Saves: $saves';
+  }
+
+  @override
+  String chefRecipeDeleted(Object title) {
+    return 'Recipe \"$title\" deleted';
+  }
+
+  @override
+  String get discoverFeaturedCookbooks => 'Featured cookbooks';
+
+  @override
+  String get discoverCookbookLoadFailed => 'Failed to load cookbook';
+
+  @override
+  String get discoverCookbookNotFound => 'Cookbook not found';
+
+  @override
+  String get discoverCookbookNoRecipes => 'No recipes in this cookbook yet.';
+
+  @override
+  String get discoverCookbookNoRecipesAvailable => 'No recipes available.';
+
+  @override
+  String get discoverRecipesLoadFailed => 'Failed to load recipes';
 }

@@ -13,6 +13,8 @@ class AuthController extends ChangeNotifier {
 
   Future<void> signInWithGoogle() => _run(_authService.signInWithGoogle);
 
+  Future<void> signInAsGuest() => _run(_authService.signInAsGuest);
+
   Future<void> signInWithApple() => _run(_authService.signInWithApple);
 
   Future<void> signInWithEmail(String email, String password) =>

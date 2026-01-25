@@ -6,6 +6,8 @@ import 'package:foodiy/features/playlist/domain/public_chef_playlist_models.dart
 import 'package:foodiy/features/recipe/application/recipe_firestore_service.dart';
 import 'package:foodiy/features/recipe/domain/recipe.dart';
 import 'package:foodiy/shared/constants/categories.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class PublicChefPlaylistEditScreen extends StatefulWidget {
   const PublicChefPlaylistEditScreen({super.key});
@@ -33,13 +35,14 @@ class _PublicChefPlaylistEditScreenState
   bool get _atCategoryLimit => _selectedCategories.length >= 5;
 
   void _toggleCategory(String category, bool selected) {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       if (selected) {
         if (_selectedCategories.contains(category)) return;
         if (_atCategoryLimit) {
-          _categoryError = 'Pick up to 5 categories';
+          _categoryError = l10n.cookbooksCategoryLimit;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('You can select up to 5 categories')),
+            SnackBar(content: Text(l10n.cookbooksCategoryLimit)),
           );
           return;
         }
@@ -57,13 +60,15 @@ class _PublicChefPlaylistEditScreenState
   bool _validateCategories() {
     if (_selectedCategories.isEmpty) {
       setState(() {
-        _categoryError = 'Pick 1-5 categories to publish';
+        _categoryError = AppLocalizations.of(context)!
+            .cookbooksCategoryPublicRequired;
       });
       return false;
     }
     if (_selectedCategories.length > 5) {
       setState(() {
-        _categoryError = 'Pick at most 5 categories';
+        _categoryError =
+            AppLocalizations.of(context)!.cookbooksCategoryLimit;
       });
       return false;
     }
@@ -76,15 +81,19 @@ class _PublicChefPlaylistEditScreenState
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=public_chef_playlist_edit',
+    );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create public cookbook')),
+      appBar: FoodiyAppBar(title: Text(l10n.cookbooksPublicCreateTitle)),
       body: uid.isEmpty
-          ? const Center(
+          ? Center(
               child: Padding(
                 padding: EdgeInsets.all(16),
                 child: Text(
-                  'You have no recipes to add yet.\nUpload recipes to create a public cookbook.',
+                  l10n.cookbooksPublicNoRecipesBody,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -97,17 +106,17 @@ class _PublicChefPlaylistEditScreenState
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Failed to load recipes. Please try again.'),
+                  return Center(
+                    child: Text(l10n.cookbooksLoadRecipesFailedDetail),
                   );
                 }
                 final recipes = snapshot.data ?? const <Recipe>[];
                 if (recipes.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
                       padding: EdgeInsets.all(16),
                       child: Text(
-                        'You have no recipes to add yet.\nUpload recipes to create a public cookbook.',
+                        l10n.cookbooksPublicNoRecipesBody,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -120,20 +129,21 @@ class _PublicChefPlaylistEditScreenState
                     children: [
                       TextField(
                         controller: _titleController,
-                        decoration: const InputDecoration(
-                          labelText: 'Playlist title',
+                        decoration: InputDecoration(
+                          labelText: l10n.cookbooksPlaylistTitleLabel,
                         ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: _descriptionController,
-                        decoration:
-                            const InputDecoration(labelText: 'Description'),
+                        decoration: InputDecoration(
+                          labelText: l10n.cookbooksDescriptionLabel,
+                        ),
                         maxLines: 3,
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Categories',
+                        l10n.cookbooksCategoriesTitle,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 8),
@@ -171,7 +181,7 @@ class _PublicChefPlaylistEditScreenState
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Pick 1-5 categories to help people find this cookbook.',
+                        l10n.cookbooksCategoriesPublicHint,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       if (_categoryError != null) ...[
@@ -186,7 +196,7 @@ class _PublicChefPlaylistEditScreenState
                       ],
                       const SizedBox(height: 16),
                       Text(
-                        'Select recipes to include',
+                        l10n.cookbooksSelectRecipesToInclude,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 8),
@@ -207,7 +217,7 @@ class _PublicChefPlaylistEditScreenState
                               },
                               title: Text(recipe.title),
                               subtitle: Text(
-                                '${recipe.steps.length} steps • Medium',
+                                '${l10n.profileStepsCount(recipe.steps.length)} • ${l10n.recipeDifficultyMedium}',
                               ),
                             );
                           }).toList(),
@@ -218,7 +228,7 @@ class _PublicChefPlaylistEditScreenState
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.public),
-                          label: const Text('Create public cookbook'),
+                          label: Text(l10n.cookbooksPublicCreateTitle),
                           onPressed: () => _onCreatePressed(recipes),
                         ),
                       ),
@@ -235,14 +245,14 @@ class _PublicChefPlaylistEditScreenState
     final description = _descriptionController.text.trim();
 
     if (title.isEmpty) {
-      _showMessage('Please enter a playlist title');
+      _showMessage(AppLocalizations.of(context)!.cookbooksPlaylistTitleRequired);
       return;
     }
     if (!_validateCategories()) {
       return;
     }
     if (_selectedIds.isEmpty) {
-      _showMessage('Select at least one recipe');
+      _showMessage(AppLocalizations.of(context)!.cookbooksSelectAtLeastOneRecipe);
       return;
     }
 
@@ -253,8 +263,10 @@ class _PublicChefPlaylistEditScreenState
             recipeId: r.id,
             title: r.title,
             imageUrl: r.imageUrl ?? '',
-            time: '${r.steps.length} steps',
-            difficulty: 'Medium',
+            time: AppLocalizations.of(context)!.profileStepsCount(
+              r.steps.length,
+            ),
+            difficulty: AppLocalizations.of(context)!.recipeDifficultyMedium,
           ),
         )
         .toList(growable: false);
@@ -267,11 +279,11 @@ class _PublicChefPlaylistEditScreenState
         categories: _selectedCategories.toList(growable: false),
       );
     } catch (e) {
-      _showMessage('Failed to create cookbook: $e');
+      _showMessage(AppLocalizations.of(context)!.cookbooksCreateFailed('$e'));
       return;
     }
 
-    _showMessage('Public playlist created');
+    _showMessage(AppLocalizations.of(context)!.cookbooksPublicCreated);
     Navigator.of(context).maybePop();
   }
 

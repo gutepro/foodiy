@@ -11,6 +11,8 @@ import 'package:foodiy/features/playlist/domain/public_chef_playlist_models.dart
 import 'package:foodiy/features/recipe/application/recipe_firestore_service.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_details_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class PublicChefPlaylistDetailsArgs {
   final String playlistId;
@@ -27,6 +29,10 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final service = PublicChefPlaylistService.instance;
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=public_chef_playlist_details',
+    );
 
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
@@ -42,10 +48,7 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
 
         if (!playlistSnapshot.hasData || !playlistSnapshot.data!.exists) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Cookbook'),
-              leading: const BackButton(),
-            ),
+            appBar: FoodiyAppBar(title: Text(l10n.cookbooksUntitled)),
             body: _ErrorState(onRetry: () => Navigator.of(context).maybePop()),
           );
         }
@@ -53,11 +56,13 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
         final data = playlistSnapshot.data!.data() ?? {};
         final playlistId = playlistSnapshot.data!.id;
         final title =
-            data['name'] as String? ?? data['title'] as String? ?? 'Cookbook';
+            data['name'] as String? ??
+            data['title'] as String? ??
+            l10n.cookbooksUntitled;
         final chefName =
             data['ownerName'] as String? ??
             data['chefName'] as String? ??
-            'Chef';
+            l10n.homeChefPlaceholder;
         final description = data['description'] as String? ?? '';
         final ownerId = data['ownerId'] as String? ?? '';
         final isOwner = currentUid != null && ownerId == currentUid;
@@ -65,9 +70,8 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
         final theme = Theme.of(context);
 
         return Scaffold(
-          appBar: AppBar(
+          appBar: FoodiyAppBar(
             title: Text(title),
-            leading: const BackButton(),
             actions: [
               if (isOwner)
                 IconButton(
@@ -77,18 +81,16 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                       context: context,
                       builder: (context) {
                         return AlertDialog(
-                          title: const Text('Delete cookbook?'),
-                          content: const Text(
-                            'Delete this cookbook? This cannot be undone.',
-                          ),
+                          title: Text(l10n.cookbooksDeleteTitle),
+                          content: Text(l10n.cookbooksDeleteWarning),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(false),
-                              child: const Text('Cancel'),
+                              child: Text(l10n.homeCancel),
                             ),
                             ElevatedButton(
                               onPressed: () => Navigator.of(context).pop(true),
-                              child: const Text('Delete'),
+                              child: Text(l10n.cookbooksActionDelete),
                             ),
                           ],
                         );
@@ -116,7 +118,10 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                     children: [
                       Text(title, style: theme.textTheme.headlineSmall),
                       const SizedBox(height: 4),
-                      Text('By $chefName', style: theme.textTheme.bodyMedium),
+                      Text(
+                        l10n.chefByLine(chefName),
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       if (description.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         Text(description, style: theme.textTheme.bodyMedium),
@@ -125,13 +130,15 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                       ElevatedButton.icon(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Play all is not implemented yet'),
+                            SnackBar(
+                              content: Text(
+                                l10n.playlistPlayAllNotImplemented,
+                              ),
                             ),
                           );
                         },
                         icon: const Icon(Icons.play_arrow),
-                        label: const Text('Play all'),
+                        label: Text(l10n.playlistPlayAll),
                       ),
                     ],
                   ),
@@ -139,7 +146,10 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('Recipes', style: theme.textTheme.titleMedium),
+                  child: Text(
+                    l10n.recipesLabel,
+                    style: theme.textTheme.titleMedium,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -157,9 +167,9 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                       );
                     }
                     if (entriesSnapshot.hasError) {
-                      return const Padding(
+                      return Padding(
                         padding: EdgeInsets.all(16),
-                        child: Text('Failed to load recipes'),
+                        child: Text(l10n.cookbooksLoadRecipesFailedSimple),
                       );
                     }
                     final entries = entriesSnapshot.data?.docs ?? const [];
@@ -169,7 +179,7 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('This cookbook has no recipes yet.'),
+                            Text(l10n.cookbooksNoRecipesYet),
                             if (isOwner) ...[
                               const SizedBox(height: 8),
                               TextButton.icon(
@@ -177,7 +187,7 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                                   Navigator.of(context).maybePop();
                                 },
                                 icon: const Icon(Icons.add),
-                                label: const Text('Add recipes'),
+                                label: Text(l10n.cookbooksAddRecipes),
                               ),
                             ],
                           ],
@@ -196,9 +206,9 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                           );
                         }
                         if (filteredSnapshot.hasError) {
-                          return const Padding(
+                          return Padding(
                             padding: EdgeInsets.all(16),
-                            child: Text('Failed to load recipes'),
+                            child: Text(l10n.cookbooksLoadRecipesFailedSimple),
                           );
                         }
                         final filtered = filteredSnapshot.data ?? const [];
@@ -208,9 +218,7 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'This cookbook has no recipes available.',
-                                ),
+                                Text(l10n.cookbooksNoRecipesAvailable),
                                 if (isOwner) ...[
                                   const SizedBox(height: 8),
                                   TextButton.icon(
@@ -218,7 +226,7 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                                       Navigator.of(context).maybePop();
                                     },
                                     icon: const Icon(Icons.add),
-                                    label: const Text('Add recipes'),
+                                    label: Text(l10n.cookbooksAddRecipes),
                                   ),
                                 ],
                               ],
@@ -233,7 +241,8 @@ class PublicChefPlaylistDetailsScreen extends StatelessWidget {
                             final entry = filtered[index].data();
                             final recipeId = entry['recipeId'] as String? ?? '';
                             final entryTitle =
-                                entry['title'] as String? ?? 'Recipe';
+                                entry['title'] as String? ??
+                                l10n.untitledRecipe;
                             final imageUrl = entry['imageUrl'] as String? ?? '';
                             final time = entry['time'] as String? ?? '';
                             final difficulty =
@@ -319,6 +328,7 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -327,17 +337,17 @@ class _ErrorState extends StatelessWidget {
           children: [
             const Icon(Icons.error_outline, size: 40),
             const SizedBox(height: 12),
-            const Text(
-              'We had trouble loading your content.',
+            Text(
+              l10n.homeLoadErrorHeadline,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text('Back'),
+              child: Text(l10n.cookbooksBack),
             ),
             const SizedBox(height: 8),
-            TextButton(onPressed: onRetry, child: const Text('Retry')),
+            TextButton(onPressed: onRetry, child: Text(l10n.tryAgain)),
           ],
         ),
       ),

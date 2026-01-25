@@ -18,6 +18,7 @@ import 'package:foodiy/core/models/user_type.dart';
 import 'package:foodiy/shared/services/ads_service.dart';
 import 'package:foodiy/shared/widgets/banner_ad_container.dart';
 import 'package:foodiy/l10n/app_localizations.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
@@ -57,6 +58,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=Discover keys=discoverChefsToFollow,discoverNoChefsYet,discoverFollowersCount',
+    );
     final categories = kRecipeCategoryOptions;
     final userType =
         CurrentUserService.instance.currentProfile?.userType ?? UserType.freeUser;
@@ -68,7 +72,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       _adsLogged = true;
     }
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.navDiscover)),
+      appBar: FoodiyAppBar(title: Text(l10n.navDiscover)),
       bottomNavigationBar: BannerAdContainer(showAds: adsOn),
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,
@@ -152,10 +156,11 @@ class _ChefsCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DiscoverSectionHeader(title: 'Chefs to follow', onSeeAll: null),
+        DiscoverSectionHeader(title: l10n.discoverChefsToFollow, onSeeAll: null),
         const SizedBox(height: 12),
         StreamBuilder<List<FollowingChef>>(
           stream: ChefFollowService.instance.watchTopChefs(
@@ -175,7 +180,7 @@ class _ChefsCarousel extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  'No chefs to show yet. Check back soon!',
+                  l10n.discoverNoChefsYet,
                   style: theme.textTheme.bodyMedium,
                 ),
               );
@@ -207,6 +212,7 @@ class _ChefCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final avatarUrl = chef.avatarUrl.trim();
     return SizedBox(
       width: 150,
@@ -248,7 +254,7 @@ class _ChefCard extends StatelessWidget {
                     const Icon(Icons.group_outlined, size: 14),
                     const SizedBox(width: 4),
                     Text(
-                      '${chef.followersCount} followers',
+                      l10n.discoverFollowersCount(chef.followersCount),
                       style: theme.textTheme.labelSmall,
                     ),
                   ],

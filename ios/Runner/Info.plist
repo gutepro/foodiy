@@ -27,7 +27,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.988257088468-40emiipnaktcur37hl3nosivs3c4n1vd</string>
+				<string>com.googleusercontent.apps.988257088468-4sketjakb8q1jgupujnlsi1t0coqam5u</string>
 			</array>
 		</dict>
 	</array>
@@ -36,7 +36,7 @@
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-6515642500934987~4334410299</string>
 	<key>GIDClientID</key>
-	<string>988257088468-40emiipnaktcur37hl3nosivs3c4n1vd.apps.googleusercontent.com</string>
+	<string>988257088468-4sketjakb8q1jgupujnlsi1t0coqam5u.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>

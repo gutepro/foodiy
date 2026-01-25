@@ -7,6 +7,8 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import 'package:foodiy/features/recipe/domain/recipe_step.dart';
 import 'package:foodiy/features/settings/application/settings_service.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class RecipePlayerArgs {
   final String title;
@@ -57,7 +59,10 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen>
 
   RecipeStep get _currentStep {
     if (_steps.isEmpty) {
-      return const RecipeStep(text: 'Step 1', durationSeconds: 0);
+      return RecipeStep(
+        text: AppLocalizations.of(context)!.recipePlayerStepPlaceholder(1),
+        durationSeconds: 0,
+      );
     }
     if (currentStepIndex >= _steps.length) {
       currentStepIndex = 0;
@@ -157,7 +162,11 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen>
   void _startTimer() {
     if (_steps.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('This recipe has no steps to play')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.recipePlayerNoSteps,
+          ),
+        ),
       );
       return;
     }
@@ -275,6 +284,10 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=RecipePlayer keys=recipePlayerNoSteps,recipePlayerStepOf',
+    );
     final steps = widget.args.steps;
     final total = _currentDurationMs;
     final double progress =
@@ -290,25 +303,15 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen>
     return Directionality(
       textDirection: _directionFromLanguage(widget.args.languageCode),
       child: Scaffold(
-        appBar: AppBar(
+        appBar: FoodiyAppBar(
           title: Text(widget.args.title),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                Navigator.of(context).maybePop();
-              }
-            },
-          ),
           actions: [
             IconButton(
               icon: Icon(_handsFree ? Icons.hearing : Icons.hearing_disabled),
               onPressed: () {
                 setState(() => _handsFree = !_handsFree);
               },
-              tooltip: 'Hands-free mode',
+              tooltip: l10n.recipePlayerHandsFreeMode,
             ),
             IconButton(
               icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
@@ -321,7 +324,7 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen>
                       }
                     }
                   : null,
-              tooltip: 'Voice control',
+              tooltip: l10n.recipePlayerVoiceControl,
             ),
           ],
         ),
@@ -332,7 +335,7 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen>
             children: [
               Center(
                 child: Text(
-                  'Step ${currentStepIndex + 1} of ${steps.length}',
+                  l10n.recipePlayerStepOf(currentStepIndex + 1, steps.length),
                   style: theme.textTheme.bodySmall,
                   textAlign: TextAlign.center,
                 ),
@@ -341,7 +344,7 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen>
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    'Hands-free mode ON',
+                    l10n.recipePlayerHandsFreeOn,
                     style: theme.textTheme.labelMedium,
                   ),
                 ),
@@ -468,7 +471,11 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen>
   void _onNextStepPressed() {
     if (_steps.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('This recipe has no steps to play')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.recipePlayerNoSteps,
+          ),
+        ),
       );
       return;
     }
@@ -481,7 +488,11 @@ class _RecipePlayerScreenState extends State<RecipePlayerScreen>
   void _onPreviousStepPressed() {
     if (_steps.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('This recipe has no steps to play')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.recipePlayerNoSteps,
+          ),
+        ),
       );
       return;
     }

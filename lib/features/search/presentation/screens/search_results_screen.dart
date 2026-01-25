@@ -5,6 +5,7 @@ import 'package:foodiy/features/discovery/discovery_feed.dart';
 import 'package:foodiy/features/discovery/discovery_feed.dart'
     show PublicCookbookScreen;
 import 'package:foodiy/shared/constants/categories.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class SearchResultsArgs {
   final String query;
@@ -43,19 +44,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: const Text('Results'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            FocusManager.instance.primaryFocus?.unfocus();
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
-        ),
       ),
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,

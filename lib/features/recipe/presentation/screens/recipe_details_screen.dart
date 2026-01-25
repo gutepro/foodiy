@@ -295,6 +295,19 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                   width: double.infinity,
                 ),
               ),
+              if (recipe.ocrRawText == null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text('OCR text missing - please reimport'),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -612,6 +625,9 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
       {bool timedOut = false}) {
     final l10n = AppLocalizations.of(context)!;
     final status = recipe.importStatus;
+    final importDebug = recipe.importDebug ?? const <String, dynamic>{};
+    final debugStage = importDebug['stage'] as String? ?? '';
+    final debugErrors = importDebug['errors'] as List<dynamic>? ?? const <dynamic>[];
     bool isOneOf(Set<String> values) => values.contains(status);
 
     final uploadDone = status != 'uploading';
@@ -742,6 +758,12 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen>
                       )
                       .toList(),
                 ),
+              if (debugStage.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text('Debug stage: $debugStage'),
+                if (debugErrors.isNotEmpty)
+                  Text('Debug errors: ${debugErrors.length}'),
+              ],
               if (!showTimeout && !isFailed) ...[
                 const SizedBox(height: 16),
                 ElevatedButton(

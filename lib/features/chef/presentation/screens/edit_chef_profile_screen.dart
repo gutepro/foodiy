@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class EditChefProfileScreen extends StatefulWidget {
   const EditChefProfileScreen({super.key, required this.chefId});
@@ -113,7 +115,7 @@ class _EditChefProfileScreenState extends State<EditChefProfileScreen> {
       debugPrint('EditChefProfileScreen save error: $e\n$st');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save profile')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.chefSaveFailed)),
         );
       }
     } finally {
@@ -126,6 +128,10 @@ class _EditChefProfileScreenState extends State<EditChefProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=edit_chef_profile',
+    );
     final canEdit = _canEdit;
     final avatarPreview = _newAvatarFile != null
         ? Image.file(File(_newAvatarFile!.path), fit: BoxFit.cover)
@@ -134,8 +140,8 @@ class _EditChefProfileScreenState extends State<EditChefProfileScreen> {
             : const Icon(Icons.person, size: 32, color: Colors.white);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit chef profile'),
+      appBar: FoodiyAppBar(
+        title: Text(l10n.profileEditChefProfile),
         actions: [
           TextButton(
             onPressed:
@@ -146,7 +152,7 @@ class _EditChefProfileScreenState extends State<EditChefProfileScreen> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Save'),
+                : Text(l10n.cookbooksSave),
           ),
         ],
       ),
@@ -156,8 +162,6 @@ class _EditChefProfileScreenState extends State<EditChefProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('EDIT PROFILE SCREEN MOUNTED'),
-              const SizedBox(height: 12),
               if (!canEdit)
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -165,15 +169,18 @@ class _EditChefProfileScreenState extends State<EditChefProfileScreen> {
                     color: Colors.orange.shade100,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'You can only edit your own profile.',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                  child: Text(
+                    l10n.chefEditOwnOnly,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               if (_loading)
                 const Center(child: CircularProgressIndicator())
               else ...[
-                Text('Avatar', style: theme.textTheme.titleMedium),
+                Text(
+                  l10n.chefEditAvatarLabel,
+                  style: theme.textTheme.titleMedium,
+                ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -190,28 +197,27 @@ class _EditChefProfileScreenState extends State<EditChefProfileScreen> {
                     OutlinedButton.icon(
                       onPressed: _saving ? null : _pickAvatar,
                       icon: const Icon(Icons.photo_camera),
-                      label: const Text('Change photo'),
+                      label: Text(l10n.chefEditChangePhoto),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
-                Text('Bio', style: theme.textTheme.titleMedium),
+                Text(l10n.chefEditBioLabel, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _bioController,
                   maxLength: 300,
                   maxLines: 5,
-                  decoration: const InputDecoration(
-                    hintText:
-                        'Tell followers about your cooking style, specialties, and inspirations.',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: l10n.chefEditBioHint,
+                    border: const OutlineInputBorder(),
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
                 const SizedBox(height: 12),
                 if (!_dirty)
                   Text(
-                    'Make a change to enable Save.',
+                    l10n.chefEditMakeChangeToSave,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.primary,
                     ),

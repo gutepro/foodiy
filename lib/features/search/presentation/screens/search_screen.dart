@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/features/search/presentation/screens/search_results_screen.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -47,11 +48,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
+      appBar: FoodiyAppBar(
         title: TextField(
           controller: _searchController,
           decoration: const InputDecoration(

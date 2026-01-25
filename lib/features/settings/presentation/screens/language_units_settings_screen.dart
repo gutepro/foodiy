@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:foodiy/features/settings/application/settings_service.dart';
 import 'package:foodiy/l10n/app_localizations.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class LanguageAndUnitsSettingsScreen extends StatefulWidget {
   const LanguageAndUnitsSettingsScreen({super.key});
@@ -40,7 +41,7 @@ class _LanguageAndUnitsSettingsScreenState
     };
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: Text(l10n.languageUnitsTitle),
       ),
       body: ListView(

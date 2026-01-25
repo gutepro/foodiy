@@ -9,6 +9,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:foodiy/core/services/session_service.dart';
 import 'package:foodiy/features/playlist/application/playlist_firestore_service.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class DeleteAccountScreen extends StatefulWidget {
   const DeleteAccountScreen({super.key});
@@ -282,7 +283,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Delete account')),
+      appBar: const FoodiyAppBar(title: Text('Delete account')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -17,6 +17,8 @@ import 'package:foodiy/features/playlist/presentation/screens/personal_playlist_
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/shared/constants/categories.dart';
 import 'package:foodiy/l10n/app_localizations.dart';
+import 'package:foodiy/core/utils/auth_guards.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class MyPlaylistsScreen extends StatefulWidget {
   const MyPlaylistsScreen({super.key});
@@ -197,7 +199,9 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.homeMyCookbooks)),
+      appBar: FoodiyAppBar(
+        title: Text(l10n.homeMyCookbooks),
+      ),
       body: _initializing
           ? const Center(child: CircularProgressIndicator())
           : _loadError != null
@@ -452,6 +456,10 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
   }
 
   Future<void> _onCreatePlaylistPressed() async {
+    if (isGuestUser) {
+      await ensureNotGuest(context);
+      return;
+    }
     final l10n = AppLocalizations.of(context)!;
     final draft = await Navigator.of(context).push<_CookbookDraft>(
       MaterialPageRoute(
@@ -632,9 +640,10 @@ class _CreateCookbookWizardState extends State<_CreateCookbookWizard> {
 
   void _next() {
     if (_step == 0) {
+      final l10n = AppLocalizations.of(context)!;
       final name = _nameController.text.trim();
       if (name.isEmpty) {
-        setState(() => _nameError = 'Name is required');
+        setState(() => _nameError = l10n.cookbooksNameRequired);
         return;
       }
       setState(() {
@@ -828,12 +837,8 @@ class _CreateCookbookWizardState extends State<_CreateCookbookWizard> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: Text(l10n.cookbooksCreateTitle),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
       ),
       body: SafeArea(child: _buildStepContent()),
       bottomNavigationBar: SafeArea(

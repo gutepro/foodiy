@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class SubscriptionCheckoutPlaceholderScreen extends StatelessWidget {
   const SubscriptionCheckoutPlaceholderScreen({super.key});
@@ -6,7 +7,7 @@ class SubscriptionCheckoutPlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: const Text('Payment'),
       ),
       body: const Center(

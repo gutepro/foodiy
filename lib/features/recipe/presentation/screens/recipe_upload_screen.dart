@@ -17,8 +17,11 @@ import 'package:foodiy/features/recipe/application/recipe_firestore_service.dart
 import 'package:foodiy/features/recipe/domain/recipe.dart';
 import 'package:foodiy/features/recipe/domain/recipe_step.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_player_screen.dart';
+import 'package:foodiy/features/recipe/presentation/screens/import_failed_screen.dart';
 import 'package:foodiy/l10n/app_localizations.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/core/utils/auth_guards.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class RecipeUploadScreen extends StatefulWidget {
   const RecipeUploadScreen({super.key, this.recipe});
@@ -45,8 +48,15 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
   Uint8List? _pickedImageBytes;
   String _existingImageUrl = '';
   bool _saving = false;
+  String? _fatalErrorMessage;
 
   bool get _isEdit => widget.recipe != null;
+
+  void _setFatalError(Object error, StackTrace st) {
+    debugPrint('RecipeUploadScreen: fatal error $error\n$st');
+    if (!mounted) return;
+    setState(() => _fatalErrorMessage = error.toString());
+  }
 
   @override
   void initState() {
@@ -114,7 +124,7 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
       debugPrint(
         'RecipeUploadScreen: cover upload failed after ${stopwatch.elapsed.inSeconds}s: $e\n$st',
       );
-      _showMessage('Failed to upload cover image: $e');
+      _showMessage(AppLocalizations.of(context)!.recipeCoverUploadFailed('$e'));
       if (mounted) {
         setState(() => _saving = false);
       }
@@ -232,6 +242,7 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
       });
     } catch (e, st) {
       debugPrint('RecipeUploadScreen: file pick failed $e\n$st');
+      _setFatalError(e, st);
     }
   }
 
@@ -320,18 +331,24 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final picked = await _picker.pickImage(source: source, imageQuality: 80);
-    if (picked == null) return;
-    final bytes = await picked.readAsBytes();
-    setState(() {
-      _pickedImage = picked;
-      _pickedImageBytes = bytes;
-    });
+    try {
+      final picked = await _picker.pickImage(source: source, imageQuality: 80);
+      if (picked == null) return;
+      final bytes = await picked.readAsBytes();
+      setState(() {
+        _pickedImage = picked;
+        _pickedImageBytes = bytes;
+      });
+    } catch (e, st) {
+      debugPrint('RecipeUploadScreen: image pick failed $e\n$st');
+      _setFatalError(e, st);
+    }
   }
 
   void _previewInPlayer() {
     final steps = _buildStepsFromForm();
     final languageCode = Localizations.localeOf(context).languageCode;
+    final l10n = AppLocalizations.of(context)!;
 
     final previewImage = _pickedImage != null
         ? _pickedImage!.path
@@ -339,7 +356,7 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
 
     final args = RecipePlayerArgs(
       title: _titleController.text.trim().isEmpty
-          ? 'Untitled recipe'
+          ? l10n.untitledRecipe
           : _titleController.text.trim(),
       imageUrl: previewImage,
       steps: steps,
@@ -354,6 +371,7 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
     debugPrint(
       'RecipeUploadScreen: save pressed (edit=$_isEdit) title="${_titleController.text.trim()}" pickedImage=${_pickedImage != null} existingImageUrl=$_existingImageUrl',
     );
+    final l10n = AppLocalizations.of(context)!;
     final title = _titleController.text.trim();
     final steps = _buildStepsFromForm();
     final originalLanguageCode = Localizations.localeOf(context).languageCode;
@@ -362,11 +380,11 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
     final preNotes = _preNotesController.text.trim();
 
     if (title.isEmpty) {
-      _showMessage('Please enter a recipe title');
+      _showMessage(l10n.recipeTitleRequired);
       return;
     }
     if (steps.isEmpty) {
-      _showMessage('Please add at least one step');
+      _showMessage(l10n.recipeStepRequired);
       return;
     }
 
@@ -374,8 +392,8 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null || user.uid.isEmpty) {
-        _showMessage('Please sign in to save recipes');
+      if (user == null || user.uid.isEmpty || user.isAnonymous) {
+        _showMessage(l10n.recipeSignInToSave);
         return;
       }
       setState(() => _saving = true);
@@ -553,6 +571,12 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=RecipeUpload keys=recipeCreateTitle,recipeEditTitle',
+    );
+    if (_fatalErrorMessage != null) {
+      return const ImportFailedScreen();
+    }
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final profile = CurrentUserService.instance.currentProfile;
@@ -565,7 +589,7 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
 
     if (!isChef) {
       return Scaffold(
-        appBar: AppBar(title: Text(l10n.recipeCreateTitle)),
+        appBar: FoodiyAppBar(title: Text(l10n.recipeCreateTitle)),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -580,7 +604,7 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
 
     if (reachedLimit) {
       return Scaffold(
-        appBar: AppBar(title: Text(l10n.recipeCreateTitle)),
+        appBar: FoodiyAppBar(title: Text(l10n.recipeCreateTitle)),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -593,137 +617,144 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEdit ? l10n.recipeEditTitle : l10n.recipeCreateTitle),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                    Text(l10n.recipePhotoLabel, style: theme.textTheme.titleMedium),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        color: Colors.grey.shade100,
-                        child: _pickedImageBytes != null
-                            ? Image.memory(
-                                _pickedImageBytes!,
-                                height: 180,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              )
-                            : _existingImageUrl.isNotEmpty
-                            ? Image.network(
-                                _existingImageUrl,
-                                height: 180,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Image.asset(
-                                    BrandAssets.foodiyLogo,
-                                    height: 180,
-                                    width: double.infinity,
-                                    fit: BoxFit.contain,
-                                  );
-                                },
-                              )
-                            : Image.asset(
-                                BrandAssets.foodiyLogo,
-                                height: 180,
-                                width: double.infinity,
-                                fit: BoxFit.contain,
-                              ),
+    try {
+      return Scaffold(
+        appBar: FoodiyAppBar(
+          title: Text(_isEdit ? l10n.recipeEditTitle : l10n.recipeCreateTitle),
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.recipePhotoLabel,
+                        style: theme.textTheme.titleMedium,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        SizedBox(
-                          width: (MediaQuery.of(context).size.width - 48) / 2,
-                          child: OutlinedButton.icon(
-                            onPressed: () => _pickImage(ImageSource.camera),
-                            icon: const Icon(Icons.camera_alt_outlined),
-                            label: Text(l10n.recipeTakePhoto),
-                          ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          color: Colors.grey.shade100,
+                          child: _pickedImageBytes != null
+                              ? Image.memory(
+                                  _pickedImageBytes!,
+                                  height: 180,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                )
+                              : _existingImageUrl.isNotEmpty
+                                  ? Image.network(
+                                      _existingImageUrl,
+                                      height: 180,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Image.asset(
+                                          BrandAssets.foodiyLogo,
+                                          height: 180,
+                                          width: double.infinity,
+                                          fit: BoxFit.contain,
+                                        );
+                                      },
+                                    )
+                                  : Image.asset(
+                                      BrandAssets.foodiyLogo,
+                                      height: 180,
+                                      width: double.infinity,
+                                      fit: BoxFit.contain,
+                                    ),
                         ),
-                        SizedBox(
-                          width: (MediaQuery.of(context).size.width - 48) / 2,
-                          child: OutlinedButton.icon(
-                            onPressed: () => _pickImage(ImageSource.gallery),
-                            icon: const Icon(Icons.photo_library_outlined),
-                            label: Text(l10n.recipePhotoLibrary),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          SizedBox(
+                            width: (MediaQuery.of(context).size.width - 48) / 2,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _pickImage(ImageSource.camera),
+                              icon: const Icon(Icons.camera_alt_outlined),
+                              label: Text(l10n.recipeTakePhoto),
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: (MediaQuery.of(context).size.width - 48) / 2,
-                          child: OutlinedButton.icon(
-                            onPressed: _pickImageFromFiles,
-                            icon: const Icon(Icons.insert_drive_file_outlined),
-                            label: Text(l10n.recipePickFile),
+                          SizedBox(
+                            width: (MediaQuery.of(context).size.width - 48) / 2,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _pickImage(ImageSource.gallery),
+                              icon: const Icon(Icons.photo_library_outlined),
+                              label: Text(l10n.recipePhotoLibrary),
+                            ),
                           ),
+                          SizedBox(
+                            width: (MediaQuery.of(context).size.width - 48) / 2,
+                            child: OutlinedButton.icon(
+                              onPressed: _pickImageFromFiles,
+                              icon: const Icon(Icons.insert_drive_file_outlined),
+                              label: Text(l10n.recipePickFile),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      if (access.hasUploadLimit(userType)) ...[
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(l10n.recipeUploadLimitBanner),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 20),
-                    if (access.hasUploadLimit(userType)) ...[
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        margin: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
+                      TextField(
+                        controller: _titleController,
+                        decoration: InputDecoration(
+                          labelText: l10n.recipeTitleLabel,
                         ),
-                        child: Text(l10n.recipeUploadLimitBanner),
                       ),
-                    ],
-                    TextField(
-                      controller: _titleController,
-                      decoration: InputDecoration(
-                        labelText: l10n.recipeTitleLabel,
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.recipeIngredientsTitle,
+                        style: theme.textTheme.titleMedium,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(l10n.recipeIngredientsTitle, style: theme.textTheme.titleMedium),
-                    const SizedBox(height: 8),
-                    Column(
-                      children: List.generate(
-                        _ingredientNameControllers.length,
-                        (index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: TextField(
-                                    controller:
-                                        _ingredientNameControllers[index],
-                                    decoration: InputDecoration(
-                                      labelText: l10n.recipeIngredientLabel,
+                      const SizedBox(height: 8),
+                      Column(
+                        children: List.generate(
+                          _ingredientNameControllers.length,
+                          (index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: TextField(
+                                      controller:
+                                          _ingredientNameControllers[index],
+                                      decoration: InputDecoration(
+                                        labelText: l10n.recipeIngredientLabel,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  flex: 2,
-                                  child: TextField(
-                                    controller:
-                                        _ingredientQuantityControllers[index],
-                                    decoration: InputDecoration(
-                                      labelText: l10n.recipeQuantityLabel,
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextField(
+                                      controller:
+                                          _ingredientQuantityControllers[index],
+                                      decoration: InputDecoration(
+                                        labelText: l10n.recipeQuantityLabel,
+                                      ),
+                                      keyboardType: TextInputType.number,
                                     ),
-                                    keyboardType: TextInputType.number,
                                   ),
-                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   flex: 2,
@@ -739,8 +770,8 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
                                   icon: const Icon(Icons.remove_circle_outline),
                                   onPressed:
                                       _ingredientNameControllers.length > 1
-                                      ? () => _removeIngredientRow(index)
-                                      : null,
+                                          ? () => _removeIngredientRow(index)
+                                          : null,
                                 ),
                               ],
                             ),
@@ -870,6 +901,10 @@ class _RecipeUploadScreenState extends State<RecipeUploadScreen> {
         ),
       ),
     );
+    } catch (e, st) {
+      debugPrint('RecipeUploadScreen build crash: $e\n$st');
+      return const ImportFailedScreen();
+    }
   }
 }
 

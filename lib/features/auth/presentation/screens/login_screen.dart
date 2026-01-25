@@ -127,6 +127,10 @@ class _LoginScreenState extends State<LoginScreen> {
     await _handleAuthAction(_authController.signInWithApple);
   }
 
+  Future<void> _handleGuestSignIn() async {
+    await _handleAuthAction(_authController.signInAsGuest);
+  }
+
   Future<void> _handleAuthAction(Future<void> Function() action) async {
     FocusScope.of(context).unfocus();
     try {
@@ -245,6 +249,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _refreshDevDiagnostics() async {
     if (!kDebugMode) return;
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      // Google Play Services check is Android-only; avoid unsupported calls on iOS.
+      return;
+    }
     final availability = await GoogleApiAvailability.instance
         .checkGooglePlayServicesAvailability();
     final connectivity = await Connectivity().checkConnectivity();
@@ -389,6 +397,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _handleAppleSignIn,
                     icon: const Icon(Icons.apple),
                     label: const Text('Continue with Apple'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: _handleGuestSignIn,
+                    child: const Text('Continue as Guest'),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Browse recipes and cookbooks without an account.',
+                    style: theme.textTheme.bodySmall,
+                    textAlign: TextAlign.center,
                   ),
                   if (_lastGoogleErrorCode != null)
                     Align(

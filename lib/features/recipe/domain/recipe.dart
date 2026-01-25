@@ -67,6 +67,7 @@ class Recipe {
   final Map<String, dynamic>? ocrMeta;
   final Map<String, dynamic>? parseMeta;
   final Map<String, dynamic>? validationReport;
+  final Map<String, dynamic>? importDebug;
   final bool needsReview;
   final List<String> issues;
   final List<RecipeStep> steps;
@@ -104,6 +105,7 @@ class Recipe {
     this.ocrMeta,
     this.parseMeta,
     this.validationReport,
+    this.importDebug,
     this.needsReview = false,
     this.issues = const [],
     required this.steps,
@@ -142,6 +144,7 @@ class Recipe {
     Map<String, dynamic>? ocrMeta,
     Map<String, dynamic>? parseMeta,
     Map<String, dynamic>? validationReport,
+    Map<String, dynamic>? importDebug,
     bool? needsReview,
     List<String>? issues,
     List<RecipeStep>? steps,
@@ -180,6 +183,7 @@ class Recipe {
       ocrMeta: ocrMeta ?? this.ocrMeta,
       parseMeta: parseMeta ?? this.parseMeta,
       validationReport: validationReport ?? this.validationReport,
+      importDebug: importDebug ?? this.importDebug,
       needsReview: needsReview ?? this.needsReview,
       issues: issues ?? this.issues,
       steps: steps ?? this.steps,
@@ -219,6 +223,7 @@ class Recipe {
         'ocrMeta': ocrMeta,
         'parseMeta': parseMeta,
         'validationReport': validationReport,
+        'importDebug': importDebug,
         'needsReview': needsReview,
         'issues': issues,
         'steps': steps.map((s) => s.toJson()).toList(),
@@ -311,6 +316,7 @@ class Recipe {
         ocrMeta: (json['ocrMeta'] as Map<String, dynamic>?),
         parseMeta: _mapOrNull(json['parseMeta']),
         validationReport: _mapOrNull(json['validationReport']),
+        importDebug: _mapOrNull(json['importDebug']),
         needsReview: json['needsReview'] as bool? ?? false,
         issues: _stringList(json['issues']),
         steps: stepsList
@@ -380,6 +386,7 @@ class Recipe {
         ocrMeta: null,
         parseMeta: null,
         validationReport: null,
+        importDebug: null,
         needsReview: false,
         issues: const [],
         steps: const [],

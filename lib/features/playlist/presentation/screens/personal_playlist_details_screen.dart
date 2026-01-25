@@ -18,7 +18,10 @@ import 'package:foodiy/features/recipe/domain/recipe.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_details_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/features/analytics/application/recipe_analytics_service.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 import 'package:foodiy/shared/constants/categories.dart';
+import 'package:foodiy/core/utils/auth_guards.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class PersonalPlaylistDetailsArgs {
   final String playlistId;
@@ -42,13 +45,17 @@ class _PersonalPlaylistDetailsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=personal_playlist_details',
+    );
     final maybePlaylist = _service.playlists
         .where((p) => p.id == widget.args.playlistId)
         .toList(growable: false);
     if (maybePlaylist.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('This cookbook no longer exists')),
+          SnackBar(content: Text(l10n.cookbooksMissing)),
         );
         Navigator.of(context).maybePop();
       });
@@ -76,12 +83,11 @@ class _PersonalPlaylistDetailsScreenState
         );
         if (recipeIds.isEmpty) {
           return Scaffold(
-            appBar: AppBar(
+            appBar: FoodiyAppBar(
               title: Text(playlist.name),
-              leading: const BackButton(),
             ),
-            body: const Center(
-              child: Text('No recipes in this cookbook yet'),
+            body: Center(
+              child: Text(l10n.cookbooksNoRecipesYet),
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
@@ -114,23 +120,22 @@ class _PersonalPlaylistDetailsScreenState
                     recipeId: r.id,
                     title: r.title,
                     imageUrl: r.coverImageUrl ?? r.imageUrl ?? '',
-                    time: '${r.steps.length} steps',
+                    time: l10n.profileStepsCount(r.steps.length),
                     difficulty: '-',
                   ),
                 )
                 .toList();
             _maybeCleanupMissingEntries(playlist.id, entries);
             return Scaffold(
-              appBar: AppBar(
+              appBar: FoodiyAppBar(
                 title: Text(playlist.name),
-                leading: const BackButton(),
                 actions: [
                   if (playlist.ownerId.isNotEmpty &&
                       playlist.ownerId ==
                           FirebaseAuth.instance.currentUser?.uid)
                     IconButton(
                       icon: const Icon(Icons.edit),
-                      tooltip: 'Edit cookbook',
+                      tooltip: l10n.cookbooksActionRename,
                       onPressed: () async {
                         print('[EDIT_COOKBOOK] NAV TAP cookbookId=${playlist.id}');
                         final updated = await Navigator.of(context).push<bool>(
@@ -141,20 +146,23 @@ class _PersonalPlaylistDetailsScreenState
                         if (updated == true && mounted) {
                           setState(() {});
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Cookbook updated')),
+                            SnackBar(content: Text(l10n.cookbooksUpdated)),
                           );
                         }
                       },
                     ),
                   IconButton(
                     icon: const Icon(Icons.share),
-                    tooltip: 'Share cookbook',
+                    tooltip: l10n.cookbooksActionShare,
                     onPressed: () {
                       final text = PersonalPlaylistShareHelper.formatPlaylist(
                         playlist,
                         _service,
                       );
-                      Share.share(text, subject: 'Cookbook: ${playlist.name}');
+                      Share.share(
+                        text,
+                        subject: l10n.cookbooksShareSubject(playlist.name),
+                      );
                     },
                   ),
                 ],
@@ -172,13 +180,18 @@ class _PersonalPlaylistDetailsScreenState
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.save_alt),
-                          label: const Text('Save to my cookbooks'),
+                          label: Text(l10n.cookbooksSaveToMy),
                           onPressed: () async {
-                            if (playlist.isPublic && playlist.categories.isEmpty) {
+                            if (isGuestUser) {
+                              await ensureNotGuest(context);
+                              return;
+                            }
+                            if (playlist.isPublic &&
+                                playlist.categories.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   content: Text(
-                                    'Add categories to this cookbook before making it public.',
+                                    l10n.cookbooksCategoryPublicRequired,
                                   ),
                                 ),
                               );
@@ -206,7 +219,7 @@ class _PersonalPlaylistDetailsScreenState
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    'Saved "${playlist.name}" to your cookbooks',
+                                    l10n.cookbooksSavedToMy(playlist.name),
                                   ),
                                 ),
                               );
@@ -222,7 +235,9 @@ class _PersonalPlaylistDetailsScreenState
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.add),
-                        label: const Text('Add recipes to cookbook'),
+                        label: Text(
+                          AppLocalizations.of(context)!.cookbooksAddRecipes,
+                        ),
                         onPressed: () => _onAddRecipesPressed(playlist),
                       ),
                     ),
@@ -230,8 +245,8 @@ class _PersonalPlaylistDetailsScreenState
                   const SizedBox(height: 8),
                   Expanded(
                     child: entries.isEmpty
-                        ? const Center(
-                            child: Text('No recipes in this cookbook yet'),
+                        ? Center(
+                            child: Text(l10n.cookbooksNoRecipesYet),
                           )
                         : ListView.builder(
                             itemCount: entries.length,
@@ -294,6 +309,7 @@ class _PersonalPlaylistDetailsScreenState
   }
 
   Future<void> _onAddRecipesPressed(PersonalPlaylist playlist) async {
+    final l10n = AppLocalizations.of(context)!;
     print(
       '[ADD_TO_COOKBOOK] handler entered for cookbookId=${playlist.id} owner=${playlist.ownerId}',
     );
@@ -339,7 +355,13 @@ class _PersonalPlaylistDetailsScreenState
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to load recipes: $e')));
+      ).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.cookbooksLoadRecipesFailed('$e'),
+          ),
+        ),
+      );
       }
       return;
     }
@@ -347,7 +369,13 @@ class _PersonalPlaylistDetailsScreenState
 
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Adding recipes...')));
+    ).showSnackBar(
+      SnackBar(
+        content: Text(
+          l10n.cookbooksAddingRecipes,
+        ),
+      ),
+    );
 
     for (final id in selected) {
       final recipe =
@@ -355,16 +383,17 @@ class _PersonalPlaylistDetailsScreenState
           Recipe(
             id: id,
             originalLanguageCode: '',
-            title: 'Recipe',
+            title: l10n.untitledRecipe,
             steps: const [],
             ingredients: const [],
             tools: const [],
           );
+      final time = l10n.profileStepsCount(recipe.steps.length);
       final entry = PersonalPlaylistEntry(
         recipeId: id,
         title: recipe.title,
         imageUrl: recipe.imageUrl ?? '',
-        time: '${recipe.steps.length} steps',
+        time: time,
         difficulty: '-',
       );
       print('[ADD_TO_COOKBOOK] TAP cookbookId=${playlist.id} recipeId=$id');
@@ -383,7 +412,13 @@ class _PersonalPlaylistDetailsScreenState
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Failed to add: $e')));
+          ).showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.cookbooksAddRecipeFailed('$e'),
+              ),
+            ),
+          );
         }
       }
     }
@@ -391,7 +426,11 @@ class _PersonalPlaylistDetailsScreenState
     if (mounted) {
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Recipes added to cookbook')),
+        SnackBar(
+          content: Text(
+            l10n.cookbooksRecipesAdded,
+          ),
+        ),
       );
     }
   }
@@ -450,9 +489,10 @@ class _AddRecipesScreenState extends State<_AddRecipesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select recipes'),
+      appBar: FoodiyAppBar(
+        title: Text(l10n.cookbooksSelectRecipes),
         actions: [
           TextButton(
             onPressed: _selectedIds.isEmpty
@@ -463,7 +503,7 @@ class _AddRecipesScreenState extends State<_AddRecipesScreen> {
                     );
                     Navigator.of(context).pop(_selectedIds);
                   },
-            child: const Text('Add'),
+            child: Text(l10n.addButton),
           ),
         ],
       ),
@@ -475,19 +515,19 @@ class _AddRecipesScreenState extends State<_AddRecipesScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return const Center(
+              return Center(
                 child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('Failed to load recipes'),
+                  padding: const EdgeInsets.all(16),
+                  child: Text(l10n.cookbooksLoadRecipesFailedSimple),
                 ),
               );
             }
             final recipes = snapshot.data ?? const [];
             if (recipes.isEmpty) {
-              return const Center(
+              return Center(
                 child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('No recipes available to add.'),
+                  padding: const EdgeInsets.all(16),
+                  child: Text(l10n.cookbooksNoRecipesToAdd),
                 ),
               );
             }
@@ -497,7 +537,7 @@ class _AddRecipesScreenState extends State<_AddRecipesScreen> {
               itemBuilder: (context, index) {
                 final r = recipes[index];
                 final checked = _selectedIds.contains(r.id);
-                final time = '${r.steps.length} steps';
+                final time = l10n.profileStepsCount(r.steps.length);
                 return CheckboxListTile(
                   value: checked,
                   onChanged: (value) {
@@ -526,7 +566,7 @@ class _AddRecipesScreenState extends State<_AddRecipesScreen> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.of(context).maybePop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.cancel),
                 ),
               ),
               const SizedBox(width: 12),
@@ -540,7 +580,7 @@ class _AddRecipesScreenState extends State<_AddRecipesScreen> {
                           );
                           Navigator.of(context).pop(_selectedIds);
                         },
-                  child: const Text('Add selected'),
+                  child: Text(l10n.addSelected),
                 ),
               ),
             ],
@@ -610,11 +650,12 @@ class _EditCookbookScreenState extends State<_EditCookbookScreen> {
   }
 
   void _toggleCategory(String key, bool selected) {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       if (selected) {
         if (_categories.contains(key)) return;
         if (_atCategoryLimit) {
-          _categoryError = 'You can select up to 5 categories';
+          _categoryError = l10n.cookbooksCategoryLimit;
           return;
         }
         _categories.add(key);
@@ -626,14 +667,15 @@ class _EditCookbookScreenState extends State<_EditCookbookScreen> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      setState(() => _nameError = 'Title is required');
+      setState(() => _nameError = l10n.cookbooksNameRequired);
       return;
     }
     if (_isPublic && _categories.isEmpty) {
       setState(
-        () => _categoryError = 'Select at least one category for public',
+        () => _categoryError = l10n.cookbooksCategoryPublicRequired,
       );
       return;
     }
@@ -661,7 +703,9 @@ class _EditCookbookScreenState extends State<_EditCookbookScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to save: $e')));
+        ).showSnackBar(
+          SnackBar(content: Text(l10n.cookbooksSaveFailed('$e'))),
+        );
       }
     } finally {
       if (mounted) {
@@ -673,12 +717,13 @@ class _EditCookbookScreenState extends State<_EditCookbookScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final currentImage = _pickedImagePath != null
         ? FileImage(File(_pickedImagePath!))
         : null;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit cookbook'),
+      appBar: FoodiyAppBar(
+        title: Text(l10n.cookbooksEditTitle),
         actions: [
           TextButton(
             onPressed: _saving ? null : _save,
@@ -688,7 +733,7 @@ class _EditCookbookScreenState extends State<_EditCookbookScreen> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Save'),
+                : Text(l10n.cookbooksSave),
           ),
         ],
       ),
@@ -702,17 +747,16 @@ class _EditCookbookScreenState extends State<_EditCookbookScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('EDIT COOKBOOK SCREEN MOUNTED'),
-                    const SizedBox(height: 12),
                     TextField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: 'Title',
+                        labelText: l10n.cookbooksNameLabel,
                         errorText: _nameError,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text('Cover image', style: theme.textTheme.titleMedium),
+                    Text(l10n.cookbooksCoverImage,
+                        style: theme.textTheme.titleMedium),
                     const SizedBox(height: 8),
                     SizedBox(
                       height: 180,
@@ -756,10 +800,8 @@ class _EditCookbookScreenState extends State<_EditCookbookScreen> {
                     const SizedBox(height: 16),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Public'),
-                      subtitle: const Text(
-                        'Public cookbooks are visible to other users',
-                      ),
+                      title: Text(l10n.cookbooksPublicLabel),
+                      subtitle: Text(l10n.cookbooksPublicSubtitle),
                       value: _isPublic,
                       onChanged: _saving
                           ? null
@@ -771,16 +813,21 @@ class _EditCookbookScreenState extends State<_EditCookbookScreen> {
                             },
                     ),
                     const SizedBox(height: 12),
-                    Text('Categories', style: theme.textTheme.titleMedium),
+                    Text(
+                      l10n.cookbooksCategoriesTitle,
+                      style: theme.textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       _isPublic
-                          ? 'Select 1-5 categories for public cookbooks.'
-                          : 'Optional for private cookbooks.',
+                          ? l10n.cookbooksCategoriesPublicHint
+                          : l10n.cookbooksCategoriesPrivateHint,
                       style: theme.textTheme.bodySmall,
                     ),
                     const SizedBox(height: 8),
-                    Text('${_categories.length}/5 selected'),
+                    Text(
+                      l10n.cookbooksCategoriesSelected(_categories.length),
+                    ),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -798,7 +845,7 @@ class _EditCookbookScreenState extends State<_EditCookbookScreen> {
                                 : (value) {
                                     if (value && atLimit) {
                                       _categoryError =
-                                          'You can select up to 5 categories';
+                                          l10n.cookbooksCategoryLimit;
                                       setState(() {});
                                       return;
                                     }
@@ -822,7 +869,7 @@ class _EditCookbookScreenState extends State<_EditCookbookScreen> {
                     ElevatedButton.icon(
                       onPressed: _saving ? null : _save,
                       icon: const Icon(Icons.save),
-                      label: const Text('Save changes'),
+                      label: Text(l10n.cookbooksSaveChanges),
                     ),
                   ],
                 ),

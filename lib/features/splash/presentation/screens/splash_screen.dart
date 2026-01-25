@@ -39,12 +39,15 @@ class _SplashScreenState extends State<SplashScreen> {
       final hasPlanId = (profile?.subscriptionPlanId.isNotEmpty ?? false);
       final onboardingComplete = profile?.onboardingComplete ?? false;
       final needsPlan = !hasTier && !hasPlanId && !onboardingComplete;
+      final isGuest = user.isAnonymous;
       debugPrint(
-        '[ROUTER_REDIRECT] loc=splash uid=${user.uid} hasTier=$hasTier hasPlanId=$hasPlanId onboardingComplete=$onboardingComplete verified=${user.emailVerified} -> target=${needsConsent ? AppRoutes.legalConsent : !user.emailVerified ? AppRoutes.verifyEmail : needsPlan ? AppRoutes.selectPackage : AppRoutes.home}',
+        '[ROUTER_REDIRECT] loc=splash uid=${user.uid} guest=$isGuest hasTier=$hasTier hasPlanId=$hasPlanId onboardingComplete=$onboardingComplete verified=${user.emailVerified} -> target=${needsConsent ? AppRoutes.legalConsent : isGuest ? AppRoutes.home : !user.emailVerified ? AppRoutes.verifyEmail : needsPlan ? AppRoutes.selectPackage : AppRoutes.home}',
       );
       if (!mounted) return;
       if (needsConsent) {
         context.go(AppRoutes.legalConsent);
+      } else if (isGuest) {
+        context.go(AppRoutes.home);
       } else if (!user.emailVerified) {
         context.go(AppRoutes.verifyEmail);
       } else if (needsPlan) {

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/shared/widgets/foodiy_logo.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   const EmailVerificationScreen({super.key});
@@ -92,9 +93,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   Widget build(BuildContext context) {
     final email = _user?.email ?? '';
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Verify your email'),
-      ),
+      appBar: const FoodiyAppBar(title: Text('Verify your email')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:foodiy/router/app_routes.dart';
@@ -46,9 +47,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reset password'),
-      ),
+      appBar: const FoodiyAppBar(title: Text('Reset password')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -846,4 +846,518 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get importDocSupportedFooter =>
       'נתמך: PDF, DOC, DOCX, JPG, PNG, WEBP. קבצים גדולים עשויים לקחת זמן רב יותר לעיבוד.';
+
+  @override
+  String get addButton => 'הוסף';
+
+  @override
+  String get addSelected => 'הוסף נבחרים';
+
+  @override
+  String get backButton => 'חזרה';
+
+  @override
+  String get cancel => 'ביטול';
+
+  @override
+  String chefByLine(Object name) {
+    return 'מאת $name';
+  }
+
+  @override
+  String get chefFollowLabel => 'עקוב';
+
+  @override
+  String get chefFollowSignInRequired => 'התחבר כדי לעקוב אחרי שפים';
+
+  @override
+  String chefFollowUpdateFailed(Object error) {
+    return 'עדכון מעקב נכשל: $error';
+  }
+
+  @override
+  String get chefFollowingLabel => 'עוקב';
+
+  @override
+  String get chefMyRecipesSubtitle => 'נהל את המתכונים שלך';
+
+  @override
+  String get chefNoCookbooks => 'אין ספרי בישול עדיין';
+
+  @override
+  String get chefNotEnabledBody => 'כלי השף זמינים רק לחשבונות שף.';
+
+  @override
+  String get chefNotEnabledTitle => 'כלי שף אינם זמינים';
+
+  @override
+  String get chefNotFound => 'שף לא נמצא';
+
+  @override
+  String get chefPremiumFeaturesBody =>
+      'שדרג לשף פרימיום כדי לפתוח פרסום, ספרי בישול ותובנות.';
+
+  @override
+  String get chefPremiumFeaturesTitle => 'תכונות פרימיום';
+
+  @override
+  String get chefPublicCookbook => 'ציבורי';
+
+  @override
+  String get chefUploadNewRecipe => 'העלה מתכון חדש';
+
+  @override
+  String get chefUploadNewRecipeSubtitle => 'ייבא מסמך מתכון או צור ידנית.';
+
+  @override
+  String cookbooksAddRecipeFailed(Object error) {
+    return 'הוספת מתכון נכשלה: $error';
+  }
+
+  @override
+  String get cookbooksAddRecipes => 'הוסף מתכונים';
+
+  @override
+  String get cookbooksAddingRecipes => 'מוסיף מתכונים...';
+
+  @override
+  String get cookbooksCoverImage => 'תמונת עטיפה';
+
+  @override
+  String get cookbooksDeleteWarning =>
+      'למחוק את ספר הבישול? פעולה זו אינה ניתנת לביטול.';
+
+  @override
+  String get cookbooksDescriptionLabel => 'תיאור';
+
+  @override
+  String get cookbooksEditTitle => 'ערוך ספר בישול';
+
+  @override
+  String cookbooksLoadRecipesFailed(Object error) {
+    return 'טעינת מתכונים נכשלה: $error';
+  }
+
+  @override
+  String get cookbooksLoadRecipesFailedDetail =>
+      'טעינת מתכונים נכשלה. נסה שוב.';
+
+  @override
+  String get cookbooksLoadRecipesFailedSimple => 'טעינת מתכונים נכשלה';
+
+  @override
+  String get cookbooksNoRecipesAvailable =>
+      'אין מתכונים זמינים בספר הבישול הזה.';
+
+  @override
+  String get cookbooksNoRecipesToAdd => 'אין מתכונים זמינים להוספה.';
+
+  @override
+  String get cookbooksNoRecipesYet => 'עדיין אין מתכונים בספר הבישול הזה.';
+
+  @override
+  String get cookbooksPlaylistTitleLabel => 'כותרת פלייליסט';
+
+  @override
+  String get cookbooksPlaylistTitleRequired => 'נא להזין כותרת פלייליסט';
+
+  @override
+  String get cookbooksPublicCreateTitle => 'צור ספר בישול ציבורי';
+
+  @override
+  String get cookbooksPublicCreated => 'פלייליסט ציבורי נוצר';
+
+  @override
+  String get cookbooksPublicLabel => 'ציבורי';
+
+  @override
+  String get cookbooksPublicNoRecipesBody =>
+      'אין לך מתכונים להוספה עדיין.\nהעלה מתכונים כדי ליצור ספר בישול ציבורי.';
+
+  @override
+  String get cookbooksRecipesAdded => 'המתכונים נוספו לספר הבישול';
+
+  @override
+  String get cookbooksSaveChanges => 'שמור שינויים';
+
+  @override
+  String cookbooksSaveFailed(Object error) {
+    return 'השמירה נכשלה: $error';
+  }
+
+  @override
+  String get cookbooksSaveToMy => 'שמור בספרי הבישול שלי';
+
+  @override
+  String cookbooksSavedToMy(Object name) {
+    return 'שמרת את $name בספרי הבישול שלך';
+  }
+
+  @override
+  String get cookbooksSelectAtLeastOneRecipe => 'בחר לפחות מתכון אחד';
+
+  @override
+  String get cookbooksSelectRecipes => 'בחר מתכונים';
+
+  @override
+  String get cookbooksSelectRecipesToInclude => 'בחר מתכונים לכלול';
+
+  @override
+  String get cookbooksUpdated => 'ספר הבישול עודכן';
+
+  @override
+  String get discoverChefsToFollow => 'שפים לעקוב אחריהם';
+
+  @override
+  String discoverFollowersCount(int count) {
+    return '$count עוקבים';
+  }
+
+  @override
+  String get discoverNoChefsYet => 'אין שפים לעקוב אחריהם עדיין';
+
+  @override
+  String durationHours(int hours) {
+    return '$hours שעות';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours שעות $minutes דק׳';
+  }
+
+  @override
+  String durationMinutes(int minutes) {
+    return '$minutes דק׳';
+  }
+
+  @override
+  String get goHomeButton => 'לדף הבית';
+
+  @override
+  String get importDocEmptyFile => 'הקובץ ריק. בחר קובץ אחר.';
+
+  @override
+  String get importDocOverlayErrorTitle => 'לא הצלחנו לעבד את הקובץ';
+
+  @override
+  String get importDocOverlayProcessing => 'מעבד...';
+
+  @override
+  String get importDocOverlayUploading => 'מעלה...';
+
+  @override
+  String importDocPickPhotoFailed(Object error) {
+    return 'בחירת תמונה נכשלה: $error';
+  }
+
+  @override
+  String importDocReadBytesFailed(Object error) {
+    return 'קריאת הקובץ נכשלה: $error';
+  }
+
+  @override
+  String get importDocSignInRequired => 'התחבר כדי להעלות מתכונים.';
+
+  @override
+  String get importDocStepSaving => 'שומר מתכון';
+
+  @override
+  String get importDocStepUnderstanding => 'מבין את המתכון';
+
+  @override
+  String get importDocStepUploading => 'מעלה קובץ';
+
+  @override
+  String importDocTakePhotoFailed(Object error) {
+    return 'צילום נכשל: $error';
+  }
+
+  @override
+  String get importDocUploadFailed => 'ההעלאה נכשלה';
+
+  @override
+  String importDocUploadFailedCode(Object code) {
+    return 'ההעלאה נכשלה ($code)';
+  }
+
+  @override
+  String importDocUploadFailedWithError(Object error) {
+    return 'ההעלאה נכשלה: $error';
+  }
+
+  @override
+  String get importDocUploaded => 'ההעלאה הושלמה';
+
+  @override
+  String get importedRecipeTitle => 'מתכון מיובא';
+
+  @override
+  String get playlistPlayAll => 'נגן הכל';
+
+  @override
+  String get playlistPlayAllNotImplemented => 'נגן הכל עדיין לא נתמך';
+
+  @override
+  String playlistPlayerTitle(Object title) {
+    return 'פלייליסט - $title';
+  }
+
+  @override
+  String get playlistStepCookFirstRecipe =>
+      'בשל את המתכון הראשון לפי ההוראות שלו.';
+
+  @override
+  String get playlistStepCookRemaining => 'בשל את שאר הפלייליסט.';
+
+  @override
+  String get playlistStepPrepIngredients => 'הכן מרכיבים למתכון הראשון.';
+
+  @override
+  String get playlistStepPrepNextRecipe => 'הכן את המתכון הבא בפלייליסט.';
+
+  @override
+  String get recipeAddIngredientsToCart => 'הוסף מרכיבים לעגלה';
+
+  @override
+  String get recipeAddToCartFailed => 'ההוספה לעגלה נכשלה';
+
+  @override
+  String get recipeAddToCookbook => 'הוסף לספר בישול';
+
+  @override
+  String recipeAddToCookbookFailed(Object error) {
+    return 'הוספה לספר בישול נכשלה: $error';
+  }
+
+  @override
+  String get recipeAddToCookbooksTitle => 'הוסף לספרי בישול';
+
+  @override
+  String get recipeAddToFavorites => 'הוסף למועדפים';
+
+  @override
+  String recipeAddedToCart(int count) {
+    return 'נוספו $count פריטים לעגלה';
+  }
+
+  @override
+  String get recipeAddedToCookbooks => 'נוסף לספרי בישול';
+
+  @override
+  String get recipeAddedToFavorites => 'נוסף למועדפים';
+
+  @override
+  String get recipeAttachDialogFailed => 'לא ניתן לטעון ספרי בישול';
+
+  @override
+  String get recipeCookbooksLoadFailed => 'טעינת ספרי בישול נכשלה';
+
+  @override
+  String recipeCoverUploadFailed(Object error) {
+    return 'העלאת תמונת עטיפה נכשלה: $error';
+  }
+
+  @override
+  String get recipeCreateCookbookFirst => 'צור ספר בישול קודם';
+
+  @override
+  String get recipeDifficultyEasy => 'קל';
+
+  @override
+  String get recipeEditButton => 'ערוך';
+
+  @override
+  String get recipeImportFailedBody =>
+      'לא הצלחנו לייבא את המתכון. נסה שוב או חזור לדף הבית.';
+
+  @override
+  String get recipeImportFailedScreenTitle => 'הייבוא נכשל';
+
+  @override
+  String get recipeImportFailedTitle => 'הייבוא נכשל';
+
+  @override
+  String get recipeImportNeedsReviewBody =>
+      'ייבאנו את המתכון אך הוא דורש בדיקה. אפשר לערוך עכשיו.';
+
+  @override
+  String get recipeImportNeedsReviewTitle => 'דורש בדיקה';
+
+  @override
+  String get recipeImportProcessingTitle => 'עדיין עובדים על זה';
+
+  @override
+  String get recipeImportStepExtractingText => 'מחלץ טקסט';
+
+  @override
+  String get recipeImportStepFinalizing => 'מסיים';
+
+  @override
+  String get recipeImportStepUnderstanding => 'מבין את המתכון';
+
+  @override
+  String get recipeImportStepUploadComplete => 'ההעלאה הושלמה';
+
+  @override
+  String get recipeImportTimeoutBody =>
+      'זה לוקח יותר זמן מהצפוי. אפשר לנסות שוב או לחזור לדף הבית.';
+
+  @override
+  String get recipeImportTimeoutTitle => 'זמן הייבוא פג';
+
+  @override
+  String get recipeImportUnknownError => 'שגיאה לא ידועה בייבוא';
+
+  @override
+  String get recipeNoIngredients => 'אין מרכיבים עדיין';
+
+  @override
+  String get recipeNoIngredientsToAdd => 'אין מרכיבים להוספה';
+
+  @override
+  String get recipeNoSteps => 'אין שלבים עדיין';
+
+  @override
+  String get recipeNoTools => 'אין כלים רשומים';
+
+  @override
+  String get recipeNotFoundBody => 'לא הצלחנו למצוא את המתכון הזה.';
+
+  @override
+  String get recipeNotFoundTitle => 'המתכון לא נמצא';
+
+  @override
+  String get recipeOcrPreviewLabel => 'תצוגה מקדימה של OCR';
+
+  @override
+  String get recipeOriginalLanguageLabel => 'מקורי';
+
+  @override
+  String get recipePlayerHandsFreeMode => 'מצב ידיים חופשיות';
+
+  @override
+  String get recipePlayerHandsFreeOn => 'מצב ידיים חופשיות פועל';
+
+  @override
+  String get recipePlayerNoSteps => 'אין שלבים זמינים';
+
+  @override
+  String recipePlayerStepOf(int current, int total) {
+    return 'שלב $current מתוך $total';
+  }
+
+  @override
+  String recipePlayerStepPlaceholder(int number) {
+    return 'שלב $number';
+  }
+
+  @override
+  String get recipePlayerVoiceControl => 'שליטה קולית';
+
+  @override
+  String get recipeProcessing => 'מעבד';
+
+  @override
+  String get recipeRemoveFromFavorites => 'הסר מהמועדפים';
+
+  @override
+  String get recipeRemovedFromFavorites => 'הוסר מהמועדפים';
+
+  @override
+  String get recipeSignInToSave => 'התחבר כדי לשמור מתכונים.';
+
+  @override
+  String get recipeStartCooking => 'התחל לבשל';
+
+  @override
+  String get recipeStepRequired => 'יש למלא שלב';
+
+  @override
+  String get recipeTitleRequired => 'יש למלא כותרת';
+
+  @override
+  String get recipeTranslateToEnglish => 'תרגם לאנגלית';
+
+  @override
+  String recipeTranslatedFrom(Object language) {
+    return 'תורגם מ-$language';
+  }
+
+  @override
+  String get recipeTranslating => 'מתרגם';
+
+  @override
+  String get recipeTranslationUnavailable => 'תרגום אינו זמין';
+
+  @override
+  String get recipeUnavailableBody => 'המתכון הזה אינו זמין כרגע.';
+
+  @override
+  String get recipeUnavailableTitle => 'מתכון לא זמין';
+
+  @override
+  String get recipeViewChef => 'צפה בשף';
+
+  @override
+  String get recipeViewOriginal => 'צפה במקור';
+
+  @override
+  String get recipesLabel => 'מתכונים';
+
+  @override
+  String get chefSaveFailed => 'שמירת הפרופיל נכשלה';
+
+  @override
+  String get chefEditOwnOnly => 'אפשר לערוך רק את הפרופיל שלך.';
+
+  @override
+  String get chefEditAvatarLabel => 'תמונת פרופיל';
+
+  @override
+  String get chefEditChangePhoto => 'החלף תמונה';
+
+  @override
+  String get chefEditBioLabel => 'ביוגרפיה';
+
+  @override
+  String get chefEditBioHint =>
+      'ספר לעוקבים על סגנון הבישול, ההתמחויות וההשראות שלך.';
+
+  @override
+  String get chefEditMakeChangeToSave => 'בצע שינוי כדי לאפשר שמירה.';
+
+  @override
+  String get chefNoRecipesYet => 'עדיין לא פרסמת מתכונים';
+
+  @override
+  String get chefLoadRecipesFailed => 'טעינת המתכונים נכשלה. נסה שוב.';
+
+  @override
+  String chefRecipeStats(int views, int saves) {
+    return 'צפיות: $views • שמירות: $saves';
+  }
+
+  @override
+  String chefRecipeDeleted(Object title) {
+    return 'המתכון \"$title\" נמחק';
+  }
+
+  @override
+  String get discoverFeaturedCookbooks => 'ספרי בישול מובילים';
+
+  @override
+  String get discoverCookbookLoadFailed => 'טעינת ספר הבישול נכשלה';
+
+  @override
+  String get discoverCookbookNotFound => 'ספר הבישול לא נמצא';
+
+  @override
+  String get discoverCookbookNoRecipes => 'עדיין אין מתכונים בספר הבישול הזה.';
+
+  @override
+  String get discoverCookbookNoRecipesAvailable => 'אין מתכונים זמינים.';
+
+  @override
+  String get discoverRecipesLoadFailed => 'טעינת מתכונים נכשלה';
 }

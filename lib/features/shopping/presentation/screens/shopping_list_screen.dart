@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:printing/printing.dart';
 
 import 'package:foodiy/features/shopping/application/shopping_list_service.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class ShoppingListScreen extends StatefulWidget {
   const ShoppingListScreen({super.key});
@@ -50,7 +51,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen>
     final items = _service.items;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: const Text('Shopping list'),
         actions: [
           IconButton(

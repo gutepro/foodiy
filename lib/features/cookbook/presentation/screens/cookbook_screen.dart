@@ -6,6 +6,7 @@ import 'package:foodiy/features/cookbook/application/cookbook_share_helper.dart'
 import 'package:foodiy/features/cookbook/domain/cookbook_models.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class CookbookScreen extends StatefulWidget {
   const CookbookScreen({super.key});
@@ -24,8 +25,8 @@ class _CookbookScreenState extends State<CookbookScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cookbooks'),
+      appBar: FoodiyAppBar(
+        title: Text('Cookbooks'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),

@@ -1663,6 +1663,918 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Supported: PDF, DOC, DOCX, JPG, PNG, WEBP. Larger files may take longer to process.'**
   String get importDocSupportedFooter;
+
+  /// No description provided for @addButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addButton;
+
+  /// No description provided for @addSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Add selected'**
+  String get addSelected;
+
+  /// No description provided for @backButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get backButton;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @chefByLine.
+  ///
+  /// In en, this message translates to:
+  /// **'By {name}'**
+  String chefByLine(Object name);
+
+  /// No description provided for @chefFollowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get chefFollowLabel;
+
+  /// No description provided for @chefFollowSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to follow chefs'**
+  String get chefFollowSignInRequired;
+
+  /// No description provided for @chefFollowUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update follow: {error}'**
+  String chefFollowUpdateFailed(Object error);
+
+  /// No description provided for @chefFollowingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get chefFollowingLabel;
+
+  /// No description provided for @chefMyRecipesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your recipes'**
+  String get chefMyRecipesSubtitle;
+
+  /// No description provided for @chefNoCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'No cookbooks yet'**
+  String get chefNoCookbooks;
+
+  /// No description provided for @chefNotEnabledBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Chef tools are available for chef accounts.'**
+  String get chefNotEnabledBody;
+
+  /// No description provided for @chefNotEnabledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chef tools unavailable'**
+  String get chefNotEnabledTitle;
+
+  /// No description provided for @chefNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Chef not found'**
+  String get chefNotFound;
+
+  /// No description provided for @chefPremiumFeaturesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium Chef to unlock publishing, cookbooks, and insights.'**
+  String get chefPremiumFeaturesBody;
+
+  /// No description provided for @chefPremiumFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium features'**
+  String get chefPremiumFeaturesTitle;
+
+  /// No description provided for @chefPublicCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get chefPublicCookbook;
+
+  /// No description provided for @chefUploadNewRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload new recipe'**
+  String get chefUploadNewRecipe;
+
+  /// No description provided for @chefUploadNewRecipeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a recipe document or create manually.'**
+  String get chefUploadNewRecipeSubtitle;
+
+  /// No description provided for @cookbooksAddRecipeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add recipe: {error}'**
+  String cookbooksAddRecipeFailed(Object error);
+
+  /// No description provided for @cookbooksAddRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add recipes'**
+  String get cookbooksAddRecipes;
+
+  /// No description provided for @cookbooksAddingRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding recipes...'**
+  String get cookbooksAddingRecipes;
+
+  /// No description provided for @cookbooksCoverImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image'**
+  String get cookbooksCoverImage;
+
+  /// No description provided for @cookbooksDeleteWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this cookbook? This cannot be undone.'**
+  String get cookbooksDeleteWarning;
+
+  /// No description provided for @cookbooksDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get cookbooksDescriptionLabel;
+
+  /// No description provided for @cookbooksEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit cookbook'**
+  String get cookbooksEditTitle;
+
+  /// No description provided for @cookbooksLoadRecipesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load recipes: {error}'**
+  String cookbooksLoadRecipesFailed(Object error);
+
+  /// No description provided for @cookbooksLoadRecipesFailedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load recipes. Please try again.'**
+  String get cookbooksLoadRecipesFailedDetail;
+
+  /// No description provided for @cookbooksLoadRecipesFailedSimple.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load recipes'**
+  String get cookbooksLoadRecipesFailedSimple;
+
+  /// No description provided for @cookbooksNoRecipesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook has no recipes available.'**
+  String get cookbooksNoRecipesAvailable;
+
+  /// No description provided for @cookbooksNoRecipesToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes available to add.'**
+  String get cookbooksNoRecipesToAdd;
+
+  /// No description provided for @cookbooksNoRecipesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook has no recipes yet.'**
+  String get cookbooksNoRecipesYet;
+
+  /// No description provided for @cookbooksPlaylistTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist title'**
+  String get cookbooksPlaylistTitleLabel;
+
+  /// No description provided for @cookbooksPlaylistTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a playlist title'**
+  String get cookbooksPlaylistTitleRequired;
+
+  /// No description provided for @cookbooksPublicCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create public cookbook'**
+  String get cookbooksPublicCreateTitle;
+
+  /// No description provided for @cookbooksPublicCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Public playlist created'**
+  String get cookbooksPublicCreated;
+
+  /// No description provided for @cookbooksPublicLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get cookbooksPublicLabel;
+
+  /// No description provided for @cookbooksPublicNoRecipesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no recipes to add yet.\nUpload recipes to create a public cookbook.'**
+  String get cookbooksPublicNoRecipesBody;
+
+  /// No description provided for @cookbooksRecipesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes added to cookbook'**
+  String get cookbooksRecipesAdded;
+
+  /// No description provided for @cookbooksSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get cookbooksSaveChanges;
+
+  /// No description provided for @cookbooksSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save: {error}'**
+  String cookbooksSaveFailed(Object error);
+
+  /// No description provided for @cookbooksSaveToMy.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to my cookbooks'**
+  String get cookbooksSaveToMy;
+
+  /// No description provided for @cookbooksSavedToMy.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {name} to your cookbooks'**
+  String cookbooksSavedToMy(Object name);
+
+  /// No description provided for @cookbooksSelectAtLeastOneRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one recipe'**
+  String get cookbooksSelectAtLeastOneRecipe;
+
+  /// No description provided for @cookbooksSelectRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Select recipes'**
+  String get cookbooksSelectRecipes;
+
+  /// No description provided for @cookbooksSelectRecipesToInclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Select recipes to include'**
+  String get cookbooksSelectRecipesToInclude;
+
+  /// No description provided for @cookbooksUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbook updated'**
+  String get cookbooksUpdated;
+
+  /// No description provided for @discoverChefsToFollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Chefs to follow'**
+  String get discoverChefsToFollow;
+
+  /// No description provided for @discoverFollowersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} followers'**
+  String discoverFollowersCount(int count);
+
+  /// No description provided for @discoverNoChefsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No chefs to follow yet'**
+  String get discoverNoChefsYet;
+
+  /// No description provided for @durationHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hr'**
+  String durationHours(int hours);
+
+  /// No description provided for @durationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hr {minutes} min'**
+  String durationHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String durationMinutes(int minutes);
+
+  /// No description provided for @goHomeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Home'**
+  String get goHomeButton;
+
+  /// No description provided for @importDocEmptyFile.
+  ///
+  /// In en, this message translates to:
+  /// **'File is empty. Choose another file.'**
+  String get importDocEmptyFile;
+
+  /// No description provided for @importDocOverlayErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t process this file'**
+  String get importDocOverlayErrorTitle;
+
+  /// No description provided for @importDocOverlayProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get importDocOverlayProcessing;
+
+  /// No description provided for @importDocOverlayUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading...'**
+  String get importDocOverlayUploading;
+
+  /// No description provided for @importDocPickPhotoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to pick photo: {error}'**
+  String importDocPickPhotoFailed(Object error);
+
+  /// No description provided for @importDocReadBytesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to read file: {error}'**
+  String importDocReadBytesFailed(Object error);
+
+  /// No description provided for @importDocSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to upload recipes.'**
+  String get importDocSignInRequired;
+
+  /// No description provided for @importDocStepSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving recipe'**
+  String get importDocStepSaving;
+
+  /// No description provided for @importDocStepUnderstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Understanding recipe'**
+  String get importDocStepUnderstanding;
+
+  /// No description provided for @importDocStepUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading file'**
+  String get importDocStepUploading;
+
+  /// No description provided for @importDocTakePhotoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to take photo: {error}'**
+  String importDocTakePhotoFailed(Object error);
+
+  /// No description provided for @importDocUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed'**
+  String get importDocUploadFailed;
+
+  /// No description provided for @importDocUploadFailedCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed ({code})'**
+  String importDocUploadFailedCode(Object code);
+
+  /// No description provided for @importDocUploadFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed: {error}'**
+  String importDocUploadFailedWithError(Object error);
+
+  /// No description provided for @importDocUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload complete'**
+  String get importDocUploaded;
+
+  /// No description provided for @importedRecipeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported recipe'**
+  String get importedRecipeTitle;
+
+  /// No description provided for @playlistPlayAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Play all'**
+  String get playlistPlayAll;
+
+  /// No description provided for @playlistPlayAllNotImplemented.
+  ///
+  /// In en, this message translates to:
+  /// **'Play all is not implemented yet'**
+  String get playlistPlayAllNotImplemented;
+
+  /// No description provided for @playlistPlayerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist - {title}'**
+  String playlistPlayerTitle(Object title);
+
+  /// No description provided for @playlistStepCookFirstRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook the first recipe according to its instructions.'**
+  String get playlistStepCookFirstRecipe;
+
+  /// No description provided for @playlistStepCookRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook the rest of the playlist.'**
+  String get playlistStepCookRemaining;
+
+  /// No description provided for @playlistStepPrepIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare ingredients for the first recipe.'**
+  String get playlistStepPrepIngredients;
+
+  /// No description provided for @playlistStepPrepNextRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare the next recipe in the playlist.'**
+  String get playlistStepPrepNextRecipe;
+
+  /// No description provided for @recipeAddIngredientsToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ingredients to cart'**
+  String get recipeAddIngredientsToCart;
+
+  /// No description provided for @recipeAddToCartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add to cart'**
+  String get recipeAddToCartFailed;
+
+  /// No description provided for @recipeAddToCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cookbook'**
+  String get recipeAddToCookbook;
+
+  /// No description provided for @recipeAddToCookbookFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add to cookbook: {error}'**
+  String recipeAddToCookbookFailed(Object error);
+
+  /// No description provided for @recipeAddToCookbooksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cookbooks'**
+  String get recipeAddToCookbooksTitle;
+
+  /// No description provided for @recipeAddToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favorites'**
+  String get recipeAddToFavorites;
+
+  /// No description provided for @recipeAddedToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} items to cart'**
+  String recipeAddedToCart(int count);
+
+  /// No description provided for @recipeAddedToCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to cookbooks'**
+  String get recipeAddedToCookbooks;
+
+  /// No description provided for @recipeAddedToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get recipeAddedToFavorites;
+
+  /// No description provided for @recipeAttachDialogFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load cookbooks'**
+  String get recipeAttachDialogFailed;
+
+  /// No description provided for @recipeCookbooksLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load cookbooks'**
+  String get recipeCookbooksLoadFailed;
+
+  /// No description provided for @recipeCoverUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload cover: {error}'**
+  String recipeCoverUploadFailed(Object error);
+
+  /// No description provided for @recipeCreateCookbookFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a cookbook first'**
+  String get recipeCreateCookbookFirst;
+
+  /// No description provided for @recipeDifficultyEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get recipeDifficultyEasy;
+
+  /// No description provided for @recipeEditButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get recipeEditButton;
+
+  /// No description provided for @recipeImportFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t import this recipe. Try again or go Home.'**
+  String get recipeImportFailedBody;
+
+  /// No description provided for @recipeImportFailedScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed'**
+  String get recipeImportFailedScreenTitle;
+
+  /// No description provided for @recipeImportFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed'**
+  String get recipeImportFailedTitle;
+
+  /// No description provided for @recipeImportNeedsReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We imported the recipe but it needs review. You can edit it now.'**
+  String get recipeImportNeedsReviewBody;
+
+  /// No description provided for @recipeImportNeedsReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs review'**
+  String get recipeImportNeedsReviewTitle;
+
+  /// No description provided for @recipeImportProcessingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Still working on it'**
+  String get recipeImportProcessingTitle;
+
+  /// No description provided for @recipeImportStepExtractingText.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting text'**
+  String get recipeImportStepExtractingText;
+
+  /// No description provided for @recipeImportStepFinalizing.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalizing'**
+  String get recipeImportStepFinalizing;
+
+  /// No description provided for @recipeImportStepUnderstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Understanding recipe'**
+  String get recipeImportStepUnderstanding;
+
+  /// No description provided for @recipeImportStepUploadComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload complete'**
+  String get recipeImportStepUploadComplete;
+
+  /// No description provided for @recipeImportTimeoutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This is taking longer than expected. You can try again or go Home.'**
+  String get recipeImportTimeoutBody;
+
+  /// No description provided for @recipeImportTimeoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import timeout'**
+  String get recipeImportTimeoutTitle;
+
+  /// No description provided for @recipeImportUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown import error'**
+  String get recipeImportUnknownError;
+
+  /// No description provided for @recipeNoIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'No ingredients yet'**
+  String get recipeNoIngredients;
+
+  /// No description provided for @recipeNoIngredientsToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'No ingredients to add'**
+  String get recipeNoIngredientsToAdd;
+
+  /// No description provided for @recipeNoSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'No steps yet'**
+  String get recipeNoSteps;
+
+  /// No description provided for @recipeNoTools.
+  ///
+  /// In en, this message translates to:
+  /// **'No tools listed'**
+  String get recipeNoTools;
+
+  /// No description provided for @recipeNotFoundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find this recipe.'**
+  String get recipeNotFoundBody;
+
+  /// No description provided for @recipeNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe not found'**
+  String get recipeNotFoundTitle;
+
+  /// No description provided for @recipeOcrPreviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'OCR preview'**
+  String get recipeOcrPreviewLabel;
+
+  /// No description provided for @recipeOriginalLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get recipeOriginalLanguageLabel;
+
+  /// No description provided for @recipePlayerHandsFreeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Hands-free mode'**
+  String get recipePlayerHandsFreeMode;
+
+  /// No description provided for @recipePlayerHandsFreeOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Hands-free mode ON'**
+  String get recipePlayerHandsFreeOn;
+
+  /// No description provided for @recipePlayerNoSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'No steps available'**
+  String get recipePlayerNoSteps;
+
+  /// No description provided for @recipePlayerStepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String recipePlayerStepOf(int current, int total);
+
+  /// No description provided for @recipePlayerStepPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {number}'**
+  String recipePlayerStepPlaceholder(int number);
+
+  /// No description provided for @recipePlayerVoiceControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice control'**
+  String get recipePlayerVoiceControl;
+
+  /// No description provided for @recipeProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get recipeProcessing;
+
+  /// No description provided for @recipeRemoveFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get recipeRemoveFromFavorites;
+
+  /// No description provided for @recipeRemovedFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get recipeRemovedFromFavorites;
+
+  /// No description provided for @recipeSignInToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to save recipes.'**
+  String get recipeSignInToSave;
+
+  /// No description provided for @recipeStartCooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Start cooking'**
+  String get recipeStartCooking;
+
+  /// No description provided for @recipeStepRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Step is required'**
+  String get recipeStepRequired;
+
+  /// No description provided for @recipeTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get recipeTitleRequired;
+
+  /// No description provided for @recipeTranslateToEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate to English'**
+  String get recipeTranslateToEnglish;
+
+  /// No description provided for @recipeTranslatedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Translated from {language}'**
+  String recipeTranslatedFrom(Object language);
+
+  /// No description provided for @recipeTranslating.
+  ///
+  /// In en, this message translates to:
+  /// **'Translating'**
+  String get recipeTranslating;
+
+  /// No description provided for @recipeTranslationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation is unavailable'**
+  String get recipeTranslationUnavailable;
+
+  /// No description provided for @recipeUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This recipe isn\'t available right now.'**
+  String get recipeUnavailableBody;
+
+  /// No description provided for @recipeUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe unavailable'**
+  String get recipeUnavailableTitle;
+
+  /// No description provided for @recipeViewChef.
+  ///
+  /// In en, this message translates to:
+  /// **'View chef'**
+  String get recipeViewChef;
+
+  /// No description provided for @recipeViewOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'View original'**
+  String get recipeViewOriginal;
+
+  /// No description provided for @recipesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get recipesLabel;
+
+  /// No description provided for @chefSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save profile'**
+  String get chefSaveFailed;
+
+  /// No description provided for @chefEditOwnOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'You can only edit your own profile.'**
+  String get chefEditOwnOnly;
+
+  /// No description provided for @chefEditAvatarLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar'**
+  String get chefEditAvatarLabel;
+
+  /// No description provided for @chefEditChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get chefEditChangePhoto;
+
+  /// No description provided for @chefEditBioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get chefEditBioLabel;
+
+  /// No description provided for @chefEditBioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell followers about your cooking style, specialties, and inspirations.'**
+  String get chefEditBioHint;
+
+  /// No description provided for @chefEditMakeChangeToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a change to enable Save.'**
+  String get chefEditMakeChangeToSave;
+
+  /// No description provided for @chefNoRecipesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not published any recipes yet'**
+  String get chefNoRecipesYet;
+
+  /// No description provided for @chefLoadRecipesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load recipes. Please try again.'**
+  String get chefLoadRecipesFailed;
+
+  /// No description provided for @chefRecipeStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Views: {views} • Saves: {saves}'**
+  String chefRecipeStats(int views, int saves);
+
+  /// No description provided for @chefRecipeDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe \"{title}\" deleted'**
+  String chefRecipeDeleted(Object title);
+
+  /// No description provided for @discoverFeaturedCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured cookbooks'**
+  String get discoverFeaturedCookbooks;
+
+  /// No description provided for @discoverCookbookLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load cookbook'**
+  String get discoverCookbookLoadFailed;
+
+  /// No description provided for @discoverCookbookNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbook not found'**
+  String get discoverCookbookNotFound;
+
+  /// No description provided for @discoverCookbookNoRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes in this cookbook yet.'**
+  String get discoverCookbookNoRecipes;
+
+  /// No description provided for @discoverCookbookNoRecipesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes available.'**
+  String get discoverCookbookNoRecipesAvailable;
+
+  /// No description provided for @discoverRecipesLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load recipes'**
+  String get discoverRecipesLoadFailed;
 }
 
 class _AppLocalizationsDelegate

@@ -8,6 +8,9 @@ import 'package:foodiy/features/playlist/presentation/screens/playlist_details_s
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/core/services/current_user_service.dart';
 import 'package:foodiy/features/chef/application/chef_follow_service.dart';
+import 'package:foodiy/core/utils/auth_guards.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class ChefProfileScreen extends StatelessWidget {
   const ChefProfileScreen({super.key, required this.chefId});
@@ -16,22 +19,15 @@ class ChefProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=ChefProfile keys=profileEditChefProfile,homeMyCookbooks',
+    );
     final theme = Theme.of(context);
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
     final isSelf = currentUid.isNotEmpty && currentUid == chefId;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chef'),
-        leading: BackButton(
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(AppRoutes.discovery);
-            }
-          },
-        ),
-      ),
+      appBar: FoodiyAppBar(title: Text(l10n.homeChefPlaceholder)),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
             .collection('users')
@@ -44,10 +40,10 @@ class ChefProfileScreen extends StatelessWidget {
           if (snapshot.hasError ||
               !snapshot.hasData ||
               !snapshot.data!.exists) {
-            return const Center(child: Text('Chef not found'));
+            return Center(child: Text(l10n.chefNotFound));
           }
           final data = snapshot.data!.data() ?? {};
-          final name = data['displayName'] as String? ?? 'Chef';
+          final name = data['displayName'] as String? ?? l10n.homeChefPlaceholder;
           final photoUrl = (data['chefAvatarUrl'] as String?)?.isNotEmpty == true
               ? data['chefAvatarUrl'] as String
               : (data['photoUrl'] as String? ?? '');
@@ -108,7 +104,7 @@ class ChefProfileScreen extends StatelessWidget {
                           context.push(AppRoutes.editChefProfile, extra: chefId);
                         },
                         icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Edit profile'),
+                        label: Text(l10n.profileEditChefProfile),
                       )
                     else
                       _FollowButton(
@@ -121,7 +117,7 @@ class ChefProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                'Cookbooks',
+                l10n.homeMyCookbooks,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -180,11 +176,15 @@ class _FollowButtonState extends State<_FollowButton> {
 
   Future<void> _toggle() async {
     if (_loading) return;
+    if (await ensureNotGuest(context) == false) {
+      return;
+    }
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
     if (currentUid.isEmpty) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sign in to follow chefs.')),
+          SnackBar(content: Text(l10n.chefFollowSignInRequired)),
         );
       }
       return;
@@ -217,8 +217,9 @@ class _FollowButtonState extends State<_FollowButton> {
         setState(() {
           _isFollowing = !targetState;
         });
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update follow: $e')),
+          SnackBar(content: Text(l10n.chefFollowUpdateFailed('$e'))),
         );
       }
     } finally {
@@ -231,6 +232,7 @@ class _FollowButtonState extends State<_FollowButton> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       height: 40,
       child: OutlinedButton(
@@ -247,7 +249,9 @@ class _FollowButtonState extends State<_FollowButton> {
                   color: theme.colorScheme.primary,
                 ),
               )
-            : Text(_isFollowing ? 'Following' : 'Follow'),
+            : Text(
+                _isFollowing ? l10n.chefFollowingLabel : l10n.chefFollowLabel,
+              ),
       ),
     );
   }
@@ -266,6 +270,7 @@ class _ChefPlaylistsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
       future: _fetchCookbooks(),
       builder: (context, snapshot) {
@@ -273,11 +278,11 @@ class _ChefPlaylistsList extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Text('Failed to load cookbooks');
+          return Text(l10n.cookbooksLoadError);
         }
         final publicDocs = snapshot.data ?? const [];
         if (publicDocs.isEmpty) {
-          return const Text('This chef hasn’t published any cookbooks yet.');
+          return Text(l10n.chefNoCookbooks);
         }
         return ListView.separated(
           shrinkWrap: true,
@@ -288,7 +293,7 @@ class _ChefPlaylistsList extends StatelessWidget {
             final doc = publicDocs[index];
             final data = doc.data();
             final title =
-                data['title'] ?? data['name'] ?? 'Untitled cookbook';
+                data['title'] ?? data['name'] ?? l10n.cookbooksUntitled;
             final description = data['description'] ?? '';
             final isPublic = (data['isPublic'] as bool?) ?? true;
             return Card(
@@ -366,6 +371,7 @@ class _CookbookRowCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final data = doc?.data() ?? {};
     final imageUrl =
         (data['coverImageUrl'] ?? data['imageUrl'] ?? '') as String? ?? '';
@@ -434,7 +440,9 @@ class _CookbookRowCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    isPublic ? 'Public cookbook' : 'Private cookbook',
+                    isPublic
+                        ? l10n.chefPublicCookbook
+                        : l10n.cookbooksPrivateBadge,
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: isPublic
                           ? theme.colorScheme.primary
@@ -452,7 +460,7 @@ class _CookbookRowCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'By $chefName',
+                    l10n.chefByLine(chefName),
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),

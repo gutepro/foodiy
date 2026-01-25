@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class LegalDocumentScreen extends StatefulWidget {
   const LegalDocumentScreen({
@@ -29,7 +30,7 @@ class _LegalDocumentScreenState extends State<LegalDocumentScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: Text(widget.title),
       ),
       body: FutureBuilder<String>(

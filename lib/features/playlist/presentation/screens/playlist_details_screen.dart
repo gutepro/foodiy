@@ -5,6 +5,8 @@ import 'package:foodiy/features/recipe/domain/recipe_step.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_details_screen.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_player_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class PlaylistDetailsArgs {
   final String title;
@@ -27,22 +29,25 @@ class PlaylistDetailsScreen extends StatelessWidget {
 
   final PlaylistDetailsArgs args;
 
-  List<RecipeStep> _buildMockPlaylistSteps(PlaylistDetailsArgs args) {
-    return const [
+  List<RecipeStep> _buildMockPlaylistSteps(
+    AppLocalizations l10n,
+    PlaylistDetailsArgs args,
+  ) {
+    return [
       RecipeStep(
-        text: 'Prepare ingredients for the first recipe.',
+        text: l10n.playlistStepPrepIngredients,
         durationSeconds: null,
       ),
       RecipeStep(
-        text: 'Cook the first recipe according to its instructions.',
+        text: l10n.playlistStepCookFirstRecipe,
         durationSeconds: 10 * 60,
       ),
       RecipeStep(
-        text: 'Prepare the next recipe in the playlist.',
+        text: l10n.playlistStepPrepNextRecipe,
         durationSeconds: null,
       ),
       RecipeStep(
-        text: 'Cook the rest of the playlist.',
+        text: l10n.playlistStepCookRemaining,
         durationSeconds: 20 * 60,
       ),
     ];
@@ -51,19 +56,13 @@ class PlaylistDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=playlist_details',
+    );
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: Text(args.title),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
-        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -88,7 +87,7 @@ class PlaylistDetailsScreen extends StatelessWidget {
             Text(args.description),
             const SizedBox(height: 8),
             Text(
-              '${args.recipes.length} recipes • ${args.totalTime}',
+              '${l10n.cookbooksRecipeCount(args.recipes.length)} • ${args.totalTime}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: Colors.grey.shade700,
               ),
@@ -96,9 +95,9 @@ class PlaylistDetailsScreen extends StatelessWidget {
             const SizedBox(height: 12),
             ElevatedButton.icon(
               onPressed: () {
-                final steps = _buildMockPlaylistSteps(args);
+                final steps = _buildMockPlaylistSteps(l10n, args);
                 final playerArgs = RecipePlayerArgs(
-                  title: 'Playlist - ${args.title}',
+                  title: l10n.playlistPlayerTitle(args.title),
                   imageUrl: args.imageUrl,
                   steps: steps,
                   languageCode: 'he',
@@ -106,7 +105,7 @@ class PlaylistDetailsScreen extends StatelessWidget {
                 context.push(AppRoutes.recipePlayer, extra: playerArgs);
               },
               icon: const Icon(Icons.play_arrow),
-              label: const Text('Play all'),
+              label: Text(l10n.playlistPlayAll),
             ),
             const SizedBox(height: 16),
             ...args.recipes.map(
@@ -143,7 +142,7 @@ class PlaylistDetailsScreen extends StatelessWidget {
                         title: r.title,
                         imageUrl: r.imageUrl,
                         time: r.time,
-                        difficulty: 'Easy',
+                        difficulty: l10n.recipeDifficultyEasy,
                         originalLanguageCode: 'he',
                       ),
                     );

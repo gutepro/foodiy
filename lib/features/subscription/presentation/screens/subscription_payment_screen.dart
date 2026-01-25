@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:foodiy/core/models/user_type.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class SubscriptionPaymentArgs {
   final UserType targetType;
@@ -19,7 +20,7 @@ class SubscriptionPaymentScreen extends StatelessWidget {
     final title = _labelForUserType(args.targetType);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: const Text('Payment'),
       ),
       body: Padding(

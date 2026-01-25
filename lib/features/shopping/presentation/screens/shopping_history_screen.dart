@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:foodiy/features/shopping/application/shopping_list_service.dart';
 import 'package:foodiy/features/shopping/presentation/screens/shopping_history_details_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class ShoppingHistoryScreen extends StatelessWidget {
   const ShoppingHistoryScreen({super.key});
@@ -13,9 +14,7 @@ class ShoppingHistoryScreen extends StatelessWidget {
     final history = ShoppingListService.instance.history;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Shopping history'),
-      ),
+      appBar: const FoodiyAppBar(title: Text('Shopping history')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: history.isEmpty

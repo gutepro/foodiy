@@ -67,15 +67,46 @@ async function extractTextWithVision(
 
   const run = async (languageHints: string[]) => {
     if (contentType === "application/pdf") {
-      const [result] = await visionClient.documentTextDetection({
-        image: { source: { imageUri: gcsUri } },
+      const outputPrefix = `vision_output/${filePath.replace(/[^a-zA-Z0-9_-]/g, "_")}_${Date.now()}/`;
+      const outputUri = `gs://${bucketName}/${outputPrefix}`;
+      const request = {
+        inputConfig: {
+          gcsSource: { uri: gcsUri },
+          mimeType: "application/pdf",
+        },
+        features: [{ type: "DOCUMENT_TEXT_DETECTION" }],
         imageContext: { languageHints },
+        outputConfig: { gcsDestination: { uri: outputUri }, batchSize: 20 },
+      };
+      const [operation] = await visionClient.asyncBatchAnnotateFiles({
+        requests: [request],
       });
-      return (
-        result.fullTextAnnotation?.text ||
-        result.textAnnotations?.[0]?.description ||
-        ""
+      await operation.promise();
+
+      const bucket = admin.storage().bucket(bucketName);
+      const [files] = await bucket.getFiles({ prefix: outputPrefix });
+      let text = "";
+      let pages = 0;
+      for (const file of files) {
+        if (!file.name.endsWith(".json")) continue;
+        const [contents] = await file.download();
+        const json = JSON.parse(contents.toString());
+        const responses = json.responses || [];
+        pages += responses.length;
+        for (const response of responses) {
+          const pageText =
+            response.fullTextAnnotation?.text ||
+            response.textAnnotations?.[0]?.description ||
+            "";
+          if (pageText) {
+            text = text ? `${text}\n${pageText}` : pageText;
+          }
+        }
+      }
+      console.log(
+        `[PDF_OCR] pages=${pages} textLength=${text.length} previewFirst200=${text.slice(0, 200)}`,
       );
+      return text;
     }
     const [result] = await visionClient.textDetection({
       image: { source: { imageUri: gcsUri } },
@@ -89,14 +120,18 @@ async function extractTextWithVision(
   };
 
   try {
-    const firstPass = await run(["en"]);
-    const hints = detectScripts(firstPass || "");
-    console.log("[extractTextWithVision] hints=", hints.join(","));
-    fullText = firstPass;
-    if (!fullText || fullText.length < 120) {
-      const second = await run(hints);
-      if (second.length > fullText.length) {
-        fullText = second;
+    if (contentType === "application/pdf") {
+      fullText = await run(["he", "en"]);
+    } else {
+      const firstPass = await run(["en"]);
+      const hints = detectScripts(firstPass || "");
+      console.log("[extractTextWithVision] hints=", hints.join(","));
+      fullText = firstPass;
+      if (!fullText || fullText.length < 120) {
+        const second = await run(hints);
+        if (second.length > fullText.length) {
+          fullText = second;
+        }
       }
     }
     if (!fullText) {
@@ -317,11 +352,20 @@ export const onRecipeDocUploaded = functions.storage
         durationSeconds: null,
         order: idx,
       }));
+      console.log("[PARSE] before", {
+        ing: ingredients.length,
+        steps: steps.length,
+        tools: 0,
+      });
+
+      const parseIssues: string[] = [];
+      if (ingredients.length < 3) parseIssues.push("too_few_ingredients");
+      if (steps.length < 3) parseIssues.push("too_few_steps");
 
       const needsReviewSections =
         !sections.hadHeader ||
         ingredients.length < 3 ||
-        steps.length < 2 ||
+        steps.length < 3 ||
         rawText.length < 80 ||
         garbageCharRatio > 0.35 ||
         (avgConfidence && avgConfidence < 0.4);
@@ -334,6 +378,13 @@ export const onRecipeDocUploaded = functions.storage
         rawText.toLowerCase().includes(titleEvidence.toLowerCase());
       const needsReviewTitle = !hasTitleEvidence;
       const needsReview = needsReviewSections || needsReviewTitle;
+
+      console.log("[PARSE] after", {
+        ing: ingredients.length,
+        steps: steps.length,
+        tools: 0,
+        issues: parseIssues,
+      });
 
       console.log(
         "[TITLE_GATE]",
@@ -371,6 +422,7 @@ export const onRecipeDocUploaded = functions.storage
             ? {
                 warnings: (() => {
                   const arr = ["needs_review"];
+                  arr.push(...parseIssues);
                   if (!hasTitleEvidence) arr.push("missing_explicit_title");
                   return arr;
                 })(),

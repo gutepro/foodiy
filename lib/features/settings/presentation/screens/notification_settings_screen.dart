@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:foodiy/features/settings/application/settings_service.dart';
 import 'package:foodiy/l10n/app_localizations.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -21,7 +22,7 @@ class _NotificationSettingsScreenState
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.notificationTitle)),
+      appBar: FoodiyAppBar(title: Text(l10n.notificationTitle)),
       body: ListView(
         children: [
           Padding(

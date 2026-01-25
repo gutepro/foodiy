@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:foodiy/features/legal/legal_versions.dart';
 import 'package:foodiy/features/legal/presentation/screens/legal_document_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 
@@ -69,7 +70,7 @@ class _LegalConsentScreenState extends State<LegalConsentScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Legal consent required')),
+      appBar: const FoodiyAppBar(title: Text('Legal consent required')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

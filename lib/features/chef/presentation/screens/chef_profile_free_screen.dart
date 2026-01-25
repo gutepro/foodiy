@@ -5,6 +5,8 @@ import 'package:foodiy/core/models/user_type.dart';
 import 'package:foodiy/core/services/current_user_service.dart';
 import 'package:foodiy/features/chef/presentation/screens/chef_my_recipes_screen.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_upload_screen.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class ChefProfileFreeScreen extends StatelessWidget {
   const ChefProfileFreeScreen({super.key});
@@ -16,24 +18,23 @@ class ChefProfileFreeScreen extends StatelessWidget {
     final isChef =
         userType == UserType.freeChef || userType == UserType.premiumChef;
     final isPremiumChef = userType == UserType.premiumChef;
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=ChefProfileFree keys=profileChefToolsTitle,myRecipesTitle',
+    );
 
     if (!isChef) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Chef profile'),
-          leading: const BackButton(),
-        ),
-        body: const Center(
+        appBar: FoodiyAppBar(title: Text(l10n.profileAccountTypeChef)),
+        body: Center(
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('You are not a chef yet.'),
-                SizedBox(height: 8),
-                Text('Upgrade to a chef account to create and manage recipes.'),
-                SizedBox(height: 8),
-                Text('TODO: Connect to upgrade flow.'),
+                Text(l10n.chefNotEnabledTitle),
+                const SizedBox(height: 8),
+                Text(l10n.chefNotEnabledBody),
               ],
             ),
           ),
@@ -42,31 +43,32 @@ class ChefProfileFreeScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chef profile'),
-        leading: const BackButton(),
-      ),
+      appBar: FoodiyAppBar(title: Text(l10n.profileAccountTypeChef)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Card(
             child: ListTile(
               leading: const CircleAvatar(child: Icon(Icons.restaurant_menu)),
-              title: Text(user?.displayName ?? user?.email ?? 'Chef'),
-              subtitle: Text(
-                userType == UserType.freeChef
-                    ? 'Free chef plan'
-                    : 'Premium chef plan',
+              title: Text(
+                user?.displayName ??
+                    user?.email ??
+                    l10n.homeChefPlaceholder,
               ),
+            subtitle: Text(
+              userType == UserType.freeChef
+                  ? l10n.profileUserTypeFreeChef
+                  : l10n.profileUserTypePremiumChef,
+            ),
             ),
           ),
           const SizedBox(height: 24),
-          Text('Chef tools', style: Theme.of(context).textTheme.titleMedium),
+          Text(l10n.profileChefToolsTitle, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.list),
-            title: const Text('My recipes'),
-            subtitle: const Text('View and manage your recipes'),
+            title: Text(l10n.myRecipesTitle),
+            subtitle: Text(l10n.chefMyRecipesSubtitle),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ChefMyRecipesScreen()),
@@ -76,8 +78,8 @@ class ChefProfileFreeScreen extends StatelessWidget {
           const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.upload),
-            title: const Text('Upload new recipe'),
-            subtitle: const Text('Create a new recipe as a chef'),
+            title: Text(l10n.chefUploadNewRecipe),
+            subtitle: Text(l10n.chefUploadNewRecipeSubtitle),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const RecipeUploadScreen()),
@@ -92,10 +94,8 @@ class ChefProfileFreeScreen extends StatelessWidget {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.workspace_premium),
-                title: const Text('Premium chef features'),
-                subtitle: const Text(
-                  'Upgrade to see stats and create public cookbooks',
-                ),
+                title: Text(l10n.chefPremiumFeaturesTitle),
+                subtitle: Text(l10n.chefPremiumFeaturesBody),
                 onTap: () {
                   // TODO: Navigate to package selection for upgrading to premium chef.
                 },

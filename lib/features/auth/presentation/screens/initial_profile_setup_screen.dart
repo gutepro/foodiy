@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:foodiy/core/services/current_user_service.dart';
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/features/subscription/presentation/screens/package_selection_screen.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class InitialProfileSetupScreen extends StatefulWidget {
   const InitialProfileSetupScreen({super.key});
@@ -57,9 +58,7 @@ class _InitialProfileSetupScreenState extends State<InitialProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Complete your profile'),
-      ),
+      appBar: const FoodiyAppBar(title: Text('Complete your profile')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

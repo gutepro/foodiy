@@ -136,6 +136,11 @@ class FirebaseAuthService implements AuthService {
   }
 
   @override
+  Future<void> signInAsGuest() {
+    return _firebaseAuth.signInAnonymously();
+  }
+
+  @override
   Future<void> signOut() => _firebaseAuth.signOut();
 
   Future<_AndroidSignInDiagnostics?> _ensureAndroidPreconditions() async {

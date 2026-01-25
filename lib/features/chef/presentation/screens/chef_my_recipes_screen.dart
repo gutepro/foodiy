@@ -10,6 +10,8 @@ import 'package:foodiy/features/recipe/application/recipe_firestore_service.dart
 import 'package:foodiy/features/recipe/domain/recipe.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_details_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
+import 'package:foodiy/l10n/app_localizations.dart';
 
 class ChefMyRecipesScreen extends StatefulWidget {
   const ChefMyRecipesScreen({super.key});
@@ -21,20 +23,21 @@ class ChefMyRecipesScreen extends StatefulWidget {
 class _ChefMyRecipesScreenState extends State<ChefMyRecipesScreen> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint(
+      '[L10N] locale=${Localizations.localeOf(context)} screen=chef_my_recipes',
+    );
     final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
     final localeCode = Localizations.localeOf(context).languageCode;
     final analytics = RecipeAnalyticsService.instance;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My recipes'),
-        leading: const BackButton(),
-      ),
+      appBar: FoodiyAppBar(title: Text(l10n.myRecipesTitle)),
       body: uid.isEmpty
-          ? const Center(
+          ? Center(
               child: Padding(
                 padding: EdgeInsets.all(16),
-                child: Text('You have not published any recipes yet'),
+                child: Text(l10n.chefNoRecipesYet),
               ),
             )
           : StreamBuilder<List<Recipe>>(
@@ -45,16 +48,16 @@ class _ChefMyRecipesScreenState extends State<ChefMyRecipesScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Failed to load recipes. Please try again.'),
+                  return Center(
+                    child: Text(l10n.chefLoadRecipesFailed),
                   );
                 }
                 final recipes = snapshot.data ?? const <Recipe>[];
                 if (recipes.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
                       padding: EdgeInsets.all(16),
-                      child: Text('You have not published any recipes yet'),
+                      child: Text(l10n.chefNoRecipesYet),
                     ),
                   );
                 }
@@ -67,7 +70,7 @@ class _ChefMyRecipesScreenState extends State<ChefMyRecipesScreen> {
                             (r.coverImageUrl != null && r.coverImageUrl!.isNotEmpty)
                                 ? r.coverImageUrl
                                 : r.imageUrl,
-                        time: '${r.steps.length} steps',
+                        time: l10n.profileStepsCount(r.steps.length),
                         difficulty: '-',
                         chefId: r.chefId,
                         chefName: r.chefName,
@@ -99,7 +102,7 @@ class _ChefMyRecipesScreenState extends State<ChefMyRecipesScreen> {
                       ),
                       title: Text(summary.title),
                       subtitle: Text(
-                        '${summary.time}\nViews: $views • Saves: $adds',
+                        '${summary.time}\n${l10n.chefRecipeStats(views, adds)}',
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -115,24 +118,26 @@ class _ChefMyRecipesScreenState extends State<ChefMyRecipesScreen> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete),
-                            tooltip: 'Delete recipe',
+                            tooltip: l10n.homeDeleteRecipeTitle,
                             onPressed: () async {
                               final confirmed = await showDialog<bool>(
                                 context: context,
                                 builder: (ctx) {
                                   return AlertDialog(
-                                    title: const Text('Delete recipe'),
+                                    title: Text(l10n.homeDeleteRecipeTitle),
                                     content: Text(
-                                      'Are you sure you want to delete "${summary.title}"? This cannot be undone.',
+                                      l10n.homeDeleteRecipeMessage(
+                                        summary.title,
+                                      ),
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.of(ctx).pop(false),
-                                        child: const Text('Cancel'),
+                                        child: Text(l10n.homeCancel),
                                       ),
                                       ElevatedButton(
                                         onPressed: () => Navigator.of(ctx).pop(true),
-                                        child: const Text('Delete'),
+                                        child: Text(l10n.homeDelete),
                                       ),
                                     ],
                                   );
@@ -152,7 +157,9 @@ class _ChefMyRecipesScreenState extends State<ChefMyRecipesScreen> {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('Recipe "${summary.title}" deleted'),
+                                      content: Text(
+                                        l10n.chefRecipeDeleted(summary.title),
+                                      ),
                                     ),
                                   );
                                 }
@@ -163,7 +170,8 @@ class _ChefMyRecipesScreenState extends State<ChefMyRecipesScreen> {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('Failed to delete recipe: $e'),
+                                      content:
+                                          Text(l10n.homeDeleteRecipeFailed('$e')),
                                     ),
                                   );
                                 }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:foodiy/core/services/current_user_service.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class EditPersonalDetailsScreen extends StatefulWidget {
   const EditPersonalDetailsScreen({super.key});
@@ -81,7 +82,7 @@ class _EditPersonalDetailsScreenState extends State<EditPersonalDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit personal details')),
+      appBar: const FoodiyAppBar(title: Text('Edit personal details')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

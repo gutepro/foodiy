@@ -3,14 +3,24 @@ import 'package:foodiy/core/brand/brand_assets.dart';
 
 /// Centralized logo widget for the Foodiy brand.
 class FoodiyLogo extends StatelessWidget {
-  const FoodiyLogo({super.key});
+  const FoodiyLogo({super.key, this.height, this.width});
+
+  final double? height;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
+    final image = Image.asset(
       BrandAssets.foodiyLogo,
       fit: BoxFit.contain,
-      // TODO: Add responsive scaling once layout breakpoints are defined.
+    );
+    if (height == null && width == null) {
+      return image;
+    }
+    return SizedBox(
+      height: height,
+      width: width,
+      child: image,
     );
   }
 }

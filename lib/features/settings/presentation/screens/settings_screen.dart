@@ -14,6 +14,7 @@ import 'package:foodiy/features/settings/presentation/screens/about_screen.dart'
 import 'package:foodiy/features/legal/presentation/screens/legal_document_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
 import 'package:foodiy/l10n/app_localizations.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -49,7 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settingsTitle)),
+      appBar: FoodiyAppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
         children: [
           SwitchListTile(

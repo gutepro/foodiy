@@ -17,6 +17,33 @@ class RecipeFirestoreService {
 
   String newRecipeId() => _recipes.doc().id;
 
+  Future<void> saveImportStub({
+    required String recipeId,
+    required String sourceFilePath,
+    required String sourceType,
+    String? originalDocumentUrl,
+    String importStatus = 'uploading',
+    String importStage = 'uploading',
+    int progress = 0,
+    String? errorMessage,
+  }) async {
+    final data = <String, dynamic>{
+      'id': recipeId,
+      'sourceType': sourceType,
+      'sourceFilePath': sourceFilePath,
+      'originalDocumentUrl': originalDocumentUrl,
+      'importStatus': importStatus,
+      'importStage': importStage,
+      'progress': progress,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    if (errorMessage != null && errorMessage.isNotEmpty) {
+      data['errorMessage'] = errorMessage;
+    }
+    await _recipes.doc(recipeId).set(data, SetOptions(merge: true));
+  }
+
   Future<String> saveRecipe(Recipe recipe) async {
     final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
     if (uid.isEmpty) {

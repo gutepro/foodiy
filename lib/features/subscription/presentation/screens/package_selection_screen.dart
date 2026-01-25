@@ -10,6 +10,7 @@ import 'package:foodiy/core/services/subscription_service.dart';
 import 'package:foodiy/features/profile/application/user_profile_service.dart';
 import 'package:foodiy/features/subscription/presentation/screens/subscription_payment_screen.dart';
 import 'package:foodiy/router/app_routes.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 enum PlanPickerEntrySource { onboarding, settings }
 
@@ -48,10 +49,8 @@ class _PackageSelectionScreenState extends State<PackageSelectionScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: const Text('Choose your plan'),
-        leading: const BackButton(),
-        // TODO: Decide if back button is allowed on first time flow.
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -86,7 +85,7 @@ class _PackageSelectionScreenState extends State<PackageSelectionScreen> {
                     icon: Icons.workspace_premium_outlined,
                     title: 'Premium user',
                     subtitle: 'No ads',
-                    price: '\$4.99 / month',
+                    price: '\$1.99 / month',
                     enabled: !_saving,
                     selected: _selectedPlan == UserType.premiumUser,
                     onTap: () => setState(() => _selectedPlan = UserType.premiumUser),
@@ -104,7 +103,7 @@ class _PackageSelectionScreenState extends State<PackageSelectionScreen> {
                     icon: Icons.emoji_events_outlined,
                     title: 'Premium chef',
                     subtitle: 'Unlimited uploads',
-                    price: '\$9.99 / month',
+                    price: '\$3.99 / month',
                     enabled: !_saving,
                     selected: _selectedPlan == UserType.premiumChef,
                     onTap: () => setState(() => _selectedPlan = UserType.premiumChef),

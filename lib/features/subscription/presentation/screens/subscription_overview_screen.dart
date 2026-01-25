@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:foodiy/core/models/user_type.dart';
 import 'package:foodiy/core/services/current_user_service.dart';
 import 'package:foodiy/features/subscription/presentation/screens/package_selection_screen.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class SubscriptionOverviewScreen extends StatelessWidget {
   const SubscriptionOverviewScreen({super.key});
@@ -21,7 +22,7 @@ class SubscriptionOverviewScreen extends StatelessWidget {
     final planBillingLabel = _billingLabelForPlan(subscriptionPlan);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: const Text('My subscription'),
       ),
       body: SingleChildScrollView(
@@ -49,7 +50,7 @@ class SubscriptionOverviewScreen extends StatelessWidget {
             const _PlanRow(
               title: 'Premium user',
               description: 'No ads, personal playlists and advanced player.',
-              price: '\$4.99/mo',
+              price: '\$1.99/mo',
             ),
             const _PlanRow(
               title: 'Free chef',
@@ -59,7 +60,7 @@ class SubscriptionOverviewScreen extends StatelessWidget {
             const _PlanRow(
               title: 'Premium chef',
               description: 'Unlimited uploads, public playlists, stats and promotion.',
-              price: '\$9.99/mo',
+              price: '\$3.99/mo',
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -81,20 +82,20 @@ class SubscriptionOverviewScreen extends StatelessWidget {
               const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const PackageSelectionScreen(
-                          source: PlanPickerEntrySource.settings,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const PackageSelectionScreen(
+                            source: PlanPickerEntrySource.settings,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  child: const Text('Upgrade now'),
+                      );
+                    },
+                    child: const Text('Go Premium'),
+                  ),
                 ),
-              ),
-            ],
+              ],
           ],
         ),
       ),

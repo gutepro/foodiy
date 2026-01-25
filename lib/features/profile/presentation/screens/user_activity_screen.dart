@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:foodiy/features/profile/application/user_profile_service.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class UserActivityScreen extends StatelessWidget {
   const UserActivityScreen({super.key});
@@ -11,10 +12,7 @@ class UserActivityScreen extends StatelessWidget {
     final activity = service.activity;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Activity'),
-        leading: const BackButton(),
-      ),
+      appBar: const FoodiyAppBar(title: Text('Activity')),
       body: activity.isEmpty
           ? const Center(child: Text('No recent activity yet'))
           : ListView.builder(

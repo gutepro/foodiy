@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:foodiy/core/models/user_type.dart';
 import 'package:foodiy/core/services/current_user_service.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -106,8 +107,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       imageProvider = NetworkImage(profile!.photoUrl!);
     }
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit profile'),
+      appBar: FoodiyAppBar(
+        title: Text('Edit profile'),
         actions: [
           TextButton(
             onPressed: _saving ? null : _save,

@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:foodiy/features/shopping/application/shopping_list_service.dart';
 import 'package:foodiy/features/shopping/application/shopping_share_helper.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 
 class ShoppingHistoryDetailsArgs {
   final String listId;
@@ -27,9 +28,7 @@ class ShoppingHistoryDetailsScreen extends StatelessWidget {
 
     if (snapshot == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Shopping history'),
-        ),
+        appBar: const FoodiyAppBar(title: Text('Shopping history')),
         body: const Center(
           child: Text('List not found'),
         ),
@@ -39,17 +38,8 @@ class ShoppingHistoryDetailsScreen extends StatelessWidget {
     final list = snapshot;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: FoodiyAppBar(
         title: Text(list.title),
-        leading: BackButton(
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
-        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.share),

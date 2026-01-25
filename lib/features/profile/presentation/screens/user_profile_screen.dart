@@ -18,6 +18,8 @@ import 'package:foodiy/features/recipe/domain/recipe.dart';
 import 'package:foodiy/features/recipe/presentation/screens/recipe_details_screen.dart';
 import 'package:foodiy/features/analytics/application/recipe_analytics_service.dart';
 import 'package:foodiy/features/playlist/application/personal_playlist_service.dart';
+import 'package:foodiy/core/utils/auth_guards.dart';
+import 'package:foodiy/shared/widgets/foodiy_app_bar.dart';
 import 'package:foodiy/features/chef/application/chef_recipes_service.dart';
 import 'package:foodiy/l10n/app_localizations.dart';
 
@@ -29,6 +31,39 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
+  bool _openingCreateRecipe = false;
+
+  void _showCreateRecipeError(BuildContext context, Object error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Unable to open Create recipe: $error'),
+      ),
+    );
+  }
+
+  Future<void> _handleCreateRecipeTap() async {
+    if (_openingCreateRecipe) return;
+    setState(() => _openingCreateRecipe = true);
+    debugPrint('[CREATE_RECIPE_TAP] start');
+    try {
+      final canProceed = await ensureNotGuest(context);
+      if (!canProceed) return;
+      debugPrint('[CREATE_RECIPE_TAP] before_route');
+      await context.push(AppRoutes.recipeCreate);
+      debugPrint('[CREATE_RECIPE_TAP] after_route');
+    } catch (e, st) {
+      debugPrint('[CREATE_RECIPE_TAP] error=$e\n$st');
+      if (mounted) {
+        _showCreateRecipeError(context, e);
+        context.go(AppRoutes.home);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _openingCreateRecipe = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final firebaseUser = FirebaseAuth.instance.currentUser;
@@ -42,9 +77,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.profileTitle),
-      ),
+      appBar: FoodiyAppBar(title: Text(l10n.profileTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -145,7 +178,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            const _ChefDashboardSection(),
+            _ChefDashboardSection(
+              onCreateRecipe: _handleCreateRecipeTap,
+            ),
           ],
           const SizedBox(height: 24),
           Row(
@@ -217,7 +252,11 @@ String _labelForUserType(UserType type, AppLocalizations l10n) {
 }
 
 class _ChefDashboardSection extends StatelessWidget {
-  const _ChefDashboardSection();
+  const _ChefDashboardSection({
+    required this.onCreateRecipe,
+  });
+
+  final Future<void> Function() onCreateRecipe;
 
   @override
   Widget build(BuildContext context) {
@@ -295,7 +334,7 @@ class _ChefDashboardSection extends StatelessWidget {
                       runSpacing: 12,
                       children: [
                         ElevatedButton.icon(
-                          onPressed: () => context.push(AppRoutes.recipeCreate),
+                          onPressed: () => onCreateRecipe(),
                           icon: const Icon(Icons.cloud_upload_outlined),
                           label: Text(l10n.profileUploadRecipe),
                         ),
@@ -560,7 +599,7 @@ class _ChefRecipesListScreen extends StatelessWidget {
     final localeCode = Localizations.localeOf(context).languageCode;
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.myRecipesTitle)),
+      appBar: FoodiyAppBar(title: Text(l10n.myRecipesTitle)),
       body: recipes.isEmpty
           ? Center(child: Text(l10n.noRecipesYet))
           : ListView.separated(
